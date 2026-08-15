@@ -761,5 +761,23 @@
       "CUSTOM": "Custom"
     },
     "previewSubtotal": "Order value"
+  },
+  "counterRules": {
+    "title": "Counter rules",
+    "subtitle": "Switch individual behaviours on or off. Every one of these is enforced by the server, not just hidden from the screen.",
+    "loadError": "Could not load counter rules.",
+    "nextInvoice": "Next invoice number:",
+    "issuedSoFar": "({{count}} issued this year)",
+    "planControlled": "Plan",
+    "chosen": "You set this",
+    "usingDefault": "Using the default ({{value}})",
+    "resetToDefault": "Reset to the default ({{value}})",
+    "resetDone": "Reset to the default.",
+    "on": "on",
+    "off": "off",
+    "group": {
+      "BILLING": "Billing and invoices",
+      "COUNTER": "Counter"
+    }
   }
 }

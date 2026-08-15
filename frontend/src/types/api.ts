@@ -964,6 +964,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/{bill_id}/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Void Bill
+         * @description Cancels a bill without deleting it.
+         *
+         *     Deliberately allowed for ROLE_BILLING at the router, with the tighter
+         *     manager-only rule applied inside the service according to the
+         *     billing.void_requires_manager toggle. Putting it in the router instead
+         *     would make the toggle unable to loosen it, which is the point of having
+         *     the toggle.
+         */
+        post: operations["void_bill_api_v1_billing__bill_id__void_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/{bill_id}/print": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register Print
+         * @description Records that the bill was printed and says whether this copy is a
+         *     duplicate. Called by the client immediately before it renders, so the
+         *     count reflects paper actually produced rather than screens opened.
+         */
+        post: operations["register_print_api_v1_billing__bill_id__print_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/payments/cash": {
         parameters: {
             query?: never;
@@ -1055,6 +1103,30 @@ export interface paths {
          *     uses that exact business's connected (or global-fallback) secret.
          */
         post: operations["razorpay_webhook_for_business_api_v1_payments_webhooks_razorpay__business_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/refund": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refund
+         * @description Hands money back against a specific payment.
+         *
+         *     Gated by the billing.allow_refunds toggle inside the service rather than
+         *     here, so a business that switches refunds off is actually protected at
+         *     the API and not merely missing a button.
+         */
+        post: operations["refund_api_v1_payments_refund_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1867,6 +1939,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/settings/toggles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Toggles */
+        get: operations["list_toggles_api_v1_settings_toggles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/toggles/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Toggle */
+        put: operations["update_toggle_api_v1_settings_toggles__key__put"];
+        post?: never;
+        /**
+         * Reset Toggle
+         * @description Clears the override so this business follows the default again.
+         */
+        delete: operations["reset_toggle_api_v1_settings_toggles__key__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/invoice-series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Invoice Series */
+        get: operations["invoice_series_api_v1_settings_invoice_series_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1965,6 +2092,19 @@ export interface components {
             location_id: string | null;
             /** Bill Number */
             bill_number: string;
+            /** Invoice Number */
+            invoice_number?: string | null;
+            /** Finalised At */
+            finalised_at?: string | null;
+            /** Voided At */
+            voided_at?: string | null;
+            /** Void Reason */
+            void_reason?: string | null;
+            /**
+             * Print Count
+             * @default 0
+             */
+            print_count: number;
             status: components["schemas"]["BillStatus"];
             /** Subtotal */
             subtotal: number;
@@ -1974,8 +2114,18 @@ export interface components {
             service_charge_total: number;
             /** Discount Total */
             discount_total: number;
+            /**
+             * Round Off
+             * @default 0
+             */
+            round_off: number;
             /** Grand Total */
             grand_total: number;
+            /**
+             * Amount Refunded
+             * @default 0
+             */
+            amount_refunded: number;
             /** Amount Paid */
             amount_paid: number;
             /** Items */
@@ -1986,6 +2136,21 @@ export interface components {
             discounts?: components["schemas"]["BillLineOut"][];
             /** Service Charges */
             service_charges?: components["schemas"]["BillLineOut"][];
+        };
+        /**
+         * BillPrintOut
+         * @description The bill plus whether this particular copy must be stamped DUPLICATE.
+         *
+         *     The flag is computed server-side rather than left to the client to work
+         *     out from print_count, so a client that forgets the rule cannot print an
+         *     unmarked second original.
+         */
+        BillPrintOut: {
+            bill: components["schemas"]["BillOut"];
+            /** Is Duplicate */
+            is_duplicate: boolean;
+            /** Print Count */
+            print_count: number;
         };
         /** BillServiceChargeCreate */
         BillServiceChargeCreate: {
@@ -2493,6 +2658,21 @@ export interface components {
          * @enum {string}
          */
         IntegrationProvider: "RAZORPAY" | "ZOMATO" | "SWIGGY";
+        /**
+         * InvoiceSeriesOut
+         * @description Shown on the settings screen so an owner can see their series without
+         *     having to settle a bill to find out what it looks like.
+         */
+        InvoiceSeriesOut: {
+            /** Series */
+            series: string;
+            /** Financial Year */
+            financial_year: string;
+            /** Next Number */
+            next_number: string;
+            /** Last Issued */
+            last_issued: number;
+        };
         /** KOTItemOut */
         KOTItemOut: {
             /**
@@ -3563,6 +3743,49 @@ export interface components {
             /** Refresh Token */
             refresh_token: string;
         };
+        /** RefundOut */
+        RefundOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Bill Id
+             * Format: uuid
+             */
+            bill_id: string;
+            /**
+             * Payment Id
+             * Format: uuid
+             */
+            payment_id: string;
+            /** Amount */
+            amount: number;
+            method: components["schemas"]["PaymentMethod"];
+            /** Reason */
+            reason: string | null;
+            /**
+             * Refunded At
+             * Format: date-time
+             */
+            refunded_at: string;
+        };
+        /** RefundRequest */
+        RefundRequest: {
+            /**
+             * Payment Id
+             * Format: uuid
+             */
+            payment_id: string;
+            /** Amount */
+            amount: number;
+            method?: components["schemas"]["PaymentMethod"] | null;
+            /** Reason */
+            reason?: string | null;
+            /** Notes */
+            notes?: string | null;
+        };
         /** RegisterRequest */
         RegisterRequest: {
             /** Business Name */
@@ -3781,6 +4004,37 @@ export interface components {
             /** Razorpay Signature */
             razorpay_signature: string;
         };
+        /**
+         * ToggleGroup
+         * @description Used to group switches on the settings screen.
+         * @enum {string}
+         */
+        ToggleGroup: "BILLING" | "COUNTER";
+        /** ToggleOut */
+        ToggleOut: {
+            /** Key */
+            key: string;
+            group: components["schemas"]["ToggleGroup"];
+            /** Enabled */
+            enabled: boolean;
+            /** Is Overridden */
+            is_overridden: boolean;
+            /** Default */
+            default: boolean;
+            /** Owner Editable */
+            owner_editable: boolean;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string;
+            /** Warning */
+            warning?: string | null;
+        };
+        /** ToggleUpdateRequest */
+        ToggleUpdateRequest: {
+            /** Enabled */
+            enabled: boolean;
+        };
         /** TokenPairResponse */
         TokenPairResponse: {
             /** Access Token */
@@ -3853,6 +4107,17 @@ export interface components {
             email: string;
             /** Code */
             code: string;
+        };
+        /**
+         * VoidBillRequest
+         * @description Reason is optional here and required by the service when the
+         *     billing.void_requires_reason toggle is on, so the rule lives in one place
+         *     rather than being duplicated as schema validation that a toggle cannot
+         *     reach.
+         */
+        VoidBillRequest: {
+            /** Reason */
+            reason?: string | null;
         };
         /** WebsiteConfigOut */
         WebsiteConfigOut: {
@@ -6114,6 +6379,72 @@ export interface operations {
             };
         };
     };
+    void_bill_api_v1_billing__bill_id__void_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bill_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidBillRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_print_api_v1_billing__bill_id__print_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bill_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillPrintOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     record_cash_payment_api_v1_payments_cash_post: {
         parameters: {
             query?: never;
@@ -6266,6 +6597,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refund_api_v1_payments_refund_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
                 };
             };
             /** @description Validation Error */
@@ -7863,6 +8227,112 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_toggles_api_v1_settings_toggles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToggleOut"][];
+                };
+            };
+        };
+    };
+    update_toggle_api_v1_settings_toggles__key__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ToggleUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToggleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_toggle_api_v1_settings_toggles__key__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToggleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    invoice_series_api_v1_settings_invoice_series_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceSeriesOut"];
                 };
             };
         };

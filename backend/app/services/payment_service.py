@@ -9,12 +9,15 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.core import toggles
 from app.models.billing import Bill
 from app.models.enums import BillStatus, IntegrationProvider, PaymentMethod, PaymentStatus, WebhookProcessStatus
 from app.models.integration import WebhookEvent
 from app.models.payment import IdempotencyKey, Payment
+from app.models.refund import Refund
 from app.services import billing_service, integration_service, subscription_service
 from app.services.payments.base import PaymentProviderError, PaymentProviderNotConfigured
 from app.services.payments.razorpay_provider import razorpay_provider
@@ -265,3 +268,66 @@ def handle_razorpay_webhook(
         raise
 
     return event
+
+
+def refund_payment(db: Session, business_id: uuid.UUID, staff_id: uuid.UUID, payload) -> Refund:
+    """Hands money back against a specific payment.
+
+    Records a new event rather than reducing the original payment: the
+    payment is evidence that money was collected, and editing it away would
+    leave the bill silently disagreeing with what actually crossed the
+    counter. The payment's status becomes REFUNDED only once the whole of it
+    has been returned — a partial refund leaves it SUCCESS, because it still
+    is one.
+    """
+    if not toggles.is_enabled(db, business_id, toggles.ALLOW_REFUNDS):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Refunds are switched off for this business",
+        )
+
+    payment = (
+        db.query(Payment)
+        .filter(Payment.id == payload.payment_id, Payment.business_id == business_id)
+        .first()
+    )
+    if payment is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment not found")
+    if payment.status != PaymentStatus.SUCCESS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only a successful payment can be refunded",
+        )
+
+    already = float(
+        db.query(func.coalesce(func.sum(Refund.amount), 0))
+        .filter(Refund.payment_id == payment.id)
+        .scalar()
+    )
+    remaining = round(float(payment.amount) - already, 2)
+    amount = round(float(payload.amount), 2)
+    if amount > remaining:
+        # The cap is per payment, not per bill: refunding more than was taken
+        # on this tender would mean handing back money that never came in
+        # through it.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Only {remaining:.2f} remains refundable on this payment",
+        )
+
+    refund = Refund(
+        business_id=business_id, bill_id=payment.bill_id, payment_id=payment.id,
+        amount=amount, method=payload.method or payment.method, reason=payload.reason,
+        notes=payload.notes, refunded_by_staff_id=staff_id,
+        refunded_at=datetime.now(timezone.utc),
+    )
+    db.add(refund)
+    db.flush()
+
+    if round(already + amount, 2) >= round(float(payment.amount), 2):
+        payment.status = PaymentStatus.REFUNDED
+
+    bill = billing_service.get_bill_or_404(db, business_id, payment.bill_id)
+    bill.amount_refunded = round(float(bill.amount_refunded) + amount, 2)
+    db.flush()
+    return refund

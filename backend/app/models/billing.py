@@ -57,8 +57,15 @@ class Bill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     tax_total: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
     service_charge_total: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
     discount_total: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
+    # Applied after tax so the taxable value stays exact — see
+    # _recompute_totals. Positive when the guest pays up, negative when down.
+    round_off: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
     grand_total: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
     amount_paid: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
+    # Money handed back. Kept separate from amount_paid rather than deducted
+    # from it, because the bill is a record of what was collected and a
+    # refund is a second event — netting them off would erase both.
+    amount_refunded: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
 
     items: Mapped[list["BillItem"]] = relationship(back_populates="bill", cascade="all, delete-orphan")
     taxes: Mapped[list["BillTax"]] = relationship(back_populates="bill", cascade="all, delete-orphan")

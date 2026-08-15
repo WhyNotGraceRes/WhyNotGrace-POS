@@ -66,7 +66,9 @@ class BillOut(BaseModel):
     tax_total: float
     service_charge_total: float
     discount_total: float
+    round_off: float = 0
     grand_total: float
+    amount_refunded: float = 0
     amount_paid: float
     items: list[BillItemOut] = Field(default_factory=list)
     taxes: list[BillLineOut] = Field(default_factory=list)

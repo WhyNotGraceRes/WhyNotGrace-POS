@@ -45,3 +45,26 @@ class PaymentOut(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class RefundRequest(BaseModel):
+    payment_id: uuid.UUID
+    amount: float = Field(gt=0)
+    # Defaults to however the payment came in. Made explicit because money
+    # often goes back a different way than it arrived — an online payment
+    # refunded as cash at the counter is routine.
+    method: PaymentMethod | None = None
+    reason: str | None = Field(default=None, max_length=255)
+    notes: str | None = None
+
+
+class RefundOut(BaseModel):
+    id: uuid.UUID
+    bill_id: uuid.UUID
+    payment_id: uuid.UUID
+    amount: float
+    method: PaymentMethod
+    reason: str | None
+    refunded_at: datetime
+
+    model_config = {"from_attributes": True}

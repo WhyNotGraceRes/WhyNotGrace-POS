@@ -15,6 +15,7 @@ import { parseApiError } from "@/api/errors";
 import { useBusiness, useUpdateBusiness } from "@/features/business/hooks";
 import { useBusinessSettings, useUpdateBusinessSettings } from "@/features/settings/hooks";
 import { ChargeBandsSection } from "@/features/settings/components/ChargeBandsSection";
+import { CounterRulesSection } from "@/features/settings/components/CounterRulesSection";
 import type { BusinessType } from "@/types/models";
 
 const BUSINESS_TYPES: BusinessType[] = ["RESTAURANT", "HOTEL", "RESORT", "LODGE", "LOUNGE", "CAFE", "CLOUD_KITCHEN", "OTHER"];
@@ -198,8 +199,9 @@ export function BusinessSettingsPage() {
       )}
 
       {!isLoading && !isError && (
-        <div className="mt-4 max-w-xl">
+        <div className="mt-4 max-w-xl space-y-4">
           <ChargeBandsSection />
+          <CounterRulesSection />
         </div>
       )}
     </div>

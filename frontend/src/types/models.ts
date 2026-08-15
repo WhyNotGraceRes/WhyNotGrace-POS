@@ -283,3 +283,11 @@ export type ChargeLadderGap = Schemas["ChargeLadderGap"];
 export type ChargeBasis = Schemas["ChargeBasis"];
 export type ChargePreviewRequest = Schemas["ChargePreviewRequest"];
 export type ChargePreviewOut = Schemas["ChargePreviewOut"];
+
+// --- Fine-grained behaviour toggles ---
+export type ToggleOut = Schemas["ToggleOut"];
+export type ToggleUpdateRequest = Schemas["ToggleUpdateRequest"];
+export type ToggleGroup = Schemas["ToggleGroup"];
+export type InvoiceSeriesOut = Schemas["InvoiceSeriesOut"];
+export type RefundRequest = Schemas["RefundRequest"];
+export type RefundOut = Schemas["RefundOut"];

@@ -15,6 +15,8 @@ from app.schemas.payment import (
     RazorpayOrderCreateRequest,
     RazorpayOrderCreateResponse,
     RazorpayVerifyRequest,
+    RefundOut,
+    RefundRequest,
 )
 from app.services import audit_service, payment_service
 
@@ -122,3 +124,27 @@ async def razorpay_webhook_for_business(
     with transaction(db):
         event = payment_service.handle_razorpay_webhook(db, raw_body, x_razorpay_signature, business_id=business_id)
     return {"status": event.status.value}
+
+
+@router.post("/refund", response_model=RefundOut, status_code=status.HTTP_201_CREATED)
+def refund(
+    payload: RefundRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_BILLING)),
+):
+    """Hands money back against a specific payment.
+
+    Gated by the billing.allow_refunds toggle inside the service rather than
+    here, so a business that switches refunds off is actually protected at
+    the API and not merely missing a button.
+    """
+    with transaction(db):
+        record = payment_service.refund_payment(db, business_id, user.id, payload)
+        audit_service.record(
+            db, action="payment.refund", business_id=business_id, user_id=user.id,
+            resource_type="refund", resource_id=str(record.id),
+            metadata={"amount": float(record.amount), "reason": record.reason,
+                      "payment_id": str(record.payment_id)},
+        )
+    return RefundOut.model_validate(record)

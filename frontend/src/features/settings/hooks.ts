@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { featureFlagsApi } from "@/api/featureFlags";
 import { businessSettingsApi } from "@/api/settings";
 import { chargesApi } from "@/api/charges";
+import { togglesApi } from "@/api/toggles";
 import type {
   BusinessSettingsUpdateRequest,
   ChargeBandCreate,
@@ -95,5 +96,39 @@ export function useChargePreview(amount: number | null, context: PricingContext 
     queryFn: () => chargesApi.preview({ amount: amount ?? 0, context }),
     enabled: amount !== null && Number.isFinite(amount),
     staleTime: 0,
+  });
+}
+
+// --- Fine-grained toggles ---
+
+export function useToggles() {
+  return useQuery({
+    queryKey: ["toggles"],
+    queryFn: ({ signal }) => togglesApi.list(signal),
+    staleTime: 30_000,
+  });
+}
+
+export function useUpdateToggle() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ key, enabled }: { key: string; enabled: boolean }) => togglesApi.update(key, enabled),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["toggles"] }),
+  });
+}
+
+export function useResetToggle() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (key: string) => togglesApi.reset(key),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["toggles"] }),
+  });
+}
+
+export function useInvoiceSeries() {
+  return useQuery({
+    queryKey: ["invoice-series"],
+    queryFn: ({ signal }) => togglesApi.invoiceSeries(signal),
+    staleTime: 30_000,
   });
 }

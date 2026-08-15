@@ -38,6 +38,7 @@ from app.models.audit import AuditLog  # noqa: F401
 from app.models.subscription import Subscription, SubscriptionPayment  # noqa: F401
 from app.models.charge import ChargeBand  # noqa: F401
 from app.models.invoice import InvoiceCounter  # noqa: F401
+from app.models.refund import Refund  # noqa: F401
 from app.models.toggle import BusinessToggle  # noqa: F401
 from app.models.partner import PartnerChannel, PartnerMenuMap, PartnerRequestNonce  # noqa: F401
 

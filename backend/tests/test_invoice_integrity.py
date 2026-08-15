@@ -447,3 +447,133 @@ def test_concurrent_allocations_do_not_collide(client, shop):
     assert len(set(results)) == 8, f"duplicate serials issued: {sorted(results)}"
     sequences = sorted(int(n.rsplit("/", 1)[1]) for n in results)
     assert sequences == list(range(1, 9)), sequences
+
+
+# ---------------------------------------------------------------------------
+# round-off — the toggle that had been declared but not honoured
+# ---------------------------------------------------------------------------
+
+def test_round_off_is_off_by_default(client, shop):
+    """It changes the amount charged, so it is opt-in."""
+    client.put("/api/v1/settings", json={"default_tax_percent": 5}, headers=shop["headers"])
+    table = _new_table(client, shop["headers"])
+    order = _order(client, shop["headers"], table["id"], shop["item"]["id"], qty=3)  # ₹300
+    bill = _bill(client, shop["headers"], order["session_id"])
+    assert bill["tax_total"] == 15.0
+    assert bill["round_off"] == 0
+    assert bill["grand_total"] == 315.0
+
+
+def test_round_off_adjusts_only_the_payable_total(client, shop):
+    """Applied after tax: the taxable value and the tax itself must not move,
+    because a rounding convenience is not a change to the value of supply."""
+    client.put(f"/api/v1/settings/toggles/{toggles.ROUND_OFF_TOTAL.key}",
+               json={"enabled": True}, headers=shop["headers"])
+    client.put("/api/v1/settings", json={"default_tax_percent": 5}, headers=shop["headers"])
+
+    table = _new_table(client, shop["headers"])
+    # ₹100 x 2.5 is not orderable, so use a qty that yields paise via tax:
+    # ₹100 x 7 = ₹700, 5% = ₹35 -> lands whole. Use 5% of ₹250 = ₹12.50.
+    _c, odd_item = create_category_and_item(client, shop["headers"], price=250.0)
+    order = _order(client, shop["headers"], table["id"], odd_item["id"], qty=1)
+    bill = _bill(client, shop["headers"], order["session_id"])
+
+    assert bill["subtotal"] == 250.0
+    assert bill["tax_total"] == 12.5          # tax itself is untouched
+    assert bill["round_off"] == -0.5          # 262.50 -> 262
+    assert bill["grand_total"] == 262.0
+
+
+# ---------------------------------------------------------------------------
+# refunds — likewise declared, now real
+# ---------------------------------------------------------------------------
+
+def _paid_bill(client, headers, item_id, qty=1):
+    table = _new_table(client, headers)
+    order = _order(client, headers, table["id"], item_id, qty=qty)
+    bill = _bill(client, headers, order["session_id"])
+    resp = client.post("/api/v1/payments/cash",
+                       json={"bill_id": bill["id"], "amount": bill["grand_total"], "method": "CASH"},
+                       headers=headers)
+    assert resp.status_code == 201, resp.text
+    return bill, resp.json()
+
+
+def test_full_refund_marks_the_payment_refunded(client, shop):
+    client.put("/api/v1/settings", json={"default_tax_percent": 0}, headers=shop["headers"])
+    bill, payment = _paid_bill(client, shop["headers"], shop["item"]["id"], qty=2)  # ₹200
+
+    resp = client.post("/api/v1/payments/refund",
+                       json={"payment_id": payment["id"], "amount": 200, "reason": "Order never served"},
+                       headers=shop["headers"])
+    assert resp.status_code == 201, resp.text
+    assert resp.json()["amount"] == 200.0
+
+    after = client.get(f"/api/v1/billing/{bill['id']}", headers=shop["headers"]).json()
+    assert after["amount_refunded"] == 200.0
+    # The bill still records what was collected — a refund is a second event,
+    # not an edit of the first.
+    assert after["amount_paid"] == 200.0
+
+
+def test_partial_refund_leaves_the_payment_successful(client, shop):
+    client.put("/api/v1/settings", json={"default_tax_percent": 0}, headers=shop["headers"])
+    bill, payment = _paid_bill(client, shop["headers"], shop["item"]["id"], qty=2)
+
+    first = client.post("/api/v1/payments/refund",
+                        json={"payment_id": payment["id"], "amount": 50}, headers=shop["headers"])
+    assert first.status_code == 201
+
+    second = client.post("/api/v1/payments/refund",
+                         json={"payment_id": payment["id"], "amount": 50}, headers=shop["headers"])
+    assert second.status_code == 201
+
+    after = client.get(f"/api/v1/billing/{bill['id']}", headers=shop["headers"]).json()
+    assert after["amount_refunded"] == 100.0
+
+
+def test_cannot_refund_more_than_was_taken(client, shop):
+    client.put("/api/v1/settings", json={"default_tax_percent": 0}, headers=shop["headers"])
+    _bill_, payment = _paid_bill(client, shop["headers"], shop["item"]["id"], qty=2)  # ₹200
+
+    resp = client.post("/api/v1/payments/refund",
+                       json={"payment_id": payment["id"], "amount": 500}, headers=shop["headers"])
+    assert resp.status_code == 400
+    assert "refundable" in resp.text
+
+
+def test_cannot_refund_the_same_money_twice(client, shop):
+    client.put("/api/v1/settings", json={"default_tax_percent": 0}, headers=shop["headers"])
+    _bill_, payment = _paid_bill(client, shop["headers"], shop["item"]["id"], qty=2)
+
+    client.post("/api/v1/payments/refund", json={"payment_id": payment["id"], "amount": 200},
+                headers=shop["headers"])
+    again = client.post("/api/v1/payments/refund", json={"payment_id": payment["id"], "amount": 200},
+                        headers=shop["headers"])
+    assert again.status_code == 400
+
+
+def test_refunds_can_be_switched_off(client, shop):
+    """The toggle must protect the API, not just hide a button."""
+    client.put("/api/v1/settings", json={"default_tax_percent": 0}, headers=shop["headers"])
+    _bill_, payment = _paid_bill(client, shop["headers"], shop["item"]["id"], qty=2)
+
+    client.put(f"/api/v1/settings/toggles/{toggles.ALLOW_REFUNDS.key}",
+               json={"enabled": False}, headers=shop["headers"])
+
+    resp = client.post("/api/v1/payments/refund", json={"payment_id": payment["id"], "amount": 50},
+                       headers=shop["headers"])
+    assert resp.status_code == 403
+
+
+def test_refund_can_go_back_by_a_different_method(client, shop):
+    """Money often returns differently than it arrived — an online payment
+    refunded as cash at the counter is routine."""
+    client.put("/api/v1/settings", json={"default_tax_percent": 0}, headers=shop["headers"])
+    _bill_, payment = _paid_bill(client, shop["headers"], shop["item"]["id"], qty=2)
+
+    resp = client.post("/api/v1/payments/refund",
+                       json={"payment_id": payment["id"], "amount": 100, "method": "UPI"},
+                       headers=shop["headers"])
+    assert resp.status_code == 201
+    assert resp.json()["method"] == "UPI"

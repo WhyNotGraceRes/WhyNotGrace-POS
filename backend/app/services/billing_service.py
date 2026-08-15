@@ -33,7 +33,7 @@ def get_bill_or_404(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID) -> 
     return bill
 
 
-def _recompute_totals(bill: Bill) -> None:
+def _recompute_totals(db: Session, business_id: uuid.UUID, bill: Bill) -> None:
     """Recomputes every derived total on the bill.
 
     The order of operations is the whole point here, and it was previously
@@ -88,11 +88,24 @@ def _recompute_totals(bill: Bill) -> None:
         tax.amount = round(taxable_value * float(tax.percent) / 100, 2)
         tax_total += tax.amount
 
+    payable = round(taxable_base + charges_total + tax_total, 2)
+
+    # Round-off is applied last, after tax, and never folded into the taxable
+    # value. Rounding before tax would change the amount GST is computed on,
+    # which is not ours to adjust — the round-off is a convenience for handling
+    # cash, not a change to the value of supply.
+    round_off = 0.0
+    if toggles.is_enabled(db, business_id, toggles.ROUND_OFF_TOTAL):
+        rounded = round(payable)
+        round_off = round(rounded - payable, 2)
+        payable = float(rounded)
+
     bill.subtotal = round(subtotal, 2)
     bill.tax_total = round(tax_total, 2)
     bill.service_charge_total = round(charges_total, 2)
     bill.discount_total = round(discount_total, 2)
-    bill.grand_total = round(taxable_base + charges_total + tax_total, 2)
+    bill.round_off = round_off
+    bill.grand_total = payable
 
     if bill.status not in (BillStatus.PAID, BillStatus.CANCELLED):
         if bill.amount_paid <= 0:
@@ -247,7 +260,7 @@ def generate_or_refresh_bill(db: Session, business_id: uuid.UUID, payload) -> Bi
     db.flush()
 
     bill = get_bill_or_404(db, business_id, bill.id)
-    _recompute_totals(bill)
+    _recompute_totals(db, business_id, bill)
     db.flush()
     return bill
 
@@ -272,7 +285,7 @@ def apply_discount(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, payl
     )
     db.flush()
     bill = get_bill_or_404(db, business_id, bill.id)
-    _recompute_totals(bill)
+    _recompute_totals(db, business_id, bill)
     db.flush()
     return bill
 
@@ -281,7 +294,7 @@ def record_payment_applied(db: Session, business_id: uuid.UUID, bill_id: uuid.UU
     bill = get_bill_or_404(db, business_id, bill_id)
     was_paid_before = bill.status == BillStatus.PAID
     bill.amount_paid = round(float(bill.amount_paid) + amount, 2)
-    _recompute_totals(bill)
+    _recompute_totals(db, business_id, bill)
     db.flush()
 
     if bill.status == BillStatus.PAID and bill.location_id:
