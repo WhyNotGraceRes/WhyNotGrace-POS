@@ -13,7 +13,9 @@
     "mobile": "Mobile number",
     "firstName": "First name",
     "lastName": "Last name",
-    "somethingWentWrong": "Something went wrong. Please try again."
+    "somethingWentWrong": "Something went wrong. Please try again.",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "auth": {
     "login": {
@@ -626,7 +628,16 @@
     "defaultTax": "Default tax %",
     "defaultServiceCharge": "Default service charge %",
     "currency": "Currency",
-    "timezone": "Timezone"
+    "timezone": "Timezone",
+    "taxHint": "Total tax rate on the bill, e.g. 5 for a standard restaurant.",
+    "serviceChargeHint": "Used only when no charge band below matches.",
+    "gstin": "GSTIN",
+    "gstinHint": "Printed on every tax invoice. Leave blank if unregistered.",
+    "taxLabel": "Tax name on the bill",
+    "taxLabelHint": "Shown on the printed bill, e.g. GST.",
+    "splitTax": "Split into CGST and SGST",
+    "splitTaxOn": "The bill will show C{{label}} {{half}}% and S{{label}} {{half}}% as separate lines, as an intra-state tax invoice requires.",
+    "splitTaxOff": "The bill will show a single combined {{label}} line. Only correct for inter-state supply."
   },
   "integrationsAdmin": {
     "subtitle": "Connect third-party ordering and payment providers.",
@@ -699,5 +710,56 @@
       "DELIVERED": "Delivered",
       "CANCELLED": "Cancelled"
     }
+  },
+  "charges": {
+    "title": "Charges by order value",
+    "subtitle": "Packing, delivery or service charges that change with the size of the order.",
+    "addBand": "Add band",
+    "addRow": "Add row",
+    "editBand": "Edit band",
+    "empty": "No charge bands yet. Add one to charge, say, ₹20 packing under ₹200 and nothing above ₹500.",
+    "loadError": "Could not load charge bands.",
+    "saved": "Charge band saved.",
+    "deleted": "Charge band deleted.",
+    "chargeName": "Charge name",
+    "chargeNamePlaceholder": "Packing charge",
+    "chargeNameHint": "Rows sharing a name form one ladder, and this is what the guest sees on the bill.",
+    "fromAmount": "From (₹)",
+    "toAmount": "To (₹)",
+    "noUpperLimit": "No limit",
+    "rangeHint": "The From amount is included, the To amount is not. Leave To empty for 'and above'.",
+    "basis": "Charge type",
+    "basisFlat": "Fixed amount",
+    "basisPercent": "Percentage of order",
+    "valueFlat": "Amount (₹)",
+    "valuePercent": "Percent (%)",
+    "zeroHint": "Set 0 to make this range free — no line is added to the bill.",
+    "appliesTo": "Applies to",
+    "allContexts": "All order types",
+    "taxable": "Tax applies to this charge",
+    "taxableHint": "Normally on: packing, delivery and service charges are part of the taxable value.",
+    "active": "Active",
+    "taxableShort": "Taxed",
+    "notTaxableShort": "Not taxed",
+    "inactive": "Inactive",
+    "free": "Free",
+    "rangeOpen": "{{from}} and above",
+    "rangeClosed": "{{from}} to under {{to}}",
+    "gapWarning": "No charge is set for:",
+    "previewTitle": "Check what an order would be charged",
+    "previewAmount": "Order value",
+    "previewTotal": "Guest pays",
+    "context": {
+      "DINE_IN": "Dine-in",
+      "PICKUP": "Pickup",
+      "DELIVERY": "Delivery",
+      "ROOM_SERVICE": "Room service",
+      "SECTION_A": "Section A",
+      "SECTION_B": "Section B",
+      "POOL_AREA": "Pool area",
+      "LOUNGE": "Lounge",
+      "CUSTOM": "Custom"
+    },
+    "previewSubtotal": "Order value"
   }
 }

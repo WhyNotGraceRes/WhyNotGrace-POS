@@ -48,6 +48,12 @@ class FeatureModule(StrEnum):
 ALWAYS_ON_FEATURES = {FeatureModule.CORE_POS}
 
 
+class ChargeBasis(StrEnum):
+    """How a ChargeBand's value is interpreted."""
+    PERCENT = "PERCENT"
+    FLAT = "FLAT"
+
+
 class LocationType(StrEnum):
     TABLE = "TABLE"
     ROOM = "ROOM"

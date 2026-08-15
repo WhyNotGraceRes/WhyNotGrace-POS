@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select } from "@/components/ui/Select";
+import { Switch } from "@/components/ui/Switch";
 import { parseApiError } from "@/api/errors";
 import { useBusiness, useUpdateBusiness } from "@/features/business/hooks";
 import { useBusinessSettings, useUpdateBusinessSettings } from "@/features/settings/hooks";
+import { ChargeBandsSection } from "@/features/settings/components/ChargeBandsSection";
 import type { BusinessType } from "@/types/models";
 
 const BUSINESS_TYPES: BusinessType[] = ["RESTAURANT", "HOTEL", "RESORT", "LODGE", "LOUNGE", "CAFE", "CLOUD_KITCHEN", "OTHER"];
@@ -32,6 +34,9 @@ export function BusinessSettingsPage() {
   const [tax, setTax] = useState("");
   const [serviceCharge, setServiceCharge] = useState("");
   const [currency, setCurrency] = useState("");
+  const [gstin, setGstin] = useState("");
+  const [taxLabel, setTaxLabel] = useState("GST");
+  const [splitTax, setSplitTax] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [hydrated, setHydrated] = useState(false);
@@ -43,6 +48,9 @@ export function BusinessSettingsPage() {
     setTax(String(settings.default_tax_percent));
     setServiceCharge(String(settings.default_service_charge_percent));
     setCurrency(settings.currency);
+    setGstin(settings.gstin ?? "");
+    setTaxLabel(settings.tax_label);
+    setSplitTax(settings.tax_split_intra_state);
     setHydrated(true);
   }
 
@@ -61,6 +69,9 @@ export function BusinessSettingsPage() {
           default_tax_percent: Number(tax) || 0,
           default_service_charge_percent: Number(serviceCharge) || 0,
           currency: currency.trim(),
+          gstin: gstin.trim(),
+          tax_label: taxLabel.trim() || "GST",
+          tax_split_intra_state: splitTax,
         }),
       ]);
       toast.success(t("businessSettings.saved"));
@@ -121,11 +132,52 @@ export function BusinessSettingsPage() {
             <div>
               <Label htmlFor="biz-tax">{t("businessSettings.defaultTax")}</Label>
               <Input id="biz-tax" type="number" min={0} max={100} step="0.01" value={tax} onChange={(e) => setTax(e.target.value)} />
+              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.taxHint")}</p>
             </div>
             <div>
               <Label htmlFor="biz-service">{t("businessSettings.defaultServiceCharge")}</Label>
               <Input id="biz-service" type="number" min={0} max={100} step="0.01" value={serviceCharge} onChange={(e) => setServiceCharge(e.target.value)} />
+              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.serviceChargeHint")}</p>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="biz-gstin">{t("businessSettings.gstin")}</Label>
+              <Input
+                id="biz-gstin"
+                value={gstin}
+                onChange={(e) => setGstin(e.target.value.toUpperCase())}
+                placeholder="27AAPFU0939F1ZV"
+                maxLength={15}
+              />
+              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.gstinHint")}</p>
+            </div>
+            <div>
+              <Label htmlFor="biz-tax-label">{t("businessSettings.taxLabel")}</Label>
+              <Input id="biz-tax-label" value={taxLabel} onChange={(e) => setTaxLabel(e.target.value)} />
+              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.taxLabelHint")}</p>
+            </div>
+          </div>
+
+          {/* Intra-state is the normal case for a restaurant, and a single
+              combined line is not a compliant invoice — so the split is on
+              by default and the consequence of turning it off is spelled
+              out rather than left to the owner to discover on a printed
+              bill. */}
+          <div className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2">
+            <div>
+              <p className="text-sm font-medium text-slate-800">{t("businessSettings.splitTax")}</p>
+              <p className="text-xs text-slate-500">
+                {splitTax
+                  ? t("businessSettings.splitTaxOn", {
+                      label: taxLabel || "GST",
+                      half: (Number(tax) / 2 || 0).toFixed(2),
+                    })
+                  : t("businessSettings.splitTaxOff", { label: taxLabel || "GST" })}
+              </p>
+            </div>
+            <Switch checked={splitTax} onChange={setSplitTax} label={t("businessSettings.splitTax")} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -143,6 +195,12 @@ export function BusinessSettingsPage() {
             {t("common.save")}
           </Button>
         </Card>
+      )}
+
+      {!isLoading && !isError && (
+        <div className="mt-4 max-w-xl">
+          <ChargeBandsSection />
+        </div>
       )}
     </div>
   );

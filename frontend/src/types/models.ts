@@ -273,3 +273,13 @@ export type QROrderCreateRequest = Schemas["QROrderCreateRequest"];
 // --- Validation errors (FastAPI 422 shape) ---
 export type ValidationError = Schemas["ValidationError"];
 export type HTTPValidationError = Schemas["HTTPValidationError"];
+
+// --- Charge bands (value-based packing/delivery/service charges) ---
+export type ChargeBandOut = Schemas["ChargeBandOut"];
+export type ChargeBandCreate = Schemas["ChargeBandCreate"];
+export type ChargeBandUpdate = Schemas["ChargeBandUpdate"];
+export type ChargeBandListOut = Schemas["ChargeBandListOut"];
+export type ChargeLadderGap = Schemas["ChargeLadderGap"];
+export type ChargeBasis = Schemas["ChargeBasis"];
+export type ChargePreviewRequest = Schemas["ChargePreviewRequest"];
+export type ChargePreviewOut = Schemas["ChargePreviewOut"];

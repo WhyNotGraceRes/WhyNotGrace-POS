@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import ForeignKey, Numeric, String
+from sqlalchemy import Boolean, ForeignKey, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -104,7 +104,15 @@ class BillServiceCharge(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("bills.id", ondelete="CASCADE"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    percent: Mapped[float] = mapped_column(Numeric(5, 2), nullable=False)
+    # NULL when the charge came from a FLAT band — there is no percentage to
+    # show on the bill in that case, and storing a fake one would make the
+    # printed invoice lie about how the number was arrived at.
+    percent: Mapped[float | None] = mapped_column(Numeric(5, 2), nullable=True)
     amount: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
+    # Whether this charge is part of the taxable value of supply. Almost
+    # always true on a restaurant bill (service, packing and delivery
+    # charges all attract GST), but a non-supply line must be excludable or
+    # the bill over-taxes the guest.
+    is_taxable: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     bill: Mapped["Bill"] = relationship(back_populates="service_charges")

@@ -1681,6 +1681,192 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/partner-channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Channels */
+        get: operations["list_channels_api_v1_partner_channels_get"];
+        put?: never;
+        /**
+         * Create Channel
+         * @description Issues credentials. The response carries the signing secret, and it is
+         *     the only time it is ever returned — see partner_service.create_channel.
+         */
+        post: operations["create_channel_api_v1_partner_channels_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner-channels/{channel_id}/rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rotate Secret */
+        post: operations["rotate_secret_api_v1_partner_channels__channel_id__rotate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner-channels/{channel_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke Channel
+         * @description Revokes rather than deletes, so the audit trail and any orders already
+         *     submitted through this channel stay attributable to it.
+         */
+        delete: operations["revoke_channel_api_v1_partner_channels__channel_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner-channels/{channel_id}/menu-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Mappings */
+        get: operations["list_mappings_api_v1_partner_channels__channel_id__menu_map_get"];
+        /**
+         * Upsert Mapping
+         * @description Binds one of the partner's item refs to a real menu item. This is the
+         *     owner-controlled half of price integrity: the partner chooses which ref
+         *     to send, the owner chooses what that ref costs.
+         */
+        put: operations["upsert_mapping_api_v1_partner_channels__channel_id__menu_map_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/partner-channels/{channel_id}/menu-map/{mapping_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Mapping */
+        delete: operations["delete_mapping_api_v1_partner_channels__channel_id__menu_map__mapping_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/channels/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Order
+         * @description Accepts an order from a provisioned partner site.
+         *
+         *     Note what the handler never does: read a business id from the payload,
+         *     or read a price from it. The tenant comes from the authenticated
+         *     channel; the money comes from pricing_service.
+         */
+        post: operations["submit_order_api_v1_channels_orders_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/charges/bands": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Bands */
+        get: operations["list_bands_api_v1_charges_bands_get"];
+        put?: never;
+        /** Create Band */
+        post: operations["create_band_api_v1_charges_bands_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/charges/bands/{band_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Band */
+        put: operations["update_band_api_v1_charges_bands__band_id__put"];
+        post?: never;
+        /** Delete Band */
+        delete: operations["delete_band_api_v1_charges_bands__band_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/charges/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview
+         * @description Shows what an order of a given value would actually be charged.
+         *
+         *     Bands plus tax interact in ways that are hard to hold in your head — a
+         *     taxable delivery fee changes the GST, a band boundary is half-open — so
+         *     the owner gets to ask the system rather than reason it out and hope.
+         *     Uses the same tax split the real bill uses, so what this shows is what
+         *     the guest would pay.
+         */
+        post: operations["preview_api_v1_charges_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1849,6 +2035,18 @@ export interface components {
             default_service_charge_percent: number;
             /** Currency */
             currency: string;
+            /** Gstin */
+            gstin?: string | null;
+            /**
+             * Tax Label
+             * @default GST
+             */
+            tax_label: string;
+            /**
+             * Tax Split Intra State
+             * @default true
+             */
+            tax_split_intra_state: boolean;
         };
         /** BusinessSettingsUpdateRequest */
         BusinessSettingsUpdateRequest: {
@@ -1864,6 +2062,12 @@ export interface components {
             default_service_charge_percent?: number | null;
             /** Currency */
             currency?: string | null;
+            /** Gstin */
+            gstin?: string | null;
+            /** Tax Label */
+            tax_label?: string | null;
+            /** Tax Split Intra State */
+            tax_split_intra_state?: boolean | null;
         };
         /**
          * BusinessType
@@ -1889,6 +2093,155 @@ export interface components {
             method: components["schemas"]["PaymentMethod"];
             /** Notes */
             notes?: string | null;
+        };
+        /** ChargeBandCreate */
+        ChargeBandCreate: {
+            /** Name */
+            name: string;
+            applies_to_context?: components["schemas"]["PricingContext"] | null;
+            /** Min Amount */
+            min_amount: number;
+            /** Max Amount */
+            max_amount?: number | null;
+            /** @default FLAT */
+            basis: components["schemas"]["ChargeBasis"];
+            /** Value */
+            value: number;
+            /**
+             * Is Taxable
+             * @default true
+             */
+            is_taxable: boolean;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * Display Order
+             * @default 0
+             */
+            display_order: number;
+        };
+        /** ChargeBandListOut */
+        ChargeBandListOut: {
+            /** Bands */
+            bands: components["schemas"]["ChargeBandOut"][];
+            /** Gaps */
+            gaps: components["schemas"]["ChargeLadderGap"][];
+        };
+        /** ChargeBandOut */
+        ChargeBandOut: {
+            /** Name */
+            name: string;
+            applies_to_context?: components["schemas"]["PricingContext"] | null;
+            /** Min Amount */
+            min_amount: number;
+            /** Max Amount */
+            max_amount?: number | null;
+            /** @default FLAT */
+            basis: components["schemas"]["ChargeBasis"];
+            /** Value */
+            value: number;
+            /**
+             * Is Taxable
+             * @default true
+             */
+            is_taxable: boolean;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * Display Order
+             * @default 0
+             */
+            display_order: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
+        /** ChargeBandUpdate */
+        ChargeBandUpdate: {
+            /** Name */
+            name?: string | null;
+            applies_to_context?: components["schemas"]["PricingContext"] | null;
+            /** Min Amount */
+            min_amount?: number | null;
+            /** Max Amount */
+            max_amount?: number | null;
+            basis?: components["schemas"]["ChargeBasis"] | null;
+            /** Value */
+            value?: number | null;
+            /** Is Taxable */
+            is_taxable?: boolean | null;
+            /** Is Active */
+            is_active?: boolean | null;
+            /** Display Order */
+            display_order?: number | null;
+        };
+        /**
+         * ChargeBasis
+         * @description How a ChargeBand's value is interpreted.
+         * @enum {string}
+         */
+        ChargeBasis: "PERCENT" | "FLAT";
+        /**
+         * ChargeLadderGap
+         * @description An uncovered stretch of a ladder. Surfaced so the admin screen can
+         *     warn about a likely mistyped boundary — not treated as an error, since a
+         *     charge that only applies in one range is legitimate.
+         */
+        ChargeLadderGap: {
+            /** Name */
+            name: string;
+            applies_to_context: components["schemas"]["PricingContext"] | null;
+            /** From Amount */
+            from_amount: number;
+            /** To Amount */
+            to_amount: number | null;
+        };
+        /** ChargePreviewLine */
+        ChargePreviewLine: {
+            /** Name */
+            name: string;
+            basis: components["schemas"]["ChargeBasis"];
+            /** Value */
+            value: number;
+            /** Amount */
+            amount: number;
+            /** Is Taxable */
+            is_taxable: boolean;
+        };
+        /** ChargePreviewOut */
+        ChargePreviewOut: {
+            /** Amount */
+            amount: number;
+            /** Charges */
+            charges: components["schemas"]["ChargePreviewLine"][];
+            /** Charges Total */
+            charges_total: number;
+            /** Taxable Value */
+            taxable_value: number;
+            /** Tax Lines */
+            tax_lines: Record<string, never>[];
+            /** Tax Total */
+            tax_total: number;
+            /** Grand Total */
+            grand_total: number;
+        };
+        /**
+         * ChargePreviewRequest
+         * @description Lets the owner check what a given order value would actually be
+         *     charged, without having to create a real order to find out.
+         */
+        ChargePreviewRequest: {
+            /** Amount */
+            amount: number;
+            context?: components["schemas"]["PricingContext"] | null;
         };
         /** CheckoutResponse */
         CheckoutResponse: {
@@ -2084,7 +2437,7 @@ export interface components {
          * FeatureModule
          * @enum {string}
          */
-        FeatureModule: "CORE_POS" | "QR_ORDERING" | "ONLINE_WEBSITE" | "PICKUP" | "DELIVERY" | "LOYALTY" | "HOTEL_ROOMS" | "ROOM_SERVICE" | "ONLINE_PAYMENT" | "ZOMATO" | "SWIGGY" | "REVIEWS" | "CUSTOMER_MARKETING";
+        FeatureModule: "CORE_POS" | "QR_ORDERING" | "ONLINE_WEBSITE" | "PICKUP" | "DELIVERY" | "LOYALTY" | "HOTEL_ROOMS" | "ROOM_SERVICE" | "ONLINE_PAYMENT" | "ZOMATO" | "SWIGGY" | "REVIEWS" | "CUSTOMER_MARKETING" | "PARTNER_CHANNEL";
         /** ForgotPasswordRequest */
         ForgotPasswordRequest: {
             /**
@@ -2743,6 +3096,165 @@ export interface components {
          * @enum {string}
          */
         OrderStatus: "PLACED" | "CONFIRMED" | "PREPARING" | "READY" | "OUT_FOR_DELIVERY" | "SERVED" | "DELIVERED" | "COMPLETED" | "CANCELLED";
+        /** PartnerChannelCreate */
+        PartnerChannelCreate: {
+            /** Name */
+            name: string;
+        };
+        /** PartnerChannelOut */
+        PartnerChannelOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Key Id */
+            key_id: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Revoked At */
+            revoked_at: string | null;
+            /** Last Used At */
+            last_used_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /**
+         * PartnerChannelWithSecretOut
+         * @description Returned ONLY by create and rotate.
+         *
+         *     The secret is not stored in a readable form and no other endpoint can
+         *     produce it, so this response is the single opportunity to capture it.
+         */
+        PartnerChannelWithSecretOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Key Id */
+            key_id: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Revoked At */
+            revoked_at: string | null;
+            /** Last Used At */
+            last_used_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Secret */
+            secret: string;
+        };
+        /** PartnerCustomerInfo */
+        PartnerCustomerInfo: {
+            /** First Name */
+            first_name: string;
+            /** Mobile */
+            mobile: string;
+        };
+        /** PartnerMenuMapCreate */
+        PartnerMenuMapCreate: {
+            /** External Ref */
+            external_ref: string;
+            /**
+             * Menu Item Id
+             * Format: uuid
+             */
+            menu_item_id: string;
+            /** Variant Id */
+            variant_id?: string | null;
+        };
+        /** PartnerMenuMapOut */
+        PartnerMenuMapOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** External Ref */
+            external_ref: string;
+            /**
+             * Menu Item Id
+             * Format: uuid
+             */
+            menu_item_id: string;
+            /** Variant Id */
+            variant_id: string | null;
+        };
+        /**
+         * PartnerOrderAck
+         * @description Deliberately thin.
+         *
+         *     A partner needs to know its order was accepted and how to refer to it
+         *     later. It does not need the full OrderOut, which carries pricing
+         *     internals, session ids, and staff-facing fields that a channel
+         *     credential has no business reading.
+         */
+        PartnerOrderAck: {
+            /**
+             * Order Id
+             * Format: uuid
+             */
+            order_id: string;
+            /** Order Number */
+            order_number: string;
+            /** Status */
+            status: string;
+            /** Subtotal */
+            subtotal: number;
+            /**
+             * Duplicate
+             * @default false
+             */
+            duplicate: boolean;
+        };
+        /** PartnerOrderCreate */
+        PartnerOrderCreate: {
+            /** Items */
+            items: components["schemas"]["PartnerOrderLine"][];
+            /**
+             * Fulfilment
+             * @default PICKUP
+             * @enum {string}
+             */
+            fulfilment: "PICKUP" | "DELIVERY";
+            customer?: components["schemas"]["PartnerCustomerInfo"] | null;
+            /** Notes */
+            notes?: string | null;
+            /** Delivery Address */
+            delivery_address?: string | null;
+            /** Delivery Instructions */
+            delivery_instructions?: string | null;
+            /** Idempotency Key */
+            idempotency_key?: string | null;
+        };
+        /**
+         * PartnerOrderLine
+         * @description Note what is absent: there is no price field, and no way to add one.
+         *
+         *     A partner names the item it wants by its own reference and says how
+         *     many. Everything monetary is resolved server-side from that, so the
+         *     request cannot express "this dish costs ₹1" even if the sending site is
+         *     fully compromised.
+         */
+        PartnerOrderLine: {
+            /** External Ref */
+            external_ref: string;
+            /** Quantity */
+            quantity: number;
+            /** Special Instructions */
+            special_instructions?: string | null;
+        };
         /**
          * PaymentMethod
          * @enum {string}
@@ -6952,6 +7464,405 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SubscriptionOut"];
+                };
+            };
+        };
+    };
+    list_channels_api_v1_partner_channels_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerChannelOut"][];
+                };
+            };
+        };
+    };
+    create_channel_api_v1_partner_channels_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartnerChannelCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerChannelWithSecretOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rotate_secret_api_v1_partner_channels__channel_id__rotate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerChannelWithSecretOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_channel_api_v1_partner_channels__channel_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerChannelOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_mappings_api_v1_partner_channels__channel_id__menu_map_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerMenuMapOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upsert_mapping_api_v1_partner_channels__channel_id__menu_map_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartnerMenuMapCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerMenuMapOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_mapping_api_v1_partner_channels__channel_id__menu_map__mapping_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                channel_id: string;
+                mapping_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_order_api_v1_channels_orders_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Partner-Key"?: string | null;
+                "X-Partner-Timestamp"?: string | null;
+                "X-Partner-Nonce"?: string | null;
+                "X-Partner-Signature"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartnerOrderCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartnerOrderAck"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_bands_api_v1_charges_bands_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChargeBandListOut"];
+                };
+            };
+        };
+    };
+    create_band_api_v1_charges_bands_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChargeBandCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChargeBandOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_band_api_v1_charges_bands__band_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                band_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChargeBandUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChargeBandOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_band_api_v1_charges_bands__band_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                band_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_api_v1_charges_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChargePreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChargePreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

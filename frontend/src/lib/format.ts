@@ -12,6 +12,23 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+/**
+ * Same, but keeping paise. Whole-rupee rounding is fine for a dashboard
+ * tile, and wrong anywhere the reader is checking that the numbers add up:
+ * a 2.5% CGST and a 2.5% SGST of ₹6.50 each both render as "₹7" under the
+ * rounding formatter, so the two lines appear to sum to ₹14 while the total
+ * correctly says ₹13. Use this wherever individual lines are shown next to
+ * the total they make up — tax previews, bills, receipts.
+ */
+export function formatCurrencyExact(amount: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
 export function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-IN").format(value);
 }

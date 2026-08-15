@@ -175,6 +175,7 @@ from app.api import integrations  # noqa: E402
 from app.api import admin  # noqa: E402
 from app.api import subscription  # noqa: E402
 from app.api import channels, partner_channels  # noqa: E402
+from app.api import charges  # noqa: E402
 
 prefix = settings.api_v1_prefix
 
@@ -210,3 +211,4 @@ app.include_router(admin.router, prefix=prefix)
 app.include_router(subscription.router, prefix=prefix)
 app.include_router(partner_channels.router, prefix=prefix)
 app.include_router(channels.router, prefix=prefix)
+app.include_router(charges.router, prefix=prefix)
