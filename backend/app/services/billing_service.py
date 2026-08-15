@@ -1,14 +1,17 @@
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
+from app.core import toggles
+from app.core.permissions import ROLE_OPERATIONAL
 from app.models.billing import Bill, BillDiscount, BillItem, BillServiceCharge, BillTax
 from app.models.business import BusinessSettings
 from app.models.enums import BillStatus, ChargeBasis, LocationStatus, OrderStatus, PricingContext
 from app.models.location import Location
 from app.models.order import Order, OrderSession
-from app.services import charge_service
+from app.services import charge_service, invoice_service
 from app.utils.numbering import generate_number
 
 
@@ -290,10 +293,98 @@ def record_payment_applied(db: Session, business_id: uuid.UUID, bill_id: uuid.UU
     if bill.status == BillStatus.PAID and not was_paid_before:
         from app.services import kot_service
 
+        # Settlement is the moment the bill becomes a tax invoice, so this is
+        # where its number is allocated — see invoice_service for why not at
+        # creation. Guarded by `not was_paid_before` so a second payment on an
+        # already-settled bill can never allocate a second number.
+        finalise(db, business_id, bill)
+
         kot_service.release_held_kots_for_session(db, business_id, bill.session_id)
         _accrue_loyalty_if_enabled(db, business_id, bill)
 
     return bill
+
+
+def finalise(db: Session, business_id: uuid.UUID, bill: Bill) -> Bill:
+    """Turns a settled bill into a numbered tax invoice.
+
+    Idempotent: a bill that already carries a number keeps it. Anything that
+    re-runs this — a retried request, a webhook arriving twice — must not
+    consume a second serial.
+    """
+    if bill.invoice_number is not None:
+        return bill
+
+    number, series, fy, sequence = invoice_service.allocate(db, business_id)
+    bill.invoice_number = number
+    bill.invoice_series = series
+    bill.invoice_financial_year = fy
+    bill.invoice_sequence = sequence
+    bill.finalised_at = datetime.now(timezone.utc)
+    db.flush()
+    return bill
+
+
+def void_bill(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, *, reason: str | None, user) -> Bill:
+    """Cancels a bill without deleting it.
+
+    A voided invoice keeps its number and stays in the series. Removing it
+    would create exactly the gap the numbering rules forbid, and would erase
+    the record of the cancellation — which is the thing an owner most wants
+    to be able to look at.
+    """
+    bill = get_bill_or_404(db, business_id, bill_id)
+    if bill.status == BillStatus.CANCELLED:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bill is already cancelled")
+
+    if toggles.is_enabled(db, business_id, toggles.VOID_REQUIRES_MANAGER):
+        if user.role not in ROLE_OPERATIONAL:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only a manager or owner can void a bill",
+            )
+
+    if toggles.is_enabled(db, business_id, toggles.VOID_REQUIRES_REASON):
+        if not reason or not reason.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A reason is required to void a bill",
+            )
+
+    bill.status = BillStatus.CANCELLED
+    bill.voided_at = datetime.now(timezone.utc)
+    bill.void_reason = (reason or "").strip() or None
+    bill.voided_by_user_id = user.id
+    db.flush()
+
+    # Free the table. A cancelled bill should not leave the floor plan
+    # showing a location as still owing money.
+    if bill.location_id:
+        location = db.get(Location, bill.location_id)
+        if location is not None:
+            location.status = LocationStatus.AVAILABLE
+            db.flush()
+
+    return bill
+
+
+def register_print(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID) -> tuple[Bill, bool]:
+    """Records that the bill was printed. Returns (bill, is_duplicate).
+
+    The first print is the original; every one after it is a duplicate, which
+    the renderer stamps on the paper. This is the standard control against
+    the oldest till trick there is — printing two "originals" of one bill and
+    pocketing one payment.
+    """
+    bill = get_bill_or_404(db, business_id, bill_id)
+    is_first = bill.print_count == 0
+    bill.print_count += 1
+    if is_first:
+        bill.first_printed_at = datetime.now(timezone.utc)
+    db.flush()
+
+    mark = toggles.is_enabled(db, business_id, toggles.MARK_DUPLICATE_REPRINT)
+    return bill, (not is_first and mark)
 
 
 def _accrue_loyalty_if_enabled(db: Session, business_id: uuid.UUID, bill: Bill) -> None:

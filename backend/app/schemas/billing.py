@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -41,11 +42,25 @@ class BillLineOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class VoidBillRequest(BaseModel):
+    """Reason is optional here and required by the service when the
+    billing.void_requires_reason toggle is on, so the rule lives in one place
+    rather than being duplicated as schema validation that a toggle cannot
+    reach."""
+
+    reason: str | None = Field(default=None, max_length=255)
+
+
 class BillOut(BaseModel):
     id: uuid.UUID
     session_id: uuid.UUID
     location_id: uuid.UUID | None
     bill_number: str
+    invoice_number: str | None = None
+    finalised_at: datetime | None = None
+    voided_at: datetime | None = None
+    void_reason: str | None = None
+    print_count: int = 0
     status: BillStatus
     subtotal: float
     tax_total: float
@@ -71,3 +86,16 @@ class GenerateBillRequest(BaseModel):
 
 class ApplyDiscountRequest(BillDiscountCreate):
     pass
+
+
+class BillPrintOut(BaseModel):
+    """The bill plus whether this particular copy must be stamped DUPLICATE.
+
+    The flag is computed server-side rather than left to the client to work
+    out from print_count, so a client that forgets the rule cannot print an
+    unmarked second original.
+    """
+
+    bill: BillOut
+    is_duplicate: bool
+    print_count: int

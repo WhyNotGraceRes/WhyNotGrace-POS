@@ -1,6 +1,7 @@
 import uuid
+from datetime import datetime
 
-from sqlalchemy import Boolean, ForeignKey, Numeric, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,8 +21,37 @@ class Bill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     location_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("locations.id", ondelete="SET NULL"), nullable=True
     )
+    # Internal working reference, assigned the moment the bill is opened.
+    # Not the tax invoice number — it is timestamped-and-random, so it is
+    # useful for staff to say aloud and useless as a legal serial.
     bill_number: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+
+    # The actual tax invoice number, and NULL until the bill is finalised.
+    # That is the whole point: if the number were assigned when the bill was
+    # opened, a table that walked out would burn a number and leave a gap in
+    # a series that is required to be consecutive.
+    invoice_number: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
+    invoice_series: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    invoice_financial_year: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    invoice_sequence: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    finalised_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     status: Mapped[BillStatus] = mapped_column(default=BillStatus.OPEN, nullable=False)
+
+    # Void, not delete. A voided invoice keeps its number and stays in the
+    # series — removing it would create exactly the gap the numbering rules
+    # forbid, and would also erase the evidence of the cancellation.
+    voided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    void_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    voided_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+
+    # First print is the original; everything after it is a duplicate. Stored
+    # rather than derived from the audit log so the renderer can decide what
+    # to stamp on the paper without running a query per print.
+    print_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    first_printed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     subtotal: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
     tax_total: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
