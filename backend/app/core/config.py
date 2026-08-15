@@ -96,6 +96,15 @@ class Settings(BaseSettings):
     # data, and is highly compressible JSON.
     gzip_minimum_size_bytes: int = 1000
 
+    # Partner sales channels (a business's own website submitting orders —
+    # see app/core/partner_auth.py). How far a signed request's timestamp may
+    # be from server time before it is refused. This is the window in which a
+    # captured request could be replayed if the nonce check somehow did not
+    # apply, so it is deliberately short; it also bounds how long nonces need
+    # to be retained. Too tight and ordinary clock drift on a partner's server
+    # starts rejecting legitimate traffic — 300s is the usual compromise.
+    partner_signature_max_skew_seconds: int = 300
+
     # JWT
     jwt_secret: str = INSECURE_DEV_JWT_SECRET
     jwt_algorithm: str = "HS256"

@@ -36,6 +36,12 @@ class FeatureModule(StrEnum):
     SWIGGY = "SWIGGY"
     REVIEWS = "REVIEWS"
     CUSTOMER_MARKETING = "CUSTOMER_MARKETING"
+    # Lets a business's own website (a first-party site built for them)
+    # submit orders through the partner channel API. Off by default, so a
+    # business must deliberately enable inbound order submission before any
+    # credential an owner issues will actually work — two independent gates,
+    # not one.
+    PARTNER_CHANNEL = "PARTNER_CHANNEL"
 
 
 # Features that are always on and cannot be disabled by a business.

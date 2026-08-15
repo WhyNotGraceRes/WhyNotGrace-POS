@@ -124,6 +124,24 @@ def public_checkout_key(request: Request) -> str:
     return f"checkout:{slug}:{get_client_ip(request)}"
 
 
+def partner_channel_key(request: Request) -> str:
+    """Key for partner-site order submission.
+
+    A partner site is a server: all its traffic legitimately originates from
+    one address, so an IP key would have to be either uselessly loose or
+    tight enough to throttle a busy site's real customers. The channel key
+    is the right unit — each provisioned site gets its own budget, and one
+    misbehaving site cannot affect another's.
+
+    Falls back to the IP when the header is absent, so unauthenticated
+    probing is still limited.
+    """
+    key_id = request.headers.get("x-partner-key")
+    if key_id:
+        return f"partner:{key_id}"
+    return get_client_ip(request)
+
+
 def _build_limiter() -> Limiter:
     settings = get_settings()
     if not settings.redis_url:
