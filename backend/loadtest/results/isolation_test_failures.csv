@@ -1,0 +1,10 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/qr/menu [mixed:pre-order],CatchResponseError('menu load failed: 0'),2,2026-08-13T17:13:06Z,2026-08-13T17:13:06Z
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 0'),3,2026-08-13T17:12:13Z,2026-08-13T17:13:06Z
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 500'),15,2026-08-13T17:13:00Z,2026-08-13T17:13:02Z
+GET,/api/v1/qr/menu [mixed:poll-fallback],CatchResponseError('menu load failed: 500'),10,2026-08-13T17:13:02Z,2026-08-13T17:13:02Z
+POST,/api/v1/qr/orders [mixed:POST],CatchResponseError('order placement failed: 500: Internal Server Error'),4,2026-08-13T17:13:02Z,2026-08-13T17:13:02Z
+GET,/api/v1/qr/menu [mixed:pre-order],CatchResponseError('menu load failed: 500'),7,2026-08-13T17:13:02Z,2026-08-13T17:13:09Z
+GET,/api/v1/qr/menu [mixed:poll-fallback],CatchResponseError('menu load failed: 0'),4,2026-08-13T17:12:14Z,2026-08-13T17:13:06Z
+POST,/api/v1/qr/orders [mixed:POST],CatchResponseError('order placement failed: 0: '),5,2026-08-13T17:13:06Z,2026-08-13T17:13:06Z
+POST,/api/v1/auth/login,HTTPError('429 Client Error: Too Many Requests for url: /api/v1/auth/login'),90,2026-08-13T17:12:05Z,2026-08-13T17:13:10Z

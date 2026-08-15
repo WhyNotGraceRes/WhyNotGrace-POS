@@ -1,0 +1,4 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/orders [staff],CatchResponseError('orders list failed: 500'),2,2026-08-12T22:17:47Z,2026-08-12T22:18:48Z
+GET,/api/v1/orders [staff],CatchResponseError('orders list failed: 0'),3,2026-08-12T22:15:55Z,2026-08-12T22:16:45Z
+POST,/api/v1/auth/login,HTTPError('429 Client Error: Too Many Requests for url: /api/v1/auth/login'),14,2026-08-12T22:15:29Z,2026-08-12T22:15:56Z

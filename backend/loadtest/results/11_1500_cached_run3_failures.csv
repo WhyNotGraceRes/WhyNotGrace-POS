@@ -1,0 +1,4 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/qr/menu [mixed:pre-order],CatchResponseError('menu load failed: 0'),2,2026-08-13T12:27:53Z,2026-08-13T12:28:57Z
+GET,/api/v1/qr/menu [isolation-control:b],CatchResponseError('menu load failed: 0'),7,2026-08-13T12:30:27Z,2026-08-13T12:31:20Z
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 0'),3,2026-08-13T12:29:06Z,2026-08-13T12:30:40Z

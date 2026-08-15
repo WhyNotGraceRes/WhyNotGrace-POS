@@ -1,0 +1,159 @@
+# Production topology overlay — apply ON TOP OF docker-compose.yml, never
+# alone (it relies on postgres/redis/backend/frontend service definitions
+# from the base file and only overrides/adds what's different for a
+# scaled, load-balanced deployment). See backend/README.md's "Production
+# deployment topology" section for the full picture, the connection-count
+# math, and — importantly — what has and has not been verified locally
+# (this repo's dev sandbox has no usable Docker daemon, so this overlay is
+# correctly authored and internally consistent but not itself smoke-tested
+# end-to-end here; see the README for exactly what that means for you).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#       up -d --scale backend=${BACKEND_REPLICAS:-3}
+#
+# Topology this adds on top of the base file:
+#   internet -> lb (nginx, the only published port) -> backend replicas (N)
+#                                                          |
+#                                                          v
+#                                                     pgbouncer -> postgres
+#                                                          ^
+#                                                        redis (cache + rate limit)
+#
+# `--scale backend=N` (not `deploy.replicas`) is the command used here
+# because it's honored by plain `docker compose up` on every Compose
+# version, not only newer ones — see README for why deploy.replicas isn't
+# relied on instead.
+
+services:
+  # ---------------------------------------------------------------------
+  # Postgres: no longer exposed to the host. Only `pgbouncer` and the
+  # one-shot `migrate` job need to reach it, both over the internal
+  # compose network. Real production should prefer a managed Postgres
+  # (RDS/Cloud SQL/etc.) over this self-hosted container entirely — see
+  # README — but the topology below works identically either way, since
+  # only pgbouncer.ini's `host=` needs to change.
+  # ---------------------------------------------------------------------
+  postgres:
+    # `!reset` (not a plain `[]`) is required to actually clear the base
+    # file's host port publish — verified with `docker compose config`;
+    # a plain `ports: []` override was silently ignored (base list won,
+    # port stayed published) rather than clearing it.
+    ports: !reset []
+    mem_limit: 1g
+    cpus: 1.0
+
+  redis:
+    ports: !reset []
+    mem_limit: 256m
+    cpus: 0.5
+
+  # ---------------------------------------------------------------------
+  # PgBouncer: every backend replica/worker connects HERE (not directly to
+  # postgres). Transaction-pooling mode means the app-side connection
+  # count (replicas x workers x (staff pool + QR pool)) can scale far
+  # past Postgres's own max_connections, because PgBouncer multiplexes
+  # all of it down to pgbouncer.ini's default_pool_size (25) real
+  # Postgres backend connections. See deploy/pgbouncer/pgbouncer.ini and
+  # deploy/pgbouncer/userlist.txt.example (copy to userlist.txt with real
+  # credentials before deploying — gitignored, never commit it).
+  # ---------------------------------------------------------------------
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.25.2-p0
+    restart: unless-stopped
+    volumes:
+      - ./deploy/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./deploy/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432 -U ${POSTGRES_USER:-whynotgrace} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    mem_limit: 128m
+    cpus: 0.5
+
+  # ---------------------------------------------------------------------
+  # One-shot migration job. Runs `alembic upgrade head` exactly ONCE, then
+  # exits — `backend` replicas wait for this to succeed before starting
+  # (service_completed_successfully) instead of each replica racing to run
+  # migrations concurrently against its own startup, which was the base
+  # docker-compose.yml's behavior and is unsafe once there's more than one
+  # replica (concurrent DDL from N containers against the same schema).
+  # Connects DIRECTLY to postgres, not through pgbouncer: DDL/schema
+  # migrations want normal session semantics, not transaction pooling.
+  # ---------------------------------------------------------------------
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-whynotgrace}:${POSTGRES_PASSWORD:-changeme_dev_password}@postgres:5432/${POSTGRES_DB:-whynotgrace}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: alembic upgrade head
+
+  # ---------------------------------------------------------------------
+  # Backend: no host port of its own — reachable only through `lb`, over
+  # the internal compose network on port 8000. Scale with
+  # `--scale backend=N` (see top of file). Each replica runs
+  # --workers ${UVICORN_WORKERS:-4} uvicorn worker PROCESSES on top of
+  # that, so total app-side capacity is
+  # N replicas x UVICORN_WORKERS x (staff pool + QR pool) — all of it
+  # against pgbouncer, not against Postgres's max_connections directly.
+  # ---------------------------------------------------------------------
+  backend:
+    ports: !reset []
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-whynotgrace}:${POSTGRES_PASSWORD:-changeme_dev_password}@pgbouncer:6432/${POSTGRES_DB:-whynotgrace}
+      REDIS_URL: redis://redis:6379/0
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+      DB_POOL_MAX_OVERFLOW: ${DB_POOL_MAX_OVERFLOW:-7}
+      QR_DB_POOL_SIZE: ${QR_DB_POOL_SIZE:-10}
+      QR_DB_POOL_MAX_OVERFLOW: ${QR_DB_POOL_MAX_OVERFLOW:-15}
+      QR_MAX_CONCURRENT_REQUESTS: ${QR_MAX_CONCURRENT_REQUESTS:-30}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-4}
+    mem_limit: 768m
+    cpus: 1.5
+
+  # ---------------------------------------------------------------------
+  # The only service with a published host port. Load-balances across
+  # every running `backend` replica — see deploy/nginx/nginx.conf for how
+  # (open-source nginx's dynamic `resolve` + passive max_fails/fail_timeout
+  # health tracking, not Docker DNS health-awareness, which does not exist
+  # for plain — non-swarm — Compose; verified against nginx/Docker docs
+  # before relying on it, see README).
+  # ---------------------------------------------------------------------
+  lb:
+    image: nginx:1.27.4-alpine
+    restart: unless-stopped
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "${LB_PORT:-80}:80"
+    depends_on:
+      - backend
+    mem_limit: 128m
+    cpus: 0.5
+
+  # frontend: unchanged service definition (inherited from the base file)
+  # other than VITE_API_URL needing to point at your real public API
+  # origin in production — e.g. FRONTEND_VITE_API_URL=https://api.yourdomain.com
+  # if a cloud load balancer/CDN terminates TLS and proxies to `lb`, or
+  # http://<server-ip>:${LB_PORT} for a bare single-server deployment
+  # without a domain yet. localhost (the base file's default) is never
+  # correct once the frontend is served to a real browser off this box.

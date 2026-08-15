@@ -1,0 +1,203 @@
+{
+  "business_id": "df825193-e779-491d-80ab-16d8ed0b6d8c",
+  "slug": "loadtest-isolation-control",
+  "items": [
+    {
+      "id": "52d6010e-d47c-42d5-8df5-08e11480956f",
+      "name": "Paneer Tikka",
+      "base_price": 109.0
+    },
+    {
+      "id": "71fce7e8-8508-410e-95ed-a50bd1b1ea32",
+      "name": "Veg Spring Rolls",
+      "base_price": 139.0
+    },
+    {
+      "id": "55ddb6d6-9364-41e8-83e3-c2c85040dbd6",
+      "name": "Chicken 65",
+      "base_price": 169.0
+    },
+    {
+      "id": "534fcc86-f95a-4c35-b437-096fb9a3e622",
+      "name": "Hara Bhara Kebab",
+      "base_price": 199.0
+    },
+    {
+      "id": "414bab56-dafc-4112-97dc-afb986e8d957",
+      "name": "Fish Fingers",
+      "base_price": 229.0
+    },
+    {
+      "id": "5815324d-5c8d-484c-95d3-ab2f97ac7faf",
+      "name": "Corn Cheese Balls",
+      "base_price": 259.0
+    },
+    {
+      "id": "cc55fab6-7e65-41b8-b897-fe6b73d2e2b0",
+      "name": "Tomato Basil Soup",
+      "base_price": 119.0
+    },
+    {
+      "id": "5a2326f5-084a-4e27-a1cc-7369d47403ce",
+      "name": "Sweet Corn Soup",
+      "base_price": 149.0
+    },
+    {
+      "id": "85e32bc8-ddc7-47f8-99aa-cc8d26f9a2fe",
+      "name": "Hot & Sour Soup",
+      "base_price": 179.0
+    },
+    {
+      "id": "73d735d8-51d8-4351-8b5d-1af615ad36f8",
+      "name": "Manchow Soup",
+      "base_price": 209.0
+    },
+    {
+      "id": "146e928f-a678-40b4-9e1f-046ce4304b6d",
+      "name": "Cream of Mushroom",
+      "base_price": 239.0
+    },
+    {
+      "id": "9fad251c-3331-4ac1-bd7e-315ea72b3b23",
+      "name": "Lemon Coriander Soup",
+      "base_price": 269.0
+    },
+    {
+      "id": "0de0fdcf-3c9f-4b12-ab05-d66f5de7218e",
+      "name": "Butter Chicken",
+      "base_price": 129.0
+    },
+    {
+      "id": "73b4a004-f309-431a-be49-4a5f53fa1277",
+      "name": "Paneer Butter Masala",
+      "base_price": 159.0
+    },
+    {
+      "id": "ebff2e9c-7284-4b6f-ba3d-f5d428f2eddb",
+      "name": "Dal Makhani",
+      "base_price": 189.0
+    },
+    {
+      "id": "12b978f0-7791-43b8-87d2-8c2d28420396",
+      "name": "Veg Kolhapuri",
+      "base_price": 219.0
+    },
+    {
+      "id": "f319c920-7464-46a2-b582-3a668b36c649",
+      "name": "Chicken Biryani",
+      "base_price": 249.0
+    },
+    {
+      "id": "60fb749b-0e9b-4c5e-bc49-ef29560a1447",
+      "name": "Mutton Rogan Josh",
+      "base_price": 279.0
+    },
+    {
+      "id": "bcb3be2d-ac6b-412f-affc-f15f40108de3",
+      "name": "Butter Naan",
+      "base_price": 139.0
+    },
+    {
+      "id": "80045ba0-d998-4154-9f3a-d59cd84cb274",
+      "name": "Garlic Naan",
+      "base_price": 169.0
+    },
+    {
+      "id": "7a76898c-8bd8-4d85-8439-59bfeb641a80",
+      "name": "Tandoori Roti",
+      "base_price": 199.0
+    },
+    {
+      "id": "1686174d-a95a-4d83-9b90-7af391ffaca6",
+      "name": "Laccha Paratha",
+      "base_price": 229.0
+    },
+    {
+      "id": "078a6492-4394-4383-ba6c-f47e31acef90",
+      "name": "Missi Roti",
+      "base_price": 259.0
+    },
+    {
+      "id": "91b70426-0f11-4d81-afc8-7de937d0c377",
+      "name": "Cheese Naan",
+      "base_price": 289.0
+    },
+    {
+      "id": "4f038ab3-cf59-4449-b101-65fc9224922d",
+      "name": "Gulab Jamun",
+      "base_price": 149.0
+    },
+    {
+      "id": "43b51d32-08bd-484f-a241-6f2ff392f5c8",
+      "name": "Rasmalai",
+      "base_price": 179.0
+    },
+    {
+      "id": "2d868098-14aa-40a3-b0ba-a2c59d8a9df2",
+      "name": "Chocolate Brownie",
+      "base_price": 209.0
+    },
+    {
+      "id": "31a6cf65-61fc-4a19-9efd-7b8b808a162d",
+      "name": "Kulfi",
+      "base_price": 239.0
+    },
+    {
+      "id": "9051003c-9233-48a0-a67d-35ad95d1d1db",
+      "name": "Gajar Halwa",
+      "base_price": 269.0
+    },
+    {
+      "id": "2059baa1-0345-49a6-8c9a-0344df5a7fbd",
+      "name": "Ice Cream Sundae",
+      "base_price": 299.0
+    },
+    {
+      "id": "c22e1fdb-0ed0-4612-9689-2da183c6894b",
+      "name": "Masala Chai",
+      "base_price": 159.0
+    },
+    {
+      "id": "17d161fb-e255-4742-a6d0-653ca75aa228",
+      "name": "Fresh Lime Soda",
+      "base_price": 189.0
+    },
+    {
+      "id": "cf8b02ef-abce-4396-acf9-d749ba5d8885",
+      "name": "Mango Lassi",
+      "base_price": 219.0
+    },
+    {
+      "id": "2d649ba6-71c6-455f-8ff5-50e248faebac",
+      "name": "Cold Coffee",
+      "base_price": 249.0
+    },
+    {
+      "id": "cd1993b2-c8a4-40b2-84cb-69a71935e3f5",
+      "name": "Mineral Water",
+      "base_price": 279.0
+    },
+    {
+      "id": "f5d9b8ec-66ad-4254-a912-c8390834df45",
+      "name": "Buttermilk",
+      "base_price": 309.0
+    }
+  ],
+  "tables": [
+    {
+      "location_id": "0edb8b20-018e-4f3f-b886-ea51a1c1d4e1",
+      "name": "T1",
+      "code": "meVKOZP8llbKpiJhssZqjQ"
+    },
+    {
+      "location_id": "e52533c8-9040-4da1-92e8-1d88c54ea004",
+      "name": "T2",
+      "code": "0L7hY1KKTw2ghzBTGoSn6Q"
+    },
+    {
+      "location_id": "1b5eb09a-4282-43ac-9a3a-9849f18216af",
+      "name": "T3",
+      "code": "SGM56gd7Ycm6et9uj6mKGg"
+    }
+  ]
+}

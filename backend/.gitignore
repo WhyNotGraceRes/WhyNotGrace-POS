@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+.idea/
+.vscode/
+
+# Real PgBouncer credentials — see deploy/pgbouncer/userlist.txt.example
+deploy/pgbouncer/userlist.txt

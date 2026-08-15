@@ -1,0 +1,3 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 0'),2,2026-08-12T21:49:45Z,2026-08-12T21:50:47Z
+GET,/api/v1/qr/orders/{id} [mixed:poll],CatchResponseError('status poll failed: 0'),1,2026-08-12T21:50:48Z,2026-08-12T21:50:48Z

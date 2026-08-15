@@ -1,0 +1,2 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 0'),1,2026-08-13T08:37:00Z,2026-08-13T08:37:00Z

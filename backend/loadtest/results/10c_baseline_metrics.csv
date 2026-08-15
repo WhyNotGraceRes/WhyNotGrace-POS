@@ -1,0 +1,5 @@
+elapsed_s,backend_cpu_pct_total,backend_rss_mb_total,backend_process_count,postgres_total_cpu_pct,postgres_total_rss_mb,postgres_process_count,db_active_connections,db_total_connections
+2.0,0.0,501.3,5,0.0,290.8,15,0,0
+4.1,0.7,501.3,5,0.7,290.9,15,0,0
+6.3,0.0,501.3,5,0.7,290.9,15,0,0
+8.4,0.0,501.3,5,0.7,290.9,15,0,0

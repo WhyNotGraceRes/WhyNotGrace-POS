@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-whynotgrace}
+      POSTGRES_USER: ${POSTGRES_USER:-whynotgrace}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-whynotgrace} -d ${POSTGRES_DB:-whynotgrace}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Optional (Phase 11): backs app/core/cache.py (public QR-menu caching) and,
+  # if REDIS_URL is also set for `backend` below, shared cross-worker rate
+  # limiting (app/core/rate_limit.py). The backend has no hard dependency on
+  # this service — REDIS_URL defaults to empty in .env.example, which keeps
+  # caching/distributed-rate-limiting fully disabled and the app behaves
+  # exactly as it did before Phase 11. Only start this service, and only set
+  # REDIS_URL, if you actually want the cache enabled.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-whynotgrace}:${POSTGRES_PASSWORD:-changeme_dev_password}@postgres:5432/${POSTGRES_DB:-whynotgrace}
+      # Empty by default — caching/distributed rate limiting stay off unless
+      # you uncomment this (and start the `redis` service above).
+      # REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  # Optional: the SPA can equally be deployed to any static host (Vercel,
+  # Netlify, S3+CloudFront) instead of this container — nothing about the
+  # frontend requires Docker. This service exists for a single-command
+  # `docker compose up` local/staging deployment.
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the JS bundle at build time (see ../frontend/.env.example).
+        # Defaults to the backend service's host-mapped port; override for a
+        # real deployment where the API has its own public URL.
+        VITE_API_URL: ${FRONTEND_VITE_API_URL:-http://localhost:8000}
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

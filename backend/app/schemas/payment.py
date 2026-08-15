@@ -1,0 +1,47 @@
+import uuid
+from datetime import datetime
+
+from pydantic import BaseModel, Field
+
+from app.models.enums import PaymentMethod, PaymentStatus
+
+
+class CashPaymentRequest(BaseModel):
+    bill_id: uuid.UUID
+    amount: float = Field(gt=0)
+    method: PaymentMethod = PaymentMethod.CASH
+    notes: str | None = None
+
+
+class RazorpayOrderCreateRequest(BaseModel):
+    bill_id: uuid.UUID
+
+
+class RazorpayOrderCreateResponse(BaseModel):
+    payment_id: uuid.UUID
+    razorpay_order_id: str
+    razorpay_key_id: str
+    amount_paise: int
+    currency: str = "INR"
+
+
+class RazorpayVerifyRequest(BaseModel):
+    payment_id: uuid.UUID
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+class PaymentOut(BaseModel):
+    id: uuid.UUID
+    bill_id: uuid.UUID
+    method: PaymentMethod
+    status: PaymentStatus
+    amount: float
+    provider: str | None
+    provider_order_id: str | None
+    provider_payment_id: str | None
+    verified_at: datetime | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

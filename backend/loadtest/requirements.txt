@@ -1,0 +1,5 @@
+# Load-testing tooling only — intentionally NOT part of backend/requirements.txt
+# (kept out of the production Docker image). Install into the same venv used
+# for the app: pip install -r loadtest/requirements.txt
+locust==2.46.3
+psutil==7.2.2

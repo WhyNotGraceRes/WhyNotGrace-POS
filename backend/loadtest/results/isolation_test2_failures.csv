@@ -1,0 +1,6 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/qr/menu [mixed:pre-order],CatchResponseError('menu load failed: 0'),2,2026-08-13T19:04:33Z,2026-08-13T19:05:25Z
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 0'),5,2026-08-13T19:04:07Z,2026-08-13T19:05:11Z
+GET,/api/v1/orders [staff],CatchResponseError('orders list failed: 0'),2,2026-08-13T19:04:33Z,2026-08-13T19:04:50Z
+GET,/api/v1/qr/menu [mixed:poll-fallback],CatchResponseError('menu load failed: 0'),2,2026-08-13T19:04:52Z,2026-08-13T19:05:00Z
+POST,/api/v1/auth/login,HTTPError('429 Client Error: Too Many Requests for url: /api/v1/auth/login'),90,2026-08-13T19:04:00Z,2026-08-13T19:04:11Z

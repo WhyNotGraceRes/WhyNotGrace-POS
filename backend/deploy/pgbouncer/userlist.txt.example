@@ -1,0 +1,21 @@
+; Template only — copy to userlist.txt (gitignored, never commit real
+; credentials) in this same directory and replace with a REAL md5 hash
+; before running docker-compose.prod.yml. Format per line:
+;   "username" "md5<32-hex-chars>"
+;
+; The safest way to get a correct hash is to ask Postgres for the one it
+; already computed, rather than hand-computing it yourself — Postgres
+; stores exactly this format for md5-authenticated roles:
+;
+;   psql -h localhost -p 5432 -U whynotgrace -d postgres \
+;       -c "SELECT usename, passwd FROM pg_shadow WHERE usename = 'whynotgrace';"
+;
+; Copy the passwd column's value (it already starts with "md5") verbatim
+; into the second field below.
+;
+; If you'd rather compute it by hand instead (equivalent result):
+;   python3 -c "import hashlib,sys; u,p=sys.argv[1],sys.argv[2]; print('md5'+hashlib.md5((p+u).encode()).hexdigest())" whynotgrace 'your-real-password'
+;
+; Must match POSTGRES_USER/POSTGRES_PASSWORD used by the `backend` and
+; `postgres` services in docker-compose.yml / your .env.
+"whynotgrace" "md5REPLACE_WITH_REAL_HASH_FROM_PG_SHADOW"

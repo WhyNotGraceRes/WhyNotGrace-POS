@@ -1,0 +1,13 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/qr/menu [mixed:pre-order],CatchResponseError('menu load failed: 0'),8,2026-08-13T14:07:13Z,2026-08-13T14:11:17Z
+GET,/api/v1/qr/menu [isolation-control:b],CatchResponseError('menu load failed: 0'),38,2026-08-13T14:06:56Z,2026-08-13T14:12:37Z
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 0'),27,2026-08-13T14:05:44Z,2026-08-13T14:12:35Z
+GET,/api/v1/qr/orders/{id} [mixed:poll],CatchResponseError('status poll failed: 500'),5,2026-08-13T14:09:46Z,2026-08-13T14:14:11Z
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 500'),35,2026-08-13T14:09:45Z,2026-08-13T14:14:11Z
+GET,/api/v1/qr/orders/{id} [mixed:poll],CatchResponseError('status poll failed: 0'),2,2026-08-13T14:07:23Z,2026-08-13T14:07:59Z
+GET,/api/v1/qr/menu [mixed:poll-fallback],CatchResponseError('menu load failed: 500'),20,2026-08-13T14:09:45Z,2026-08-13T14:14:11Z
+POST,/api/v1/qr/orders [mixed:POST],CatchResponseError('order placement failed: 500: Internal Server Error'),8,2026-08-13T14:09:46Z,2026-08-13T14:13:40Z
+GET,/api/v1/qr/menu [mixed:pre-order],CatchResponseError('menu load failed: 500'),18,2026-08-13T14:09:45Z,2026-08-13T14:14:11Z
+GET,/api/v1/qr/menu [mixed:poll-fallback],CatchResponseError('menu load failed: 0'),13,2026-08-13T14:06:31Z,2026-08-13T14:12:34Z
+POST,/api/v1/qr/orders [mixed:POST],CatchResponseError('order placement failed: 0: '),18,2026-08-13T14:09:45Z,2026-08-13T14:14:11Z
+GET,/api/v1/qr/menu [isolation-control:b],CatchResponseError('menu load failed: 500'),58,2026-08-13T14:09:45Z,2026-08-13T14:14:11Z

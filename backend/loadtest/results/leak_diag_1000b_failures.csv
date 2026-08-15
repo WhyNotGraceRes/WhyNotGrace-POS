@@ -1,0 +1,7 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+GET,/api/v1/qr/menu [mixed:pre-order],CatchResponseError('menu load failed: 0'),3,2026-08-13T08:56:45Z,2026-08-13T09:00:06Z
+GET,/api/v1/qr/menu [isolation-control:b],CatchResponseError('menu load failed: 0'),11,2026-08-13T08:56:08Z,2026-08-13T08:59:57Z
+GET,/api/v1/qr/menu [mixed:browse],CatchResponseError('menu load failed: 0'),16,2026-08-13T08:57:51Z,2026-08-13T09:00:17Z
+GET,/api/v1/qr/orders/{id} [mixed:poll],CatchResponseError('status poll failed: 0'),3,2026-08-13T08:58:42Z,2026-08-13T08:59:43Z
+GET,/api/v1/qr/menu [mixed:poll-fallback],CatchResponseError('menu load failed: 0'),5,2026-08-13T08:59:08Z,2026-08-13T09:00:20Z
+POST,/api/v1/qr/orders [mixed:POST],CatchResponseError('order placement failed: 0: '),1,2026-08-13T09:00:05Z,2026-08-13T09:00:05Z
