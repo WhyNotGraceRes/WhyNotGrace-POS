@@ -244,11 +244,19 @@ be localized.
   account-existence oracle; `resend-verification`'s does return a 429 with
   a wait time, which is acceptable there since that endpoint only reveals
   timing for accounts that are already known-unverified.
+- **Response compression** — `GZipMiddleware` compresses any response over
+  `GZIP_MINIMUM_SIZE_BYTES` (default 1000). Measured on the QR public menu:
+  7,838 bytes → 2,422 bytes, a 69% reduction, which matters because that
+  response is the highest-traffic one in the system and is served over
+  restaurant WiFi and mobile data. `compresslevel` is deliberately 5 rather
+  than gzip's default 9 — load-test profiling found the app CPU-bound with
+  the database nearly idle, so spending extra CPU chasing the last few
+  percent of ratio would work against the actual bottleneck.
 - **Baseline HTTP security headers** (`X-Content-Type-Options: nosniff`,
   `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`,
   and `Strict-Transport-Security` when `APP_ENV=production`) are set on
   every response — see `app/main.py:security_headers`.
-- **IP-based rate limiting** (`slowapi`, see `app/core/rate_limit.py`) is
+- **Rate limiting** (`slowapi`, see `app/core/rate_limit.py`) is
   applied to the specific endpoints most worth protecting: `/auth/login`
   (10/min), `/auth/register` (5/hour), `/auth/verify-email` (10/min),
   `/auth/resend-verification` (5/min), `/auth/refresh` (30/min),
@@ -260,6 +268,37 @@ be localized.
   **not** IP rate-limited (the caller is Razorpay's own infrastructure,
   already authenticated by HMAC signature; throttling risks dropping a
   legitimate burst of payment confirmations).
+
+  **What each limit is keyed by, and why it is not always the IP.** Two
+  distinct problems make a naive IP key wrong in production, and both are
+  silent — the app works perfectly in development and misbehaves only once
+  it is deployed:
+
+  1. *Behind a reverse proxy, every request carries the proxy's IP.*
+     `slowapi`'s own `get_remote_address` reads `request.client.host`, which
+     in the `docker-compose.prod.yml` topology is always the `lb` nginx
+     container. Every per-client limit therefore silently becomes ONE GLOBAL
+     limit for the whole deployment — 20 QR orders per minute across every
+     business on the platform. `app/core/client_ip.py` resolves the real
+     client from `X-Forwarded-For`, but **only** from proxies declared in
+     `TRUSTED_PROXY_IPS`, since that header is otherwise attacker-controlled
+     and honoring it blindly would let anyone mint a fresh bucket per
+     request. `validate_production_safety()` refuses to boot in production
+     unless the setting is declared (use `none` to state deliberately that
+     nothing sits in front).
+  2. *A venue's guests all share one IP.* Every guest on a restaurant's WiFi
+     is behind one NAT, and mobile users are behind carrier CGNAT. No proxy
+     configuration fixes this. So the public QR endpoints are **not** keyed
+     by IP: `POST /qr/orders` is keyed by the guest's QR session token
+     (`qr_session_key`) and `GET /qr/scan/...` by the location being scanned
+     (`qr_location_key`). The limit then reads "one table cannot place more
+     than 20 orders a minute", which is both the thing actually worth
+     enforcing and independent of how many guests share a public IP. A
+     200-table venue gets 200 independent budgets rather than one.
+     Pickup/delivery checkout stays IP-keyed — those customers order from
+     their own connections — but is scoped per business
+     (`public_checkout_key`) so one tenant cannot exhaust another's budget.
+
   **Known limitation, now configurable (Phase 11)**: the limiter's default
   storage is in-process memory, keyed per running process — with more than
   one worker (`--workers N` / multiple replicas), each worker enforces its

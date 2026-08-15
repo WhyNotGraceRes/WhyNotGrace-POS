@@ -27,7 +27,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import require_feature_for_business
-from app.core.rate_limit import limiter
+from app.core.rate_limit import limiter, qr_location_key, qr_session_key
 from app.core.request_limits import qr_thread_limiter
 from app.database.session import get_qr_db
 from app.database.transaction import transaction
@@ -56,7 +56,7 @@ def _scan_qr_sync(db: Session, business_slug: str, location_id: uuid.UUID, code:
 
 
 @router.get("/scan/{business_slug}/{location_id}", response_model=QRScanResponse)
-@limiter.limit("30/minute")
+@limiter.limit("30/minute", key_func=qr_location_key)
 async def scan_qr(
     request: Request,
     business_slug: str,
@@ -108,7 +108,7 @@ def _place_qr_order_sync(db: Session, session_token: str, payload: QROrderCreate
 
 
 @router.post("/orders", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
-@limiter.limit("20/minute")
+@limiter.limit("20/minute", key_func=qr_session_key)
 async def place_qr_order(
     request: Request,
     payload: QROrderCreateRequest,

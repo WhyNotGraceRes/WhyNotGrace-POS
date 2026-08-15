@@ -5,7 +5,7 @@ No customer account required.
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from app.core.rate_limit import limiter
+from app.core.rate_limit import limiter, public_checkout_key
 from app.database.session import get_db
 from app.database.transaction import transaction
 from app.models.enums import OrderSource
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/pickup", tags=["pickup"])
 
 
 @router.post("/{business_slug}/checkout", response_model=CheckoutResponse, status_code=201)
-@limiter.limit("10/minute")
+@limiter.limit("10/minute", key_func=public_checkout_key)
 def checkout(request: Request, business_slug: str, payload: PickupCheckoutRequest, db: Session = Depends(get_db)):
     with transaction(db):
         order, payment, provider_order_id, razorpay_key_id = public_order_service.checkout(

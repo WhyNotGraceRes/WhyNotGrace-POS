@@ -27,6 +27,17 @@ os.environ.setdefault(
 )
 os.environ.setdefault("EMAIL_BACKEND", "console")
 os.environ.setdefault("JWT_SECRET", "test-secret-" + "a" * 40)
+# Pin the optional-infrastructure toggles to a known baseline rather than
+# inheriting whatever the developer happens to have in their .env.
+# pydantic-settings gives real environment variables precedence over .env
+# values, so setting them here makes the suite deterministic on any machine.
+# Without this, enabling Redis locally — which the deployment guide now
+# recommends — silently changes what a test like test_cache.py's "disabled by
+# default is a safe no-op" is actually exercising, and it fails for a reason
+# that has nothing to do with the code under test. Tests that need these
+# switched on set them explicitly via monkeypatch.
+os.environ.setdefault("REDIS_URL", "")
+os.environ.setdefault("TRUSTED_PROXY_IPS", "")
 
 from app.core.rate_limit import limiter  # noqa: E402
 from app.database.base import Base  # noqa: E402

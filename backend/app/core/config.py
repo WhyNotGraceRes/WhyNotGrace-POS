@@ -76,6 +76,26 @@ class Settings(BaseSettings):
     redis_url: str | None = None
     public_menu_cache_ttl_seconds: int = 60
 
+    # Comma-separated IPs/CIDRs of reverse proxies allowed to set
+    # X-Forwarded-For, or "*" to trust any peer (only safe when the app
+    # publishes no port of its own and is reachable exclusively through the
+    # proxy — which is exactly how docker-compose.prod.yml is built). Empty
+    # (the default) means the header is ignored entirely and the direct peer
+    # is used, exactly as before this setting existed.
+    #
+    # This matters more than it looks: every IP-keyed rate limit in
+    # app/core/rate_limit.py reads its identity from here. Behind a proxy
+    # with this unset, request.client.host is the proxy's own address on
+    # every request, so each per-client limit silently becomes ONE GLOBAL
+    # limit shared by the entire deployment. See app/core/client_ip.py.
+    trusted_proxy_ips: str = ""
+
+    # Responses at least this large are gzipped (see app/main.py). The QR
+    # public menu is the reason this exists: it is the highest-traffic
+    # response in the system, is served over restaurant WiFi and mobile
+    # data, and is highly compressible JSON.
+    gzip_minimum_size_bytes: int = 1000
+
     # JWT
     jwt_secret: str = INSECURE_DEV_JWT_SECRET
     jwt_algorithm: str = "HS256"
@@ -174,6 +194,20 @@ class Settings(BaseSettings):
                 "combined with a wildcard origin would let any site make "
                 "authenticated requests on a logged-in user's behalf. List the "
                 "real frontend origin(s) explicitly (comma-separated)."
+            )
+        if not self.trusted_proxy_ips.strip():
+            errors.append(
+                "TRUSTED_PROXY_IPS must be set explicitly in production. The "
+                "deployment guide puts a reverse proxy in front of this app, and "
+                "when one is present but not declared here, every request appears "
+                "to come from the proxy's own IP — which silently turns each "
+                "per-client rate limit into a single GLOBAL limit shared by the "
+                "whole deployment (e.g. 20 QR orders per minute across every "
+                "business). Set it to the proxy's IP/CIDR, or to '*' if this app "
+                "publishes no port of its own and is reachable only through the "
+                "proxy (as in docker-compose.prod.yml). Set it to 'none' to "
+                "state deliberately that this deployment is directly exposed "
+                "with no proxy in front."
             )
 
         if errors:

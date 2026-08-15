@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.gzip import GZipMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
@@ -97,6 +98,25 @@ class SecurityHeadersMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
+# Added first, so it sits innermost and compresses the response body before
+# CORS/security headers are attached (Starlette runs the most recently added
+# middleware outermost).
+#
+# compresslevel is deliberately 5, not gzip's default 9. The load-test
+# profiling that motivated this found the app CPU-bound and the database
+# nearly idle (peak backend CPU 139-206%, 2 active DB connections at 2,000
+# concurrent users), so spending extra CPU to chase the last few percent of
+# compression ratio would work against the exact bottleneck this is meant to
+# relieve. Level 5 gets most of the size reduction for a fraction of the CPU.
+#
+# GZipMiddleware is a pure ASGI middleware, not a BaseHTTPMiddleware — see
+# SecurityHeadersMiddleware's docstring above for why that distinction is
+# load-bearing here.
+app.add_middleware(
+    GZipMiddleware,
+    minimum_size=settings.gzip_minimum_size_bytes,
+    compresslevel=5,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

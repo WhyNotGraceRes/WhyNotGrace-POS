@@ -17,6 +17,11 @@ def _valid_production_kwargs(**overrides):
         razorpay_key_id="rzp_live_x",
         razorpay_key_secret="live-secret",
         cors_origins="https://app.example.com",
+        # Must be declared explicitly in production: an undeclared reverse
+        # proxy makes every request carry the proxy's own IP, which turns
+        # each per-client rate limit into one global limit for the entire
+        # deployment. See app/core/client_ip.py.
+        trusted_proxy_ips="*",
     )
     kwargs.update(overrides)
     return kwargs

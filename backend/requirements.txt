@@ -16,9 +16,16 @@ tenacity==9.0.0
 python-dotenv==1.0.1
 gunicorn==23.0.0
 slowapi==0.1.10
+# Imported directly by app/core/cache.py, and used by limits' Redis storage
+# backend for shared rate-limit counters. It arrives transitively via
+# slowapi/limits today, but both of those are runtime imports in our own
+# code, so it is declared rather than relied on as a transitive dependency.
+redis==8.1.0
 
 # dev / test
 pytest==8.3.4
 pytest-asyncio==0.25.0
 pytest-cov==6.0.0
 faker==33.1.0
+# Required by tests/test_cache.py, which errors on import without it.
+fakeredis==2.37.0
