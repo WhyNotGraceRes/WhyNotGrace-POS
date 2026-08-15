@@ -291,3 +291,9 @@ export type ToggleGroup = Schemas["ToggleGroup"];
 export type InvoiceSeriesOut = Schemas["InvoiceSeriesOut"];
 export type RefundRequest = Schemas["RefundRequest"];
 export type RefundOut = Schemas["RefundOut"];
+
+// --- Cash drawer shifts ---
+export type ShiftOut = Schemas["ShiftOut"];
+export type ShiftReportOut = Schemas["ShiftReportOut"];
+export type OpenShiftRequest = Schemas["OpenShiftRequest"];
+export type CloseShiftRequest = Schemas["CloseShiftRequest"];

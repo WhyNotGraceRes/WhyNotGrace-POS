@@ -259,3 +259,87 @@ def stations_for_kot(db: Session, business_id: uuid.UUID, kot: KOT) -> list[str]
         .all()
     )
     return sorted({(r[0] or "") for r in rows})
+
+
+def build_shift_report(
+    db: Session,
+    business_id: uuid.UUID,
+    report: dict,
+    *,
+    width: int = DEFAULT_WIDTH,
+) -> ReceiptDocument:
+    """The Z-report as printable paper.
+
+    Reuses the same document the bills use, which is the point of having
+    built one: a report that prints on the counter's existing roll, in the
+    same shape, with no second layout system to maintain.
+
+    The variance is the line an owner actually reads, so it is the only thing
+    emphasised.
+    """
+    business = db.get(Business, business_id)
+    settings = db.query(BusinessSettings).filter(
+        BusinessSettings.business_id == business_id
+    ).first()
+    tz_name = settings.timezone if settings else "Asia/Kolkata"
+
+    doc = ReceiptDocument(width=width, open_cash_drawer=False, title="Shift report")
+
+    doc.text(business.name, align=Align.CENTER, emphasis=Emphasis.BOLD_LARGE)
+    doc.text("SHIFT REPORT", align=Align.CENTER, emphasis=Emphasis.BOLD)
+    doc.divider()
+
+    if report.get("opened_by"):
+        doc.pair("Cashier", report["opened_by"])
+    doc.pair("Opened", _local(report["opened_at"], tz_name))
+    if report.get("closed_at"):
+        doc.pair("Closed", _local(report["closed_at"], tz_name))
+
+    doc.divider()
+    doc.text("TAKINGS", emphasis=Emphasis.BOLD)
+    for line in report["payments"]:
+        doc.pair(f"{line['method']} x{line['count']}", _money(line["amount"]))
+    doc.pair("Gross", _money(report["gross_takings"]), emphasis=Emphasis.BOLD)
+
+    if report["refunds_count"]:
+        doc.pair(f"Refunds x{report['refunds_count']}", f"-{_money(report['refunds_total'])}")
+
+    doc.divider()
+    doc.text("CASH DRAWER", emphasis=Emphasis.BOLD)
+    doc.pair("Opening float", _money(report["opening_float"]))
+    doc.pair("Cash taken", _money(report["cash_taken"]))
+    if report["cash_returned"]:
+        doc.pair("Cash returned", f"-{_money(report['cash_returned'])}")
+
+    # Null while the drawer is open under blind counting. Printing a report
+    # in that state must not be a way around the control.
+    if report["expected_cash"] is not None:
+        doc.pair("Expected", _money(report["expected_cash"]))
+    else:
+        doc.pair("Expected", "(counted at close)")
+
+    if report["declared_cash"] is not None:
+        doc.pair("Counted", _money(report["declared_cash"]))
+    if report["variance"] is not None:
+        variance = float(report["variance"])
+        label = "OVER" if variance > 0 else ("SHORT" if variance < 0 else "BALANCED")
+        doc.pair(f"Variance ({label})", _money(variance), emphasis=Emphasis.BOLD_LARGE)
+
+    doc.divider()
+    doc.text("EXCEPTIONS", emphasis=Emphasis.BOLD)
+    # A drawer that balances perfectly while ten bills were voided is not a
+    # drawer that balanced, so these sit next to the variance rather than
+    # somewhere an owner has to go looking for them.
+    doc.pair("Bills settled", str(report["bills_settled"]))
+    doc.pair("Bills voided", str(report["bills_voided"]))
+    doc.pair("Discounts given", _money(report["discounts_total"]))
+
+    if report.get("notes"):
+        doc.divider()
+        doc.text("NOTE", emphasis=Emphasis.BOLD)
+        doc.text(report["notes"])
+
+    doc.spacer()
+    doc.text("Cashier signature: ____________________")
+    doc.spacer()
+    return doc

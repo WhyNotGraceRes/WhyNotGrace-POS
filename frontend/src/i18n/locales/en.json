@@ -15,7 +15,8 @@
     "lastName": "Last name",
     "somethingWentWrong": "Something went wrong. Please try again.",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "done": "Done"
   },
   "auth": {
     "login": {
@@ -102,7 +103,8 @@
     "integrations": "Integrations",
     "featureFlags": "Feature Flags",
     "settings": "Settings",
-    "subscription": "Subscription"
+    "subscription": "Subscription",
+    "shift": "Cash drawer"
   },
   "shell": {
     "notifications": "Notifications",
@@ -642,7 +644,13 @@
     "taxLabelHint": "Shown on the printed bill, e.g. GST.",
     "splitTax": "Split into CGST and SGST",
     "splitTaxOn": "The bill will show C{{label}} {{half}}% and S{{label}} {{half}}% as separate lines, as an intra-state tax invoice requires.",
-    "splitTaxOff": "The bill will show a single combined {{label}} line. Only correct for inter-state supply."
+    "splitTaxOff": "The bill will show a single combined {{label}} line. Only correct for inter-state supply.",
+    "fssai": "FSSAI licence number",
+    "fssaiHint": "Printed on every bill. Required for a licensed food business.",
+    "receiptHeader": "Receipt header lines",
+    "receiptHeaderHint": "Address, phone. One per line, printed under your name.",
+    "receiptFooter": "Receipt footer",
+    "receiptFooterHint": "Printed at the bottom of every bill. One per line."
   },
   "integrationsAdmin": {
     "subtitle": "Connect third-party ordering and payment providers.",
@@ -784,5 +792,32 @@
       "BILLING": "Billing and invoices",
       "COUNTER": "Counter"
     }
+  },
+  "shift": {
+    "title": "Cash drawer",
+    "subtitle": "Open a drawer with a float, close it against what you count.",
+    "openTitle": "Open a drawer",
+    "openHint": "Enter the cash you are starting with.",
+    "openingFloat": "Opening float",
+    "open": "Open drawer",
+    "opened": "Drawer opened.",
+    "currentTitle": "This shift so far",
+    "grossTakings": "Gross takings",
+    "refunds": "Refunds",
+    "billsSettled": "Bills settled",
+    "billsVoided": "Bills voided",
+    "expectedCash": "Expected in drawer",
+    "countedCash": "Cash counted",
+    "expectedHidden": "The expected amount is hidden until you enter your count.",
+    "closeTitle": "Close the drawer",
+    "close": "Close drawer",
+    "closeHint": "Count the cash in the drawer and enter the total.",
+    "closeHintBlind": "Count the cash first and enter the total. The expected amount is shown afterwards.",
+    "notes": "Notes (optional)",
+    "closedTitle": "Drawer closed",
+    "balanced": "Drawer balanced exactly.",
+    "short": "Short by {{amount}}",
+    "over": "Over by {{amount}}",
+    "printReport": "Print report"
   }
 }

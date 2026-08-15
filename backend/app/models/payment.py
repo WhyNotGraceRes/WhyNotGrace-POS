@@ -28,6 +28,12 @@ class Payment(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     provider_signature: Mapped[str | None] = mapped_column(String(255), nullable=True)
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    # Which drawer this money went into. Nullable because payments taken
+    # before shifts existed, or with no shift open, still have to be
+    # recordable — a missing shift must never block taking money.
+    shift_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("shift_sessions.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     received_by_staff_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )

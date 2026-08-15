@@ -14,7 +14,7 @@ import { apiClient } from "@/api/client";
  * happened. The iframe is removed after printing, but only once the dialog
  * has closed — removing it earlier cancels the print on some browsers.
  */
-async function printHtml(html: string): Promise<void> {
+export async function printHtmlDocument(html: string): Promise<void> {
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   // Off-screen rather than display:none — a hidden frame has no layout in
@@ -67,7 +67,7 @@ export async function printBill(billId: string): Promise<void> {
     null,
     { params: { format: "html" }, responseType: "text" }
   );
-  await printHtml(data);
+  await printHtmlDocument(data);
 }
 
 /** Renders the bill without counting it as a print. */
@@ -85,7 +85,7 @@ export async function printKotTicket(kotId: string, station?: string): Promise<v
     params: { format: "html", ...(station ? { station } : {}) },
     responseType: "text",
   });
-  await printHtml(data);
+  await printHtmlDocument(data);
 }
 
 /**

@@ -48,6 +48,10 @@ class Refund(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Which drawer the money came out of — see Payment.shift_id.
+    shift_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("shift_sessions.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     refunded_by_staff_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )

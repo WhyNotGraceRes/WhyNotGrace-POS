@@ -23,6 +23,25 @@ from app.services.payments.base import PaymentProviderError, PaymentProviderNotC
 from app.services.payments.razorpay_provider import razorpay_provider
 
 
+def _current_shift(db: Session, business_id: uuid.UUID, staff_id: uuid.UUID):
+    """The staff member's open drawer, if any.
+
+    When counter.require_shift_for_payment is on, having none is refused
+    outright — a payment attached to no shift never appears on any Z-report,
+    which is precisely the hole the toggle exists to close. When it is off,
+    the payment proceeds unattached so existing counters keep working.
+    """
+    from app.services import shift_service
+
+    shift = shift_service.get_open_shift(db, business_id, staff_id)
+    if shift is None and toggles.is_enabled(db, business_id, toggles.REQUIRE_SHIFT_FOR_PAYMENT):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Open a shift before taking payment.",
+        )
+    return shift
+
+
 def _resolve_razorpay_credentials(db: Session, business_id: uuid.UUID) -> dict[str, str | None]:
     """Business-connected credentials (via /integrations/RAZORPAY/credentials)
     take priority; falls back to the global env-configured account so
@@ -53,9 +72,12 @@ def record_cash_payment(db: Session, business_id: uuid.UUID, staff_id: uuid.UUID
     if bill.status in (BillStatus.PAID, BillStatus.CANCELLED):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bill is already closed")
 
+    shift = _current_shift(db, business_id, staff_id)
+
     payment = Payment(
         business_id=business_id, bill_id=bill.id, method=payload.method, status=PaymentStatus.SUCCESS,
         amount=payload.amount, received_by_staff_id=staff_id, notes=payload.notes,
+        shift_id=shift.id if shift else None,
         verified_at=datetime.now(timezone.utc),
     )
     db.add(payment)
@@ -315,10 +337,15 @@ def refund_payment(db: Session, business_id: uuid.UUID, staff_id: uuid.UUID, pay
             detail=f"Only {remaining:.2f} remains refundable on this payment",
         )
 
+    shift = _current_shift(db, business_id, staff_id)
     refund = Refund(
         business_id=business_id, bill_id=payment.bill_id, payment_id=payment.id,
         amount=amount, method=payload.method or payment.method, reason=payload.reason,
         notes=payload.notes, refunded_by_staff_id=staff_id,
+        # The drawer the money leaves is the one open now, which is not
+        # necessarily the one it arrived in — a guest refunded the next
+        # morning takes cash out of that morning's float.
+        shift_id=shift.id if shift else None,
         refunded_at=datetime.now(timezone.utc),
     )
     db.add(refund)

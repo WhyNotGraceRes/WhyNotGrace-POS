@@ -123,3 +123,24 @@ def kot_stations(
     if kot is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="KOT not found")
     return builder.stations_for_kot(db, business_id, kot)
+
+
+@router.get("/shifts/{shift_id}/report/print")
+def print_shift_report(
+    shift_id: uuid.UUID,
+    format: ReceiptFormat = "html",
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    _user=Depends(require_roles(*ROLE_BILLING)),
+):
+    """The Z-report on the counter's own paper.
+
+    Not counted or marked as a duplicate — reprinting a shift report carries
+    none of the risk that reprinting a bill does.
+    """
+    from app.services import shift_service
+
+    shift = shift_service.get_shift_or_404(db, business_id, shift_id)
+    report = shift_service.build_report(db, business_id, shift)
+    doc = builder.build_shift_report(db, business_id, report)
+    return _respond(doc, format)

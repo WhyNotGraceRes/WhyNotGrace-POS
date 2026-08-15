@@ -142,6 +142,29 @@ ROUND_OFF_TOTAL = _register(ToggleDef(
 ))
 
 
+# --- Counter / cash drawer -------------------------------------------------
+
+BLIND_CASH_COUNT = _register(ToggleDef(
+    key="counter.blind_cash_count",
+    group=ToggleGroup.COUNTER,
+    default=True,
+    owner_editable=True,
+    label="Hide the expected cash until the drawer is counted",
+    description="At close, the cashier enters what they counted before the system shows what it expected. The two are compared afterwards.",
+    warning="Turning this off shows the expected amount first, so a cashier can simply type it back instead of counting — which is the difference between a cash control and a formality.",
+))
+
+REQUIRE_SHIFT_FOR_PAYMENT = _register(ToggleDef(
+    key="counter.require_shift_for_payment",
+    group=ToggleGroup.COUNTER,
+    default=False,
+    owner_editable=True,
+    label="Require an open shift before taking payment",
+    description="Staff must open a drawer with a float before they can settle a bill, so every payment belongs to a countable shift.",
+    warning="Off by default so existing counters keep working. Turn it on for real cash accountability — without it, payments taken with no shift open are attached to nothing and never appear on a Z-report.",
+))
+
+
 def all_toggles() -> list[ToggleDef]:
     return list(_REGISTRY.values())
 

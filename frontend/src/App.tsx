@@ -22,6 +22,7 @@ import { OrdersPage } from "@/features/orders/OrdersPage";
 import { KitchenPage } from "@/features/kitchen/KitchenPage";
 import { TablesPage } from "@/features/tables/TablesPage";
 import { BillingPage } from "@/features/billing/BillingPage";
+import { ShiftPage } from "@/features/shifts/ShiftPage";
 import { CustomersPage } from "@/features/customers/CustomersPage";
 import { MenuAdminPage } from "@/features/menu/MenuAdminPage";
 import { RoomsPage } from "@/features/rooms/RoomsPage";
@@ -47,6 +48,7 @@ const BUILT_PAGES: Record<string, ComponentType> = {
   "/kitchen": KitchenPage,
   "/tables": TablesPage,
   "/billing": BillingPage,
+  "/shift": ShiftPage,
   "/customers": CustomersPage,
   "/menu": MenuAdminPage,
   "/rooms": RoomsPage,

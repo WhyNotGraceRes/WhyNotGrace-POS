@@ -38,6 +38,9 @@ export function BusinessSettingsPage() {
   const [gstin, setGstin] = useState("");
   const [taxLabel, setTaxLabel] = useState("GST");
   const [splitTax, setSplitTax] = useState(true);
+  const [fssai, setFssai] = useState("");
+  const [receiptHeader, setReceiptHeader] = useState("");
+  const [receiptFooter, setReceiptFooter] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const [hydrated, setHydrated] = useState(false);
@@ -52,6 +55,9 @@ export function BusinessSettingsPage() {
     setGstin(settings.gstin ?? "");
     setTaxLabel(settings.tax_label);
     setSplitTax(settings.tax_split_intra_state);
+    setFssai(settings.fssai_number ?? "");
+    setReceiptHeader(settings.receipt_header_lines ?? "");
+    setReceiptFooter(settings.receipt_footer_text ?? "");
     setHydrated(true);
   }
 
@@ -73,6 +79,9 @@ export function BusinessSettingsPage() {
           gstin: gstin.trim(),
           tax_label: taxLabel.trim() || "GST",
           tax_split_intra_state: splitTax,
+          fssai_number: fssai.trim(),
+          receipt_header_lines: receiptHeader,
+          receipt_footer_text: receiptFooter,
         }),
       ]);
       toast.success(t("businessSettings.saved"));
@@ -179,6 +188,36 @@ export function BusinessSettingsPage() {
               </p>
             </div>
             <Switch checked={splitTax} onChange={setSplitTax} label={t("businessSettings.splitTax")} />
+          </div>
+
+          <div>
+            <Label htmlFor="biz-fssai">{t("businessSettings.fssai")}</Label>
+            <Input id="biz-fssai" value={fssai} onChange={(e) => setFssai(e.target.value)} maxLength={30} />
+            <p className="mt-1 text-xs text-slate-500">{t("businessSettings.fssaiHint")}</p>
+          </div>
+
+          <div>
+            <Label htmlFor="biz-receipt-header">{t("businessSettings.receiptHeader")}</Label>
+            <textarea
+              id="biz-receipt-header"
+              rows={2}
+              value={receiptHeader}
+              onChange={(e) => setReceiptHeader(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus-ring"
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("businessSettings.receiptHeaderHint")}</p>
+          </div>
+
+          <div>
+            <Label htmlFor="biz-receipt-footer">{t("businessSettings.receiptFooter")}</Label>
+            <textarea
+              id="biz-receipt-footer"
+              rows={2}
+              value={receiptFooter}
+              onChange={(e) => setReceiptFooter(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus-ring"
+            />
+            <p className="mt-1 text-xs text-slate-500">{t("businessSettings.receiptFooterHint")}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

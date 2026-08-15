@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import {
   LayoutDashboard,
   ShoppingCart,
+  Wallet,
   ClipboardList,
   UtensilsCrossed,
   BedDouble,
@@ -100,6 +101,14 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Gift,
     roles: ["OWNER", "MANAGER"],
     featureFlag: "LOYALTY",
+  },
+  {
+    labelKey: "nav.shift",
+    path: "/shift",
+    icon: Wallet,
+    // Anyone who handles money needs their own drawer — the person on the
+    // counter is the person who counts it.
+    roles: ["OWNER", "MANAGER", "CASH_COUNTER"],
   },
   {
     labelKey: "nav.billing",

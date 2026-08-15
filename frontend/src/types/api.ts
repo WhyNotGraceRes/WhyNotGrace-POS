@@ -1994,6 +1994,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shifts/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Current Shift
+         * @description This user's own open drawer, or null. Drives whether the UI offers
+         *     Open or Close.
+         */
+        get: operations["current_shift_api_v1_shifts_current_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shifts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Shifts */
+        get: operations["list_shifts_api_v1_shifts_get"];
+        put?: never;
+        /** Open Shift */
+        post: operations["open_shift_api_v1_shifts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shifts/{shift_id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close Shift
+         * @description Closes against a counted amount and returns the Z-report.
+         *
+         *     The counted figure is part of the request, so it is committed before the
+         *     response reveals what was expected. That ordering is the blind count —
+         *     reversing it would let a cashier read the expected amount and type it
+         *     back.
+         */
+        post: operations["close_shift_api_v1_shifts__shift_id__close_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shifts/{shift_id}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Shift Report
+         * @description The Z-report. On an open shift with blind counting on, the expected
+         *     cash comes back null — everything else is visible.
+         */
+        get: operations["shift_report_api_v1_shifts__shift_id__report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/billing/{bill_id}/receipt": {
         parameters: {
             query?: never;
@@ -2074,6 +2159,29 @@ export interface paths {
          *     station configured.
          */
         get: operations["kot_stations_api_v1_kot__kot_id__stations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shifts/{shift_id}/report/print": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Print Shift Report
+         * @description The Z-report on the counter's own paper.
+         *
+         *     Not counted or marked as a duplicate — reprinting a shift report carries
+         *     none of the risk that reprinting a bill does.
+         */
+        get: operations["print_shift_report_api_v1_shifts__shift_id__report_print_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2541,6 +2649,13 @@ export interface components {
             razorpay_payment_id: string;
             /** Razorpay Signature */
             razorpay_signature: string;
+        };
+        /** CloseShiftRequest */
+        CloseShiftRequest: {
+            /** Declared Cash */
+            declared_cash: number;
+            /** Notes */
+            notes?: string | null;
         };
         /**
          * ConnectCredentialsRequest
@@ -3250,6 +3365,14 @@ export interface components {
             is_default?: boolean | null;
             /** Is Active */
             is_active?: boolean | null;
+        };
+        /** OpenShiftRequest */
+        OpenShiftRequest: {
+            /**
+             * Opening Float
+             * @default 0
+             */
+            opening_float: number;
         };
         /** OrderCreateRequest */
         OrderCreateRequest: {
@@ -4005,6 +4128,102 @@ export interface components {
             /** Expires At */
             expires_at: string | null;
         };
+        /** ShiftOut */
+        ShiftOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["ShiftStatus"];
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /** Closed At */
+            closed_at: string | null;
+            /** Opening Float */
+            opening_float: number;
+            /** Declared Cash */
+            declared_cash: number | null;
+            /** Expected Cash */
+            expected_cash: number | null;
+            /** Variance */
+            variance: number | null;
+            /** Notes */
+            notes: string | null;
+        };
+        /** ShiftPaymentLine */
+        ShiftPaymentLine: {
+            /** Method */
+            method: string;
+            /** Count */
+            count: number;
+            /** Amount */
+            amount: number;
+        };
+        /**
+         * ShiftReportOut
+         * @description The Z-report.
+         *
+         *     `expected_cash` is deliberately optional: while a shift is open and blind
+         *     counting is on it comes back null, so the screen has nothing to show a
+         *     cashier who has not counted yet.
+         */
+        ShiftReportOut: {
+            /**
+             * Shift Id
+             * Format: uuid
+             */
+            shift_id: string;
+            /** Status */
+            status: string;
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /** Closed At */
+            closed_at: string | null;
+            /** Opened By */
+            opened_by: string | null;
+            /** Opening Float */
+            opening_float: number;
+            /** Payments */
+            payments: components["schemas"]["ShiftPaymentLine"][];
+            /** Gross Takings */
+            gross_takings: number;
+            /** Cash Taken */
+            cash_taken: number;
+            /** Cash Returned */
+            cash_returned: number;
+            /** Refunds Count */
+            refunds_count: number;
+            /** Refunds Total */
+            refunds_total: number;
+            /** Bills Settled */
+            bills_settled: number;
+            /** Bills Voided */
+            bills_voided: number;
+            /** Discounts Total */
+            discounts_total: number;
+            /** Expected Cash */
+            expected_cash: number | null;
+            /** Declared Cash */
+            declared_cash: number | null;
+            /** Variance */
+            variance: number | null;
+            /** Blind Count */
+            blind_count: boolean;
+            /** Notes */
+            notes: string | null;
+        };
+        /**
+         * ShiftStatus
+         * @enum {string}
+         */
+        ShiftStatus: "OPEN" | "CLOSED";
         /** StaffCreateRequest */
         StaffCreateRequest: {
             /** First Name */
@@ -8443,6 +8662,145 @@ export interface operations {
             };
         };
     };
+    current_shift_api_v1_shifts_current_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftOut"] | null;
+                };
+            };
+        };
+    };
+    list_shifts_api_v1_shifts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftOut"][];
+                };
+            };
+        };
+    };
+    open_shift_api_v1_shifts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenShiftRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    close_shift_api_v1_shifts__shift_id__close_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shift_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloseShiftRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftReportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    shift_report_api_v1_shifts__shift_id__report_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shift_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftReportOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     preview_bill_receipt_api_v1_billing__bill_id__receipt_get: {
         parameters: {
             query?: {
@@ -8561,6 +8919,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    print_shift_report_api_v1_shifts__shift_id__report_print_get: {
+        parameters: {
+            query?: {
+                format?: "html" | "text" | "escpos";
+            };
+            header?: never;
+            path: {
+                shift_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
