@@ -1994,6 +1994,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/{bill_id}/receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview Bill Receipt
+         * @description Renders the bill without counting it as a print.
+         */
+        get: operations["preview_bill_receipt_api_v1_billing__bill_id__receipt_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/{bill_id}/print-receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Print Bill Receipt
+         * @description Counts a print and returns that copy, marked if it is a duplicate.
+         */
+        post: operations["print_bill_receipt_api_v1_billing__bill_id__print_receipt_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/kot/{kot_id}/ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kot Ticket
+         * @description A kitchen ticket, optionally for one station only.
+         *
+         *     Kitchen tickets are not counted or marked as duplicates: reprinting one
+         *     because the paper jammed is routine and carries none of the risk that
+         *     reprinting a bill does.
+         */
+        get: operations["kot_ticket_api_v1_kot__kot_id__ticket_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/kot/{kot_id}/stations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kot Stations
+         * @description Which stations this ticket needs printing to.
+         *
+         *     Returned as a list so the caller loops and prints one ticket per station.
+         *     An empty string in the list is the default kitchen — items with no
+         *     station configured.
+         */
+        get: operations["kot_stations_api_v1_kot__kot_id__stations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2212,6 +2300,12 @@ export interface components {
              * @default true
              */
             tax_split_intra_state: boolean;
+            /** Fssai Number */
+            fssai_number?: string | null;
+            /** Receipt Header Lines */
+            receipt_header_lines?: string | null;
+            /** Receipt Footer Text */
+            receipt_footer_text?: string | null;
         };
         /** BusinessSettingsUpdateRequest */
         BusinessSettingsUpdateRequest: {
@@ -2233,6 +2327,12 @@ export interface components {
             tax_label?: string | null;
             /** Tax Split Intra State */
             tax_split_intra_state?: boolean | null;
+            /** Fssai Number */
+            fssai_number?: string | null;
+            /** Receipt Header Lines */
+            receipt_header_lines?: string | null;
+            /** Receipt Footer Text */
+            receipt_footer_text?: string | null;
         };
         /**
          * BusinessType
@@ -2921,6 +3021,8 @@ export interface components {
              * Format: uuid
              */
             category_id: string;
+            /** Kitchen Station */
+            kitchen_station?: string | null;
             /** Name */
             name: string;
             /** Description */
@@ -2956,6 +3058,8 @@ export interface components {
              * Format: uuid
              */
             category_id: string;
+            /** Kitchen Station */
+            kitchen_station?: string | null;
             /** Name */
             name: string;
             /** Description */
@@ -2985,6 +3089,8 @@ export interface components {
         MenuItemUpdate: {
             /** Category Id */
             category_id?: string | null;
+            /** Kitchen Station */
+            kitchen_station?: string | null;
             /** Name */
             name?: string | null;
             /** Description */
@@ -8333,6 +8439,137 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InvoiceSeriesOut"];
+                };
+            };
+        };
+    };
+    preview_bill_receipt_api_v1_billing__bill_id__receipt_get: {
+        parameters: {
+            query?: {
+                format?: "html" | "text" | "escpos";
+            };
+            header?: never;
+            path: {
+                bill_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    print_bill_receipt_api_v1_billing__bill_id__print_receipt_post: {
+        parameters: {
+            query?: {
+                format?: "html" | "text" | "escpos";
+            };
+            header?: never;
+            path: {
+                bill_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kot_ticket_api_v1_kot__kot_id__ticket_get: {
+        parameters: {
+            query?: {
+                format?: "html" | "text" | "escpos";
+                station?: string | null;
+            };
+            header?: never;
+            path: {
+                kot_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kot_stations_api_v1_kot__kot_id__stations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kot_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

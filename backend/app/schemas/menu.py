@@ -102,6 +102,7 @@ class MenuVariantOut(BaseModel):
 
 class MenuItemCreate(BaseModel):
     category_id: uuid.UUID
+    kitchen_station: str | None = Field(default=None, max_length=50)
     name: str = Field(min_length=1, max_length=200)
     description: str | None = None
     base_price: float = Field(gt=0)
@@ -114,6 +115,7 @@ class MenuItemCreate(BaseModel):
 
 class MenuItemUpdate(BaseModel):
     category_id: uuid.UUID | None = None
+    kitchen_station: str | None = Field(default=None, max_length=50)
     name: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = None
     base_price: float | None = Field(default=None, gt=0)
@@ -129,6 +131,7 @@ class MenuItemUpdate(BaseModel):
 class MenuItemOut(BaseModel):
     id: uuid.UUID
     category_id: uuid.UUID
+    kitchen_station: str | None = None
     name: str
     description: str | None
     base_price: float

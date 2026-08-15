@@ -144,7 +144,7 @@ def upsert_mapping(
     if variant_id is not None:
         variant = (
             db.query(MenuVariant)
-            .filter(MenuVariant.id == variant_id, MenuVariant.menu_item_id == menu_item_id)
+            .filter(MenuVariant.id == variant_id, MenuVariant.item_id == menu_item_id)
             .first()
         )
         if variant is None:

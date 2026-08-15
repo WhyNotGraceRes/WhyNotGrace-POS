@@ -404,7 +404,12 @@
     "discountApplied": "Discount applied.",
     "noSessions": "No open tables or sessions right now.",
     "ordersInSession": "{{count}} order(s)",
-    "missingListEndpoint": "The backend has no \"list all bills\" endpoint, so this page lists open order sessions instead — open one to generate or view its real bill."
+    "missingListEndpoint": "The backend has no \"list all bills\" endpoint, so this page lists open order sessions instead — open one to generate or view its real bill.",
+    "print": "Print bill",
+    "printAgain": "Print again ({{count}} printed)",
+    "preview": "Preview",
+    "previewTitle": "Bill preview",
+    "reprintWarning": "This bill has been printed. Any further copy is marked DUPLICATE."
   },
   "payment": {
     "cash": "Cash",

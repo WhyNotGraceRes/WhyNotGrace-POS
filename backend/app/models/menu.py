@@ -38,6 +38,12 @@ class MenuItem(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     is_sold_out: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_todays_special: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_specialty: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # Which kitchen prints this item's ticket — "TANDOOR", "CHINESE",
+    # "BAR". Free text rather than an enum: every kitchen divides itself
+    # differently, and an enum would mean a migration per restaurant. NULL
+    # means the default kitchen, so a business that never configures
+    # stations keeps getting exactly one ticket per order.
+    kitchen_station: Mapped[str | None] = mapped_column(String(50), nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     display_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 

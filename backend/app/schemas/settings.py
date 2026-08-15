@@ -16,6 +16,9 @@ class BusinessSettingsOut(BaseModel):
     gstin: str | None = None
     tax_label: str = "GST"
     tax_split_intra_state: bool = True
+    fssai_number: str | None = None
+    receipt_header_lines: str | None = None
+    receipt_footer_text: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -30,6 +33,9 @@ class BusinessSettingsUpdateRequest(BaseModel):
     gstin: str | None = Field(default=None, max_length=20)
     tax_label: str | None = Field(default=None, min_length=1, max_length=40)
     tax_split_intra_state: bool | None = None
+    fssai_number: str | None = Field(default=None, max_length=30)
+    receipt_header_lines: str | None = Field(default=None, max_length=500)
+    receipt_footer_text: str | None = Field(default=None, max_length=500)
 
     @field_validator("gstin")
     @classmethod

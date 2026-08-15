@@ -11,6 +11,7 @@ import { BillStatusBadge } from "@/features/billing/components/BillStatusBadge";
 import { DiscountForm } from "@/features/billing/components/DiscountForm";
 import { PaymentPanel } from "@/features/billing/components/PaymentPanel";
 import { ReceiptView } from "@/features/billing/components/ReceiptView";
+import { PrintBillButtons } from "@/features/billing/components/PrintBillButtons";
 import type { LocationOut, OrderSource } from "@/types/models";
 
 const DISCOUNT_ROLES = new Set(["OWNER", "MANAGER"]);
@@ -92,6 +93,13 @@ export function BillDetailDialog({
               <PaymentPanel bill={bill} />
             </div>
           )}
+
+          {/* Printing is offered for any bill that exists, not only paid
+              ones — a counter routinely hands a guest the bill before they
+              pay. The server marks an unsettled copy as such. */}
+          <div className="border-t border-slate-100 pt-4">
+            <PrintBillButtons bill={bill} />
+          </div>
 
           {bill.status === "PAID" && business && (
             <div className="border-t border-slate-100 pt-4">

@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy import Boolean, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -53,5 +53,17 @@ class BusinessSettings(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # lines at half the rate each, not one combined "GST 5%" line. Off gives
     # a single combined line, for inter-state (IGST) or non-Indian use.
     tax_split_intra_state: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    # Required on the bill of any licensed food business in India, alongside
+    # the GSTIN. Kept separate because a business can be FSSAI-licensed and
+    # not GST-registered, and vice versa.
+    fssai_number: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    # Free text printed under the business name — address, phone, whatever
+    # the owner wants. Newline-separated, so it stays one field instead of
+    # five that are always either empty or in the wrong order.
+    receipt_header_lines: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Printed at the bottom: "Thank you, visit again", GST notes, wifi
+    # password. Also newline-separated.
+    receipt_footer_text: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     business: Mapped["Business"] = relationship(back_populates="settings")
