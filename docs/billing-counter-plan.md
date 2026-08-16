@@ -50,18 +50,24 @@ Commit `eef6e53`.
   every method.
 - Z-report prints through the Block 2 document.
 
-## Block 4 — Counter operations ⬜ remaining
+## Block 4 — Counter operations 🔶 in progress
 
-The last block in the original plan. None of it is started.
+The last block in the original plan. Being worked in dependency order rather
+than the order first written down: voiding a line establishes the "recompute a
+bill after its lines change" behaviour that comping and splitting both need,
+so it went first and the rest get smaller.
 
-- **Split bill** — by item, by amount, equally. `OrderSession` is the right
-  foundation and none of the operations exist.
-- **Merge tables**, **transfer table**, **transfer item**.
-- **Void an individual item** with reason and role gate (voiding a whole
-  bill already works; voiding one line does not).
-- **NC / complimentary bills** — staff meals, comped dishes.
+- **Void an individual item** with reason and role gate — ✅ done, commit
+  `94485e0`. Lines are soft-voided (kept, marked, excluded from totals, not
+  printed on the guest copy) because the bill refresh re-adds any order item
+  the bill does not already carry, so a deleted line would come back.
+- **NC / complimentary bills** — staff meals, comped dishes. Next. Builds on
+  the same line-level recompute.
 - **Split tender UI** — partial payments already work server-side, but
   nothing in the UI lets a cashier take ₹300 cash and ₹200 card on one bill.
+- **Merge tables**, **transfer table**, **transfer item**.
+- **Split bill** — by item, by amount, equally. `OrderSession` is the right
+  foundation and none of the operations exist. Last, and largest.
 
 ## Loose ends outside the blocks
 
