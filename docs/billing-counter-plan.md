@@ -67,13 +67,25 @@ The last block in the original plan. None of it is started.
 
 Carried forward honestly rather than quietly dropped.
 
-**A real bug, still unfixed.** `reports_service` filters
-`created_at <= end_date`, and the frontend sends a date-only value that
-parses to midnight — so the last day of any selected range is always
-missing, and the Reports page shows ₹0 for a range including today while the
-dashboard shows the real figure. Found in the first session, flagged, never
-fixed. It affects all six report queries. This is the highest-value small fix
-outstanding.
+**~~A real bug, still unfixed.~~ Fixed.** `reports_service` filtered
+`created_at <= end_date` against a date-only value that parses to midnight, so
+the last day of any selected range was always missing and the Reports page
+showed ₹0 for a range including today while the dashboard showed the real
+figure. All six report queries now resolve their range once, through
+`_resolve_range`, into a half-open interval `[start, end)` whose upper bound is
+the first moment of the day *after* the end date.
+
+The range is computed in the restaurant's own timezone (`BusinessSettings.
+timezone`, default `Asia/Kolkata`), matching what the receipt builder already
+does, so a bill settled at 00:30 falls on the date its receipt shows rather
+than on the previous UTC day. The endpoints now declare these parameters as
+`date` rather than `datetime`, which is what the frontend has always sent.
+
+Note for whoever picks this up: `dashboard_service._today_start_utc()` still
+defines "today" as a UTC day, so the dashboard's today-figures begin at 05:30
+IST and miss after-midnight trade. Reports and the dashboard therefore still
+disagree at the edges, in the other direction now. Small, separate, worth
+doing.
 
 **ESC/POS has never met a printer.** Byte sequences are asserted against the
 documented command set; that is not the same as paper. Before trusting it:

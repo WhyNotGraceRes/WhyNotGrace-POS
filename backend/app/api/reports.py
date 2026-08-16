@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -14,8 +14,8 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 @router.get("/sales")
 def sales(
     granularity: str = Query("daily", pattern="^(daily|weekly|monthly)$"),
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     business_id=Depends(get_current_business_id),
     db: Session = Depends(get_db),
     _user=Depends(require_roles(*ROLE_OPERATIONAL)),
@@ -25,8 +25,8 @@ def sales(
 
 @router.get("/orders")
 def orders(
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     business_id=Depends(get_current_business_id),
     db: Session = Depends(get_db),
     _user=Depends(require_roles(*ROLE_OPERATIONAL)),
@@ -36,8 +36,8 @@ def orders(
 
 @router.get("/payments")
 def payments(
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     business_id=Depends(get_current_business_id),
     db: Session = Depends(get_db),
     _user=Depends(require_roles(*ROLE_OPERATIONAL)),
@@ -47,8 +47,8 @@ def payments(
 
 @router.get("/top-items")
 def top_items(
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     limit: int = 10,
     business_id=Depends(get_current_business_id),
     db: Session = Depends(get_db),
@@ -59,8 +59,8 @@ def top_items(
 
 @router.get("/categories")
 def categories(
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     business_id=Depends(get_current_business_id),
     db: Session = Depends(get_db),
     _user=Depends(require_roles(*ROLE_OPERATIONAL)),
@@ -70,8 +70,8 @@ def categories(
 
 @router.get("/channels")
 def channels(
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
     business_id=Depends(get_current_business_id),
     db: Session = Depends(get_db),
     _user=Depends(require_roles(*ROLE_OPERATIONAL)),

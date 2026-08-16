@@ -1,4 +1,22 @@
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
 from tests.helpers import create_category_and_item, create_table, register_and_login
+
+IST = ZoneInfo("Asia/Kolkata")
+
+
+def _place_order(client, headers, table, item):
+    resp = client.post(
+        "/api/v1/orders",
+        json={
+            "location_id": table["id"], "source": "DINE_IN", "pricing_context": "DINE_IN",
+            "items": [{"menu_item_id": item["id"], "quantity": 1}],
+        },
+        headers=headers,
+    )
+    assert resp.status_code in (200, 201), resp.text
+    return resp.json()
 
 
 def test_dashboard_reflects_real_orders(client, db_session):
@@ -41,3 +59,52 @@ def test_reports_channel_breakdown(client, db_session):
     assert resp.status_code == 200
     channels = {c["channel"]: c for c in resp.json()}
     assert channels["DINE_IN"]["order_count"] >= 1
+
+
+def test_report_range_includes_its_final_day(client, db_session):
+    """A range whose end is today must count today.
+
+    The end date arrives as a calendar date and parses to midnight, so
+    filtering `created_at <= end_date` excluded every order placed during the
+    last day of the range — the Reports page showed zero for a range ending
+    today while the Dashboard showed the real figure.
+    """
+    owner = register_and_login(client, db_session, business_name="Range Biz")
+    _, item = create_category_and_item(client, owner["headers"], price=120)
+    table = create_table(client, owner["headers"])
+    _place_order(client, owner["headers"], table, item)
+
+    today = datetime.now(IST).date().isoformat()
+    params = {"start_date": today, "end_date": today}
+
+    resp = client.get("/api/v1/reports/channels", params=params, headers=owner["headers"])
+    assert resp.status_code == 200, resp.text
+    channels = {c["channel"]: c for c in resp.json()}
+    assert channels["DINE_IN"]["order_count"] >= 1
+
+    resp = client.get("/api/v1/reports/orders", params=params, headers=owner["headers"])
+    assert resp.status_code == 200, resp.text
+    assert sum(r["order_count"] for r in resp.json()) >= 1
+
+    resp = client.get("/api/v1/reports/top-items", params=params, headers=owner["headers"])
+    assert resp.status_code == 200, resp.text
+    assert any(r["name"] == item["name"] for r in resp.json())
+
+
+def test_report_range_ending_yesterday_excludes_today(client, db_session):
+    """The other side of the boundary: widening the range must not swallow
+    days that fall outside it."""
+    owner = register_and_login(client, db_session, business_name="Range Biz 2")
+    _, item = create_category_and_item(client, owner["headers"], price=120)
+    table = create_table(client, owner["headers"])
+    _place_order(client, owner["headers"], table, item)
+
+    yesterday = (datetime.now(IST).date() - timedelta(days=1)).isoformat()
+    resp = client.get(
+        "/api/v1/reports/channels",
+        params={"start_date": (datetime.now(IST).date() - timedelta(days=7)).isoformat(), "end_date": yesterday},
+        headers=owner["headers"],
+    )
+    assert resp.status_code == 200, resp.text
+    channels = {c["channel"]: c for c in resp.json()}
+    assert channels.get("DINE_IN", {}).get("order_count", 0) == 0
