@@ -1,110 +1,116 @@
 # Billing counter — build plan
 
-Status: agreed 2026-08-16, not yet started. Execution begins next session.
+Status as of 2026-08-16: **Blocks 1–3 done. Block 4 remains.**
 
-The ordering side of this system is ahead of the Indian mid-market
+The ordering side of this system was already ahead of the Indian mid-market
 (Petpooja, Posist, Rista): one order engine across six channels, one bill per
 table visit however many rounds it took, prices resolved server-side. The
-counter side is behind all of them. This plan closes that gap.
+counter side was behind all of them. Blocks 1–3 closed most of that gap.
 
-## What a counter needs that we don't have
+## Block 1 — Invoice integrity ✅ done
 
-Confirmed by reading the code, not assumed:
+Commit `76781f9`, plus `2a58d98` finishing the toggles.
 
-| | competitors | here |
-|---|---|---|
-| Sequential invoice series | per financial year, gapless | timestamp + random |
-| Bill / KOT printing | yes, with station routing | no print code at all |
-| Shift, cash drawer, day-end | yes | none |
-| Void bill or item, with reason | yes | `BillStatus.CANCELLED` never set |
-| Refunds | yes | `PaymentStatus.REFUNDED` never set |
-| Reprint audit | yes | none |
-| Split / merge / transfer table | yes | none |
-| Round-off, NC bills | yes | none |
+- Sequential per-business, per-financial-year invoice series, allocated at
+  **settlement** so an abandoned bill cannot burn a serial. A locked counter
+  row rather than a Postgres sequence, because a sequence is not gapless.
+- Void with reason and role gate; the voided invoice keeps its number and
+  stays in the series.
+- Reprint counting; any copy after the first is marked DUPLICATE.
+- Refunds recorded as their own event against a specific payment.
+- Round-off applied after tax, never folded into the taxable value.
+- A code-side toggle registry with a per-business override table, splitting
+  **preferences** (owner-editable) from **entitlements** (plan-controlled).
+  Adding a switch costs one line and no migration.
 
-## Decisions taken
+## Block 2 — Printing ✅ done
 
-**Printing renders from one canonical document.** The server produces an
-ordered list of typed receipt lines; renderers turn that into HTML (browser
-print) and ESC/POS (thermal). Both are built in the same block. This is the
-decision that matters most — an HTML-only implementation would have to be
-rewritten for thermal, and a shared document also makes a PDF renderer for
-WhatsApp receipts nearly free later.
+Commit `f6fd109`.
 
-**Invoice numbers are allocated at settlement, not at bill creation.** Today
-`generate_or_refresh_bill` assigns `bill_number` immediately, so a bill that
-is generated and then abandoned burns a number and leaves a gap in the
-series — exactly what the rule forbids. The bill keeps an internal reference
-from creation; the invoice number is allocated when it is finalised.
+- One canonical receipt document rendered three ways: text, 80mm HTML, and
+  ESC/POS bytes. Builders turn domain objects into lines; renderers turn
+  lines into output; neither knows about the other.
+- Bill carries GSTIN, FSSAI, invoice number, CGST/SGST split, round-off,
+  DUPLICATE marking.
+- Preview and print are separate verbs, so the duplicate count reflects
+  paper actually produced.
+- Cash drawer kicks on a real first print only.
+- Kitchen tickets carry no prices and route per station.
 
-**Voided invoices keep their number.** A void is a recorded event in the
-series, not a deletion. Deleting would create the gap we are trying to avoid.
+## Block 3 — Shift and day-end ✅ done
 
-**No inventory, no purchase/vendor, no captain app, no payment-terminal
-integration in this phase.** The terminal integration in particular needs
-hardware in hand; card payments can be recorded manually until then.
+Commit `eef6e53`.
 
-## Known verification limit
+- One open drawer per cashier, enforced by a partial unique index.
+- Blind cash counting: the expected figure is withheld until a count is
+  committed, including from the printed report.
+- Payments and refunds carry `shift_id`, so the Z-report is not derived from
+  a time window.
+- Drawer counts cash only, less cash refunded; gross takings still show
+  every method.
+- Z-report prints through the Block 2 document.
 
-There is a pilot restaurant but no thermal printer confirmed yet. The ESC/POS
-renderer will therefore be **written and unit-tested at the byte level, but
-not verified against real hardware**. It ships marked as such. The pilot can
-run on browser printing in the meantime, which is the reason both renderers
-are being built together rather than sequentially.
+## Block 4 — Counter operations ⬜ remaining
 
-Before trusting ESC/POS in production: print one bill and one KOT on the
-actual printer, confirm the cash drawer kick fires, and confirm paper width
-and character-per-line settings match the model.
+The last block in the original plan. None of it is started.
 
-## Block 1 — Invoice integrity
+- **Split bill** — by item, by amount, equally. `OrderSession` is the right
+  foundation and none of the operations exist.
+- **Merge tables**, **transfer table**, **transfer item**.
+- **Void an individual item** with reason and role gate (voiding a whole
+  bill already works; voiding one line does not).
+- **NC / complimentary bills** — staff meals, comped dishes.
+- **Split tender UI** — partial payments already work server-side, but
+  nothing in the UI lets a cashier take ₹300 cash and ₹200 card on one bill.
 
-Everything else depends on this, and it is small, so it goes first.
+## Loose ends outside the blocks
 
-- `invoice_counters` keyed by (business, financial year, series), incremented
-  under a row lock. Restaurant volume makes contention irrelevant — 2,000
-  bills a day is nothing.
-- Number format inside 16 characters, alphanumeric plus `-` and `/`, per
-  CGST Rule 46. Confirm the final format with the client's CA.
-- Allocation moves to settlement.
-- Void: reason required, role-gated, number retained, audit logged.
-- Reprint: counted, and any reprint after the first is marked DUPLICATE on
-  the printed output. This is the standard control against printing two
-  "originals" of the same bill.
-- Refund path, so `PaymentStatus.REFUNDED` stops being decoration.
+Carried forward honestly rather than quietly dropped.
 
-## Block 2 — Printing
+**A real bug, still unfixed.** `reports_service` filters
+`created_at <= end_date`, and the frontend sends a date-only value that
+parses to midnight — so the last day of any selected range is always
+missing, and the Reports page shows ₹0 for a range including today while the
+dashboard shows the real figure. Found in the first session, flagged, never
+fixed. It affects all six report queries. This is the highest-value small fix
+outstanding.
 
-- Canonical receipt document built server-side from the bill (or KOT).
-- HTML renderer: 80mm-styled, printed from a hidden frame.
-- ESC/POS renderer: byte output, cash-drawer kick, cut.
-- KOT station routing: menu item → station → printer, so tandoor, Chinese
-  and bar tickets separate.
-- Bill layout must carry GSTIN, the CGST/SGST split lines, invoice number,
-  and DUPLICATE marking when reprinted.
+**ESC/POS has never met a printer.** Byte sequences are asserted against the
+documented command set; that is not the same as paper. Before trusting it:
+print one bill and one kitchen ticket on the real machine and confirm the cut
+lands right, the drawer fires, and characters-per-line matches the paper.
 
-## Block 3 — Shift and day-end
+**Refunds are not GST credit notes.** Reversing a supply formally needs a
+credit note with its own document series. The invoice-series machinery would
+make that cheap to add; the data to raise one is already recorded.
 
-This is the block owners actually buy a POS for: it is how theft is detected.
+**No HSN/SAC codes per menu item.** Required for a fully compliant invoice.
 
-- `ShiftSession`: who opened it, opening float, closed_at, declared cash,
-  expected cash, variance.
-- Every `Payment` gains a `shift_id`. Without that link a Z-report is
-  guesswork.
-- Z-report at close: sales by payment method, voids, discounts, variance.
+**Entitlement toggles cannot be changed by anyone**, because there is no
+platform-superadmin surface. Every shipped toggle is currently a preference,
+so nothing is stranded — but the moment a function is sold separately, that
+surface has to exist.
 
-## Block 4 — Counter operations
+**The test suite never runs the migrations.** `conftest` builds the schema
+with `create_all()` from the models, so a model/migration divergence is
+invisible. This already bit once, when a `FeatureModule` enum value was added
+in Python but not to the Postgres type — every test passed and the migrated
+database failed on first use. A test that runs `alembic upgrade head` against
+a clean database would have caught it.
 
-- Split bill: by item, by amount, equally.
-- Merge tables, transfer table, transfer item.
-- Void item with reason and role gate.
-- NC / complimentary bills.
-- Round-off line.
-- Split tender UI (partial payments already work server-side).
+**One pre-existing test failure.**
+`test_pool_drains_after_genuine_concurrent_timeout_exhaustion` fails
+reproducibly — it expects a 500 from pool exhaustion but the auth rate limiter
+returns 429 first, so it never reproduces the contention it is testing. It
+predates all of this work.
 
-## Still open
+**No shift history screen.** The API lists past shifts; nothing renders them.
+
+**No kitchen print button.** Station routing and ticket endpoints work and
+are tested; nothing in the kitchen UI calls them.
+
+## Still to decide
 
 - Final invoice number format, to confirm with the client's CA.
-- Whether discounts need approval limits per role, or whether reason plus
-  audit is enough for this client.
-- HSN/SAC codes per menu item — needed for a fully compliant invoice, not
-  yet scoped.
+- Whether discounts need approval limits per role, or reason plus audit is
+  enough for this client.
