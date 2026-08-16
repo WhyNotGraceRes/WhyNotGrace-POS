@@ -34,6 +34,8 @@ class BillItemOut(BaseModel):
     # a bug to the person who just struck it.
     voided_at: datetime | None = None
     void_reason: str | None = None
+    comped_at: datetime | None = None
+    comp_reason: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -60,6 +62,13 @@ class VoidBillItemRequest(VoidBillRequest):
     """Same shape and the same toggle-driven reason rule as voiding a bill."""
 
 
+class CompRequest(BaseModel):
+    """Reason is required by the service when billing.comp_requires_reason is
+    on, for the same reason it is optional here as on a void."""
+
+    reason: str | None = Field(default=None, max_length=255)
+
+
 class BillOut(BaseModel):
     id: uuid.UUID
     session_id: uuid.UUID
@@ -69,6 +78,8 @@ class BillOut(BaseModel):
     finalised_at: datetime | None = None
     voided_at: datetime | None = None
     void_reason: str | None = None
+    nc_at: datetime | None = None
+    nc_reason: str | None = None
     print_count: int = 0
     status: BillStatus
     subtotal: float

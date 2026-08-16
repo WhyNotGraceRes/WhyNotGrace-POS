@@ -1014,6 +1014,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/{bill_id}/items/{item_id}/comp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Comp Bill Item
+         * @description Gives one line away. The line still prints, marked NC.
+         */
+        post: operations["comp_bill_item_api_v1_billing__bill_id__items__item_id__comp_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/{bill_id}/items/{item_id}/uncomp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Uncomp Bill Item
+         * @description Puts a comped line back on the bill and charges for it again.
+         */
+        post: operations["uncomp_bill_item_api_v1_billing__bill_id__items__item_id__uncomp_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/{bill_id}/no-charge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark Bill Nc
+         * @description Marks the whole bill no-charge — a staff meal, or a comped table.
+         *
+         *     Router role matches the other counter operations; the manager-only rule
+         *     is applied inside the service so billing.comp_requires_manager can reach
+         *     it.
+         */
+        post: operations["mark_bill_nc_api_v1_billing__bill_id__no_charge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/billing/{bill_id}/print": {
         parameters: {
             query?: never;
@@ -2285,6 +2349,10 @@ export interface components {
             voided_at?: string | null;
             /** Void Reason */
             void_reason?: string | null;
+            /** Comped At */
+            comped_at?: string | null;
+            /** Comp Reason */
+            comp_reason?: string | null;
         };
         /** BillLineOut */
         BillLineOut: {
@@ -2324,6 +2392,10 @@ export interface components {
             voided_at?: string | null;
             /** Void Reason */
             void_reason?: string | null;
+            /** Nc At */
+            nc_at?: string | null;
+            /** Nc Reason */
+            nc_reason?: string | null;
             /**
              * Print Count
              * @default 0
@@ -2684,6 +2756,15 @@ export interface components {
             declared_cash: number;
             /** Notes */
             notes?: string | null;
+        };
+        /**
+         * CompRequest
+         * @description Reason is required by the service when billing.comp_requires_reason is
+         *     on, for the same reason it is optional here as on a void.
+         */
+        CompRequest: {
+            /** Reason */
+            reason?: string | null;
         };
         /**
          * ConnectCredentialsRequest
@@ -6788,6 +6869,109 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["VoidBillItemRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    comp_bill_item_api_v1_billing__bill_id__items__item_id__comp_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bill_id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    uncomp_bill_item_api_v1_billing__bill_id__items__item_id__uncomp_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bill_id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_bill_nc_api_v1_billing__bill_id__no_charge_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bill_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompRequest"];
             };
         };
         responses: {

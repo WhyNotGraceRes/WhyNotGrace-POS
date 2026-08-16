@@ -32,6 +32,12 @@ export function ReceiptView({
         <div className="text-center">
           <p className="text-base font-bold">{businessName}</p>
           <p className="mt-0.5 text-xs text-slate-500">{t("receipt.printedOn", { datetime: new Date().toLocaleString() })}</p>
+          {bill.nc_at && (
+            <p className="mt-1 text-xs font-bold">
+              ** {t("billing.noChargeBanner")} **
+              {bill.nc_reason ? <span className="block font-normal">{bill.nc_reason}</span> : null}
+            </p>
+          )}
         </div>
 
         <div className="my-3 border-t border-dashed border-slate-300" />
@@ -57,15 +63,23 @@ export function ReceiptView({
 
         <div className="my-3 border-t border-dashed border-slate-300" />
 
+        {/* This is the guest's copy on screen, so it follows the same rules as
+            the printed one (see services/receipt/builder.py): a voided line
+            never appears, and a complimentary line does appear — marked NC,
+            because the point of comping is that the guest sees it. */}
         <ul className="space-y-1">
-          {bill.items.map((item) => (
-            <li key={item.id} className="flex justify-between text-xs">
-              <span className="pr-2">
-                {item.quantity} × {item.item_name_snapshot}
-              </span>
-              <span className="shrink-0">{formatCurrency(item.line_total)}</span>
-            </li>
-          ))}
+          {bill.items
+            .filter((item) => !item.voided_at)
+            .map((item) => (
+              <li key={item.id} className="flex justify-between text-xs">
+                <span className="pr-2">
+                  {item.quantity} × {item.item_name_snapshot}
+                </span>
+                <span className="shrink-0">
+                  {item.comped_at ? t("billing.nc") : formatCurrency(item.line_total)}
+                </span>
+              </li>
+            ))}
         </ul>
 
         <div className="my-3 border-t border-dashed border-slate-300" />

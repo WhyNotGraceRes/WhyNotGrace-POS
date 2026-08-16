@@ -60,7 +60,7 @@ export function DiscountForm({ bill }: { bill: BillOut }) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 p-3">
+    <div className="w-full rounded-lg border border-slate-200 p-3">
       {error && <p className="mb-2 text-xs text-danger-600">{error}</p>}
       <div className="space-y-2">
         <div>

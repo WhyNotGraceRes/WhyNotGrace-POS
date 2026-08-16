@@ -97,9 +97,20 @@ def build_bill_receipt(
         if bill.void_reason:
             doc.text(bill.void_reason, align=Align.CENTER)
         doc.divider()
+    if bill.is_nc:
+        doc.text("** NO CHARGE **", align=Align.CENTER, emphasis=Emphasis.BOLD)
+        if bill.nc_reason:
+            doc.text(bill.nc_reason, align=Align.CENTER)
+        doc.divider()
 
     if bill.invoice_number:
         doc.pair("Invoice", bill.invoice_number)
+    elif bill.is_nc:
+        # An NC bill never gets a tax invoice number — nothing was supplied
+        # for consideration, so there is no taxable supply to invoice. Saying
+        # so beats printing the internal reference under an "Invoice" label
+        # that would misrepresent what this document is.
+        doc.pair("No-charge bill", bill.bill_number)
     else:
         # An unsettled bill has no invoice number yet, and saying so is
         # better than printing the internal reference where a guest would
@@ -125,11 +136,15 @@ def build_bill_receipt(
         if item.is_voided:
             continue
         qty = int(float(item.quantity)) if float(item.quantity).is_integer() else float(item.quantity)
+        # A comped line does print, unlike a voided one. The guest was served
+        # the dish and the restaurant wants credit for giving it — a gesture
+        # nobody sees is not a gesture. The rate stays visible so the value of
+        # what was given is on the paper; only the amount reads NC.
         doc.item(
             item.item_name_snapshot,
             quantity=str(qty),
             rate=_money(item.unit_price),
-            amount=_money(item.line_total),
+            amount="NC" if item.is_comped else _money(item.line_total),
         )
 
     doc.divider()

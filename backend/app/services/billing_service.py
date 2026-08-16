@@ -60,7 +60,11 @@ def _recompute_totals(db: Session, business_id: uuid.UUID, bill: Bill) -> None:
     reason as the tax: a 10% service charge on food the guest was never
     billed for is a charge on nothing.
     """
-    subtotal = sum(float(i.line_total) for i in bill.items if not i.is_voided)
+    # Voided and complimentary lines both stop contributing money, for
+    # different reasons: a void was never supplied, a comp was supplied and
+    # given away. Neither carries consideration, so neither belongs in the
+    # taxable value.
+    subtotal = sum(float(i.line_total) for i in bill.items if i.is_chargeable)
     discount_total = sum(float(d.amount) for d in bill.discounts)
 
     # A discount can never take the bill below zero. A data-entry slip
@@ -429,6 +433,175 @@ def void_bill_item(
     bill = get_bill_or_404(db, business_id, bill_id)
     _recompute_totals(db, business_id, bill)
     db.flush()
+    return bill
+
+
+def _require_comp_authority(db: Session, business_id: uuid.UUID, *, reason: str | None, user, what: str) -> None:
+    """The two toggles that guard giving food away, in one place.
+
+    Separate from the void toggles on purpose: a restaurant may well want a
+    cashier to be able to strike a dish that never left the kitchen, while
+    still insisting a manager signs off anything given away.
+    """
+    if toggles.is_enabled(db, business_id, toggles.COMP_REQUIRES_MANAGER):
+        if user.role not in ROLE_OPERATIONAL:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Only a manager or owner can {what}",
+            )
+
+    if toggles.is_enabled(db, business_id, toggles.COMP_REQUIRES_REASON):
+        if not reason or not reason.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"A reason is required to {what}",
+            )
+
+
+def comp_bill_item(
+    db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, item_id: uuid.UUID, *, reason: str | None, user
+) -> Bill:
+    """Gives one line away without removing it from the bill.
+
+    The line keeps its price and still prints, marked NC — a guest who was
+    given a dessert should see the dessert and see that it was free. It simply
+    stops contributing to the subtotal, so tax and percentage charges fall
+    with it.
+    """
+    bill = get_bill_or_404(db, business_id, bill_id)
+    if bill.status in (BillStatus.PAID, BillStatus.CANCELLED):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot modify a closed bill")
+
+    item = next((i for i in bill.items if i.id == item_id), None)
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill item not found")
+    if item.is_voided:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="That line is voided — a dish that was never supplied cannot be given away",
+        )
+    if item.is_comped:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Item is already complimentary")
+
+    _require_comp_authority(db, business_id, reason=reason, user=user, what="give an item free")
+
+    item.comped_at = datetime.now(timezone.utc)
+    item.comp_reason = (reason or "").strip() or None
+    item.comped_by_user_id = user.id
+    db.flush()
+
+    bill = get_bill_or_404(db, business_id, bill_id)
+    _recompute_totals(db, business_id, bill)
+    db.flush()
+    return bill
+
+
+def uncomp_bill_item(
+    db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, item_id: uuid.UUID, *, user
+) -> Bill:
+    """Puts a comped line back on the bill.
+
+    Reversible where a void is not, because the two claims are different. A
+    void asserts a fact about the kitchen — that the dish was never supplied —
+    and unsaying it would be rewriting history. A comp is only a pricing
+    decision, and the manager who made it may reasonably change their mind
+    before the guest pays.
+    """
+    bill = get_bill_or_404(db, business_id, bill_id)
+    if bill.status in (BillStatus.PAID, BillStatus.CANCELLED):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot modify a closed bill")
+    if bill.is_nc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This is a no-charge bill — remove the no-charge mark first",
+        )
+
+    item = next((i for i in bill.items if i.id == item_id), None)
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill item not found")
+    if not item.is_comped:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Item is not complimentary")
+
+    _require_comp_authority(db, business_id, reason="uncomp", user=user, what="charge for an item again")
+
+    item.comped_at = None
+    item.comp_reason = None
+    item.comped_by_user_id = None
+    db.flush()
+
+    bill = get_bill_or_404(db, business_id, bill_id)
+    _recompute_totals(db, business_id, bill)
+    db.flush()
+    return bill
+
+
+def mark_bill_nc(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, *, reason: str | None, user) -> Bill:
+    """Marks a whole bill no-charge: a staff meal, or a table the owner
+    decided not to bill.
+
+    Every line is comped, so the bill lands at zero through the ordinary
+    recompute rather than by writing a zero over the top of it — the lines,
+    their prices, and the tax that would have applied all stay legible.
+
+    The bill then settles without a payment, because there is no money to
+    record and inventing a zero-rupee CASH payment would put a fictional row
+    into the shift's takings and the Z-report.
+
+    It does NOT allocate a tax invoice number. The invoice series is the GST
+    serial (see invoice_service), and food given away for no consideration is
+    not a taxable supply — burning a serial on it would put a zero-value
+    invoice into the return. The internal bill_number still identifies it.
+    """
+    bill = get_bill_or_404(db, business_id, bill_id)
+    if bill.status == BillStatus.CANCELLED:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bill is cancelled")
+    if bill.is_nc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bill is already no-charge")
+    if float(bill.amount_paid) > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Money has already been taken on this bill — refund it before marking no-charge",
+        )
+
+    _require_comp_authority(db, business_id, reason=reason, user=user, what="mark a bill no-charge")
+
+    now = datetime.now(timezone.utc)
+    bill.nc_at = now
+    bill.nc_reason = (reason or "").strip() or None
+    bill.nc_by_user_id = user.id
+
+    for item in bill.items:
+        # A voided line stays voided. It was never supplied, so it is not
+        # part of what is being given away.
+        if item.is_voided or item.is_comped:
+            continue
+        item.comped_at = now
+        item.comp_reason = bill.nc_reason
+        item.comped_by_user_id = user.id
+    db.flush()
+
+    bill = get_bill_or_404(db, business_id, bill_id)
+    _recompute_totals(db, business_id, bill)
+
+    # Zero outstanding means settled. _recompute_totals already lands on PAID
+    # when amount_paid >= grand_total, and 0 >= 0; this is here so the
+    # intention is explicit rather than an arithmetic coincidence.
+    bill.status = BillStatus.PAID
+    db.flush()
+
+    if bill.location_id:
+        location = db.get(Location, bill.location_id)
+        if location is not None:
+            location.status = LocationStatus.PAID
+            db.flush()
+
+    from app.services import kot_service
+
+    # Held tickets are released the same as on a paid bill: the kitchen still
+    # has to cook a staff meal. Loyalty is deliberately not accrued — points
+    # are earned on money spent, and nothing was.
+    kot_service.release_held_kots_for_session(db, business_id, bill.session_id)
+
     return bill
 
 

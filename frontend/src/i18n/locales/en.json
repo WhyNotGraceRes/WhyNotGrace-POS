@@ -416,7 +416,18 @@
     "voidItemConfirm": "Void {{item}}? It stays on the record but is removed from the total and won't print on the guest's bill.",
     "voidReasonPlaceholder": "Reason (e.g. sent back, rung up twice)",
     "voided": "Voided",
-    "itemVoided": "Item voided."
+    "itemVoided": "Item voided.",
+    "nc": "NC",
+    "compItem": "Give free",
+    "compItemConfirm": "Give {{item}} free? It stays on the guest's bill marked NC, so they can see what they were given.",
+    "compReasonPlaceholder": "Reason (e.g. on the house, staff meal)",
+    "itemComped": "Item given free.",
+    "uncompItem": "Charge for this again",
+    "markNoCharge": "No charge",
+    "markNoChargeConfirm": "Mark the whole bill no charge? {{amount}} will not be collected, every line is given free, and the bill closes without a payment.",
+    "ncReasonPlaceholder": "Reason (e.g. staff meal, owner's guests)",
+    "markedNoCharge": "Bill marked no charge.",
+    "noChargeBanner": "NO CHARGE"
   },
   "payment": {
     "cash": "Cash",

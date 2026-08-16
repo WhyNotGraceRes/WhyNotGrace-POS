@@ -11,6 +11,7 @@ from app.schemas.billing import (
     ApplyDiscountRequest,
     BillOut,
     BillPrintOut,
+    CompRequest,
     GenerateBillRequest,
     VoidBillItemRequest,
     VoidBillRequest,
@@ -117,6 +118,82 @@ def void_bill_item(
                 "item_name": item.item_name_snapshot if item else None,
                 "line_total": float(item.line_total) if item else None,
                 "reason": item.void_reason if item else None,
+            },
+        )
+    return BillOut.model_validate(bill)
+
+
+@router.post("/{bill_id}/items/{item_id}/comp", response_model=BillOut)
+def comp_bill_item(
+    bill_id: uuid.UUID,
+    item_id: uuid.UUID,
+    payload: CompRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_BILLING)),
+):
+    """Gives one line away. The line still prints, marked NC."""
+    with transaction(db):
+        bill = billing_service.comp_bill_item(
+            db, business_id, bill_id, item_id, reason=payload.reason, user=user
+        )
+        item = next((i for i in bill.items if i.id == item_id), None)
+        audit_service.record(
+            db, action="bill.item_comp", business_id=business_id, user_id=user.id,
+            resource_type="bill", resource_id=str(bill_id),
+            metadata={
+                "bill_item_id": str(item_id),
+                "item_name": item.item_name_snapshot if item else None,
+                "value_given": float(item.line_total) if item else None,
+                "reason": item.comp_reason if item else None,
+            },
+        )
+    return BillOut.model_validate(bill)
+
+
+@router.post("/{bill_id}/items/{item_id}/uncomp", response_model=BillOut)
+def uncomp_bill_item(
+    bill_id: uuid.UUID,
+    item_id: uuid.UUID,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_BILLING)),
+):
+    """Puts a comped line back on the bill and charges for it again."""
+    with transaction(db):
+        bill = billing_service.uncomp_bill_item(db, business_id, bill_id, item_id, user=user)
+        audit_service.record(
+            db, action="bill.item_uncomp", business_id=business_id, user_id=user.id,
+            resource_type="bill", resource_id=str(bill_id),
+            metadata={"bill_item_id": str(item_id)},
+        )
+    return BillOut.model_validate(bill)
+
+
+@router.post("/{bill_id}/no-charge", response_model=BillOut)
+def mark_bill_nc(
+    bill_id: uuid.UUID,
+    payload: CompRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_BILLING)),
+):
+    """Marks the whole bill no-charge — a staff meal, or a comped table.
+
+    Router role matches the other counter operations; the manager-only rule
+    is applied inside the service so billing.comp_requires_manager can reach
+    it.
+    """
+    with transaction(db):
+        bill = billing_service.mark_bill_nc(db, business_id, bill_id, reason=payload.reason, user=user)
+        audit_service.record(
+            db, action="bill.no_charge", business_id=business_id, user_id=user.id,
+            resource_type="bill", resource_id=str(bill.id),
+            metadata={
+                "reason": bill.nc_reason,
+                # What the bill would have come to. This is the number an
+                # owner reviewing giveaways actually wants.
+                "value_given": float(sum(float(i.line_total) for i in bill.items if not i.is_voided)),
             },
         )
     return BillOut.model_validate(bill)

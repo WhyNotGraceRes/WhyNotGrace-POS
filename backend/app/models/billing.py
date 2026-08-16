@@ -47,6 +47,17 @@ class Bill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
 
+    # No-charge: a staff meal, or a table the owner decided not to bill. Every
+    # line is comped and the bill settles at zero without a payment. It is
+    # deliberately a mark on the bill rather than a BillStatus, because the
+    # bill still moves through OPEN -> PAID like any other and the status
+    # column answers "is money outstanding", which for an NC bill is no.
+    nc_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    nc_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    nc_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+
     # First print is the original; everything after it is a duplicate. Stored
     # rather than derived from the audit log so the renderer can decide what
     # to stamp on the paper without running a query per print.
@@ -75,6 +86,10 @@ class Bill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     items: Mapped[list["BillItem"]] = relationship(
         back_populates="bill", cascade="all, delete-orphan", order_by="BillItem.created_at"
     )
+
+    @property
+    def is_nc(self) -> bool:
+        return self.nc_at is not None
     taxes: Mapped[list["BillTax"]] = relationship(back_populates="bill", cascade="all, delete-orphan")
     discounts: Mapped[list["BillDiscount"]] = relationship(back_populates="bill", cascade="all, delete-orphan")
     service_charges: Mapped[list["BillServiceCharge"]] = relationship(
@@ -111,11 +126,33 @@ class BillItem(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
 
+    # Complimentary is not the same act as void, even though both stop the
+    # line being charged. A void says the dish was never supplied, so it
+    # leaves the guest's bill entirely. A comp says it was supplied and given
+    # free — the line stays on the printed bill marked NC, because the whole
+    # point of comping is that the guest sees what they were given. The cost
+    # also has to stay countable: food that left the kitchen unpaid is a real
+    # expense, not an absence of a sale.
+    comped_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    comp_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    comped_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+
     bill: Mapped["Bill"] = relationship(back_populates="items")
 
     @property
     def is_voided(self) -> bool:
         return self.voided_at is not None
+
+    @property
+    def is_comped(self) -> bool:
+        return self.comped_at is not None
+
+    @property
+    def is_chargeable(self) -> bool:
+        """Whether this line contributes money to the bill."""
+        return not self.is_voided and not self.is_comped
 
 
 class BillTax(Base, UUIDPrimaryKeyMixin, TimestampMixin):

@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useBusiness } from "@/features/business/hooks";
 import { useBill } from "@/features/billing/hooks";
 import { BillItemsList } from "@/features/billing/components/BillItemsList";
+import { NoChargeButton } from "@/features/billing/components/NoChargeButton";
 import { BillStatusBadge } from "@/features/billing/components/BillStatusBadge";
 import { DiscountForm } from "@/features/billing/components/DiscountForm";
 import { PaymentPanel } from "@/features/billing/components/PaymentPanel";
@@ -56,6 +57,11 @@ export function BillDetailDialog({
         <div className="space-y-5">
           <div className="flex items-center gap-2">
             <BillStatusBadge status={bill.status} />
+            {bill.nc_at && (
+              <span className="rounded bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700">
+                {bill.nc_reason ? `${t("billing.nc")}: ${bill.nc_reason}` : t("billing.nc")}
+              </span>
+            )}
             {table && <span className="text-sm text-slate-500">{table.name}</span>}
           </div>
 
@@ -78,7 +84,12 @@ export function BillDetailDialog({
             {remaining > 0 && <Row label={t("billing.remaining")} value={formatCurrency(remaining)} tone="danger" bold />}
           </div>
 
-          {canApplyDiscount && <DiscountForm bill={bill} />}
+          {canApplyDiscount && (
+            <div className="flex flex-wrap items-start gap-2">
+              <DiscountForm bill={bill} />
+              <NoChargeButton bill={bill} />
+            </div>
+          )}
 
           {bill.status !== "PAID" && bill.status !== "CANCELLED" && (
             <div className="border-t border-slate-100 pt-4">

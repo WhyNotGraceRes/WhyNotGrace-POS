@@ -132,6 +132,26 @@ ALLOW_REFUNDS = _register(ToggleDef(
     description="Staff can refund a settled payment. The original payment and the refund both stay on record.",
 ))
 
+COMP_REQUIRES_REASON = _register(ToggleDef(
+    key="billing.comp_requires_reason",
+    group=ToggleGroup.BILLING,
+    default=True,
+    owner_editable=True,
+    label="Require a reason when giving an item or bill free",
+    description="Staff must type why the food was not charged. The reason is stored on the bill and in the audit log.",
+    warning="Turning this off leaves no record of why food left the kitchen unpaid, which is how staff meals and giveaways stop being countable.",
+))
+
+COMP_REQUIRES_MANAGER = _register(ToggleDef(
+    key="billing.comp_requires_manager",
+    group=ToggleGroup.BILLING,
+    default=True,
+    owner_editable=True,
+    label="Only a manager or owner can give an item or bill free",
+    description="Cash counter staff cannot comp a dish or mark a bill no-charge on their own.",
+    warning="Turning this off lets any counter user give away food with nobody else involved.",
+))
+
 ROUND_OFF_TOTAL = _register(ToggleDef(
     key="billing.round_off_total",
     group=ToggleGroup.BILLING,

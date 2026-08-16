@@ -22,4 +22,19 @@ export const billingApi = {
     apiClient
       .post<BillOut>(`/billing/${billId}/items/${itemId}/void`, { reason })
       .then((r) => normalizeBill(r.data)),
+
+  /** Gives one line away. It stays on the bill, marked NC. */
+  compItem: (billId: string, itemId: string, reason?: string) =>
+    apiClient
+      .post<BillOut>(`/billing/${billId}/items/${itemId}/comp`, { reason })
+      .then((r) => normalizeBill(r.data)),
+
+  /** Charges for a comped line again. There is no void equivalent, by design. */
+  uncompItem: (billId: string, itemId: string) =>
+    apiClient
+      .post<BillOut>(`/billing/${billId}/items/${itemId}/uncomp`, {})
+      .then((r) => normalizeBill(r.data)),
+
+  markNoCharge: (billId: string, reason?: string) =>
+    apiClient.post<BillOut>(`/billing/${billId}/no-charge`, { reason }).then((r) => normalizeBill(r.data)),
 };
