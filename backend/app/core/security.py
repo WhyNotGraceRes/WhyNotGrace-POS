@@ -102,6 +102,21 @@ def create_access_token(
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
+def create_platform_access_token(*, platform_user_id: uuid.UUID, role: str) -> str:
+    """A platform staff token, structurally distinct from a business one.
+
+    Reuses create_access_token's payload shape but stamps `"actor":
+    "platform"` via extra_claims and leaves biz/role's business meaning
+    unset (business_id=None). app.core.dependencies.get_current_user
+    explicitly rejects any token carrying this claim, and
+    app.core.platform_dependencies.get_current_platform_user requires it —
+    the two dependency chains never trust the same token.
+    """
+    return create_access_token(
+        user_id=platform_user_id, business_id=None, role=None, extra_claims={"actor": "platform"}
+    )
+
+
 def decode_token(token: str) -> dict[str, Any]:
     try:
         return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])

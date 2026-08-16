@@ -49,12 +49,18 @@ def test_kitchen_staff_can_view_kitchen_queue(client, db_session):
     assert resp.status_code == 200
 
 
-def test_cash_counter_cannot_change_feature_flags(client, db_session):
+def test_no_business_role_can_change_feature_flags_any_more(client, db_session):
+    """Not even the owner — see app.api.feature_flags: the write path was
+    removed entirely and moved to app.api.platform.features, since an owner
+    being able to self-enable a paid module was exactly the hole this
+    closed. There's no 403 to check here any more: the route itself is
+    gone, for every business role including OWNER."""
     owner = register_and_login(client, db_session, business_name="RBAC Biz 3")
     cash_counter = _create_staff_and_login(client, owner["headers"], "CASH_COUNTER")
 
-    resp = client.put("/api/v1/settings/features/DELIVERY", json={"enabled": True}, headers=cash_counter["headers"])
-    assert resp.status_code == 403
+    for headers in (owner["headers"], cash_counter["headers"]):
+        resp = client.put("/api/v1/settings/features/DELIVERY", json={"enabled": True}, headers=headers)
+        assert resp.status_code == 404
 
 
 def test_delivery_staff_cannot_view_reports(client, db_session):
@@ -69,7 +75,7 @@ def test_loyalty_rules_read_requires_operational_role(client, db_session):
     from tests.helpers import enable_feature
 
     owner = register_and_login(client, db_session, business_name="RBAC Biz 6")
-    enable_feature(client, owner["headers"], "LOYALTY")
+    enable_feature(client, db_session, owner, "LOYALTY")
 
     resp = client.get("/api/v1/loyalty/rules", headers=owner["headers"])
     assert resp.status_code == 200

@@ -16,6 +16,13 @@ class AuditLog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    # Set instead of user_id when the actor is WhyNotGrace's own staff rather
+    # than someone logged into the business — e.g. provisioning a business or
+    # changing its entitlements. Exactly one of user_id/platform_user_id is
+    # set for an actioned entry; both are NULL for a system-generated one.
+    platform_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("platform_users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     action: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     resource_type: Mapped[str | None] = mapped_column(String(60), nullable=True)
     resource_id: Mapped[str | None] = mapped_column(String(64), nullable=True)

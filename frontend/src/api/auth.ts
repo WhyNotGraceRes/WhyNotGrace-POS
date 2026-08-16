@@ -6,25 +6,12 @@ import type {
   LoginRequest,
   LogoutRequest,
   RefreshRequest,
-  RegisterRequest,
-  RegisterResponse,
-  ResendVerificationRequest,
   ResetPasswordRequest,
   TokenPairResponse,
   UserOut,
-  VerifyEmailRequest,
 } from "@/types/models";
 
 export const authApi = {
-  register: (payload: RegisterRequest) =>
-    apiClient.post<RegisterResponse>("/auth/register", payload).then((r) => r.data),
-
-  verifyEmail: (payload: VerifyEmailRequest) =>
-    apiClient.post<GenericMessageResponse>("/auth/verify-email", payload).then((r) => r.data),
-
-  resendVerification: (payload: ResendVerificationRequest) =>
-    apiClient.post<GenericMessageResponse>("/auth/resend-verification", payload).then((r) => r.data),
-
   login: (payload: LoginRequest) =>
     apiClient.post<TokenPairResponse>("/auth/login", payload).then((r) => r.data),
 

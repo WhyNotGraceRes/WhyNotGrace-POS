@@ -104,51 +104,12 @@ def client(db_session):
 
 
 @pytest.fixture()
-def registered_business(client):
-    """Registers + auto-verifies a business/owner for tests that need an
-    authenticated context without exercising the email flow itself.
+def registered_business(client, db_session):
+    """A business/owner for tests that need an authenticated context. Goes
+    through platform provisioning (see tests.helpers.register_and_login) —
+    there is no self-registration any more.
     """
-    payload = {
-        "business_name": f"Test Restaurant {uuid.uuid4().hex[:6]}",
-        "business_type": "RESTAURANT",
-        "owner_first_name": "Ada",
-        "owner_last_name": "Owner",
-        "email": f"owner-{uuid.uuid4().hex[:8]}@example.com",
-        "mobile": f"9{uuid.uuid4().int % 10**9:09d}",
-        "password": "SuperSecret123",
-        "confirm_password": "SuperSecret123",
-    }
-    resp = client.post("/api/v1/auth/register", json=payload)
-    assert resp.status_code == 201, resp.text
-    data = resp.json()
-    return {"payload": payload, "business_id": data["business_id"], "user_id": data["user_id"]}
+    from tests.helpers import register_and_login
 
-
-def verify_and_login(client, db_session, payload):
-    """Helper: reads the verification code directly from the DB (since the
-    email backend is console-only in tests) and completes login."""
-    from app.core.security import hash_token
-    from app.models.user import EmailVerificationCode, User
-
-    user = db_session.query(User).filter(User.email == payload["email"].lower()).first()
-    code_row = (
-        db_session.query(EmailVerificationCode)
-        .filter(EmailVerificationCode.user_id == user.id)
-        .order_by(EmailVerificationCode.created_at.desc())
-        .first()
-    )
-    # The plaintext code isn't recoverable from the hash (by design) —
-    # tests instead call the service function directly to get a fresh one.
-    from app.services import auth_service
-
-    code = auth_service._issue_verification_code(db_session, user)
-    db_session.flush()
-
-    resp = client.post("/api/v1/auth/verify-email", json={"email": payload["email"], "code": code})
-    assert resp.status_code == 200, resp.text
-
-    resp = client.post(
-        "/api/v1/auth/login", json={"identifier": payload["email"], "password": payload["password"]}
-    )
-    assert resp.status_code == 200, resp.text
-    return resp.json()
+    ctx = register_and_login(client, db_session)
+    return {"payload": ctx["payload"], "business_id": ctx["business_id"], "user_id": ctx["user_id"]}

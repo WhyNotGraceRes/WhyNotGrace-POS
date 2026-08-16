@@ -31,7 +31,23 @@ def list_effective(db: Session, business_id: uuid.UUID) -> list[tuple[ToggleDef,
     return out
 
 
+def _upsert(db: Session, business_id: uuid.UUID, key: str, enabled: bool) -> None:
+    row = (
+        db.query(BusinessToggle)
+        .filter(BusinessToggle.business_id == business_id, BusinessToggle.key == key)
+        .first()
+    )
+    if row is None:
+        row = BusinessToggle(business_id=business_id, key=key, enabled=enabled)
+        db.add(row)
+    else:
+        row.enabled = enabled
+    db.flush()
+
+
 def set_toggle(db: Session, business_id: uuid.UUID, key: str, enabled: bool) -> tuple[ToggleDef, bool]:
+    """The owner-facing writer. Refuses to touch an entitlement toggle —
+    see platform_set_toggle for the one path that can."""
     definition = toggles.get_def(key)
     if definition is None:
         # The key column is a free string so that adding a switch needs no
@@ -50,17 +66,20 @@ def set_toggle(db: Session, business_id: uuid.UUID, key: str, enabled: bool) -> 
             ),
         )
 
-    row = (
-        db.query(BusinessToggle)
-        .filter(BusinessToggle.business_id == business_id, BusinessToggle.key == key)
-        .first()
-    )
-    if row is None:
-        row = BusinessToggle(business_id=business_id, key=key, enabled=enabled)
-        db.add(row)
-    else:
-        row.enabled = enabled
-    db.flush()
+    _upsert(db, business_id, key, enabled)
+    return definition, enabled
+
+
+def platform_set_toggle(db: Session, business_id: uuid.UUID, key: str, enabled: bool) -> tuple[ToggleDef, bool]:
+    """The platform-facing writer, called only from behind
+    get_current_platform_user (see app.api.platform.toggles). Deliberately
+    has no owner_editable check — that gate exists to stop a BUSINESS from
+    changing its own entitlements, not to stop the platform that grants them.
+    """
+    definition = toggles.get_def(key)
+    if definition is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Unknown setting: {key}")
+    _upsert(db, business_id, key, enabled)
     return definition, enabled
 
 

@@ -21,7 +21,7 @@ import uuid
 import pytest
 
 from app.core.partner_auth import build_signing_string, sign
-from tests.helpers import create_category_and_item, enable_feature, register_and_login
+from tests.helpers import create_category_and_item, disable_feature, enable_feature, register_and_login
 
 CHANNEL_PATH = "/api/v1/channels/orders"
 
@@ -51,7 +51,7 @@ def channel(client, db_session):
     """A fully provisioned channel: owner, enabled module, menu item, key,
     and a mapping for the partner's own item reference."""
     owner = register_and_login(client, db_session, business_name=f"Partner Biz {uuid.uuid4().hex[:6]}")
-    enable_feature(client, owner["headers"], "PARTNER_CHANNEL")
+    enable_feature(client, db_session, owner, "PARTNER_CHANNEL")
     _category, item = create_category_and_item(client, owner["headers"], price=250.0)
 
     resp = client.post("/api/v1/partner-channels", json={"name": "Sweet Home site"}, headers=owner["headers"])
@@ -137,7 +137,7 @@ def test_channel_cannot_reach_another_business(client, db_session, channel):
     """Business B provisions its own channel and maps its own item. B's
     credential must not be able to order A's item, even by ref name."""
     other = register_and_login(client, db_session, business_name=f"Other Biz {uuid.uuid4().hex[:6]}")
-    enable_feature(client, other["headers"], "PARTNER_CHANNEL")
+    enable_feature(client, db_session, other, "PARTNER_CHANNEL")
     create_category_and_item(client, other["headers"], price=999.0)
 
     resp = client.post("/api/v1/partner-channels", json={"name": "Other site"}, headers=other["headers"])
@@ -283,14 +283,10 @@ def test_rotating_the_secret_invalidates_the_old_one(client, channel):
     assert _post(client, channel["key_id"], new_secret, ORDER).status_code == 201
 
 
-def test_disabling_the_module_stops_an_already_issued_key(client, channel):
+def test_disabling_the_module_stops_an_already_issued_key(client, db_session, channel):
     """Two independent gates: the credential exists, but the business has
     switched inbound submission off."""
-    resp = client.put(
-        "/api/v1/settings/features/PARTNER_CHANNEL",
-        json={"enabled": False},
-        headers=channel["owner"]["headers"],
-    )
+    resp = disable_feature(client, db_session, channel["owner"], "PARTNER_CHANNEL")
     assert resp.status_code == 200
 
     resp = _post(client, channel["key_id"], channel["secret"], ORDER)

@@ -1,7 +1,8 @@
-"""Authentication business logic. Kept separate from app/api/auth.py so it
-can be unit-exercised and reused (e.g. by the seed script).
+"""Authentication business logic for a business's own staff. Kept separate
+from app/api/auth.py so it can be unit-exercised and reused. Business
+provisioning lives in app.services.platform_service now, not here — see
+that module for why (there is no self-registration any more).
 """
-import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -11,152 +12,20 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.security import (
     create_access_token,
-    generate_numeric_code,
     generate_url_safe_token,
     hash_password,
     hash_token,
     refresh_token_expiry,
     verify_password,
 )
-from app.models.business import Business, BusinessSettings
-from app.models.enums import ALWAYS_ON_FEATURES, FeatureModule, UserRole
-from app.models.feature_flag import FeatureFlag
-from app.models.user import EmailVerificationCode, PasswordResetToken, RefreshToken, User
+from app.models.user import PasswordResetToken, RefreshToken, User
 from app.services import audit_service
 from app.services.email_service import email_service
-from app.utils.slugify import unique_slug
 
 settings = get_settings()
 
-EMAIL_VERIFICATION_EXPIRE_MINUTES = 15
 PASSWORD_RESET_EXPIRE_MINUTES = 30
-RESEND_VERIFICATION_COOLDOWN_SECONDS = 60
 PASSWORD_RESET_COOLDOWN_SECONDS = 60
-
-
-def register_business(db: Session, payload) -> User:
-    existing = db.query(User).filter(
-        or_(User.email == payload.email.lower(), User.mobile == payload.mobile)
-    ).first()
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="An account with this email or mobile number already exists",
-        )
-
-    slug = unique_slug(db, Business, payload.business_name)
-
-    business = Business(name=payload.business_name, slug=slug, business_type=payload.business_type)
-    db.add(business)
-    db.flush()
-
-    db.add(BusinessSettings(business_id=business.id))
-
-    for module in FeatureModule:
-        db.add(
-            FeatureFlag(
-                business_id=business.id,
-                module=module,
-                enabled=module in ALWAYS_ON_FEATURES,
-            )
-        )
-
-    owner = User(
-        business_id=business.id,
-        first_name=payload.owner_first_name,
-        last_name=payload.owner_last_name,
-        email=payload.email.lower(),
-        mobile=payload.mobile,
-        password_hash=hash_password(payload.password),
-        role=UserRole.OWNER,
-        is_email_verified=False,
-    )
-    db.add(owner)
-    db.flush()
-
-    _issue_verification_code(db, owner)
-
-    audit_service.record(
-        db, action="business.register", business_id=business.id, user_id=owner.id,
-        resource_type="business", resource_id=str(business.id),
-    )
-
-    return owner
-
-
-def _issue_verification_code(db: Session, user: User) -> str:
-    now = datetime.now(timezone.utc)
-    db.query(EmailVerificationCode).filter(
-        EmailVerificationCode.user_id == user.id,
-        EmailVerificationCode.used_at.is_(None),
-        EmailVerificationCode.invalidated_at.is_(None),
-    ).update({"invalidated_at": now})
-
-    code = generate_numeric_code(6)
-    record = EmailVerificationCode(
-        user_id=user.id,
-        code_hash=hash_token(code),
-        expires_at=now + timedelta(minutes=EMAIL_VERIFICATION_EXPIRE_MINUTES),
-    )
-    db.add(record)
-    db.flush()
-
-    email_service.send_email(
-        to=user.email,
-        subject="Verify your WhyNotGrace account",
-        body=f"Your verification code is {code}. It expires in {EMAIL_VERIFICATION_EXPIRE_MINUTES} minutes.",
-    )
-    return code
-
-
-def resend_verification(db: Session, email: str) -> None:
-    user = db.query(User).filter(User.email == email.lower()).first()
-    if user is None or user.is_email_verified:
-        # Do not reveal account existence / already-verified state.
-        return
-
-    latest = (
-        db.query(EmailVerificationCode)
-        .filter(EmailVerificationCode.user_id == user.id)
-        .order_by(EmailVerificationCode.created_at.desc())
-        .first()
-    )
-    if latest is not None:
-        elapsed = (datetime.now(timezone.utc) - latest.created_at).total_seconds()
-        if elapsed < RESEND_VERIFICATION_COOLDOWN_SECONDS:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Please wait {int(RESEND_VERIFICATION_COOLDOWN_SECONDS - elapsed)}s before requesting another code",
-            )
-
-    _issue_verification_code(db, user)
-
-
-def verify_email(db: Session, email: str, code: str) -> None:
-    user = db.query(User).filter(User.email == email.lower()).first()
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification code")
-
-    now = datetime.now(timezone.utc)
-    record = (
-        db.query(EmailVerificationCode)
-        .filter(
-            EmailVerificationCode.user_id == user.id,
-            EmailVerificationCode.used_at.is_(None),
-            EmailVerificationCode.invalidated_at.is_(None),
-            EmailVerificationCode.expires_at > now,
-        )
-        .order_by(EmailVerificationCode.created_at.desc())
-        .first()
-    )
-    if record is None or record.code_hash != hash_token(code):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification code")
-
-    record.used_at = now
-    user.is_email_verified = True
-    db.flush()
-
-    audit_service.record(db, action="auth.email_verified", business_id=user.business_id, user_id=user.id)
 
 
 def _lockout_message(attempts_remaining: int) -> str:
@@ -307,7 +176,7 @@ def request_password_reset(db: Session, email: str) -> None:
     if user is None:
         return  # Never reveal whether the account exists.
 
-    # Rate-limit: unlike resend_verification, this must never surface a 429
+    # Rate-limit: this must never surface a 429
     # (a different response for "exists and just requested" vs. "doesn't
     # exist" would itself leak account existence), so an over-cooldown
     # request silently no-ops — no new token, no email — while still

@@ -87,12 +87,7 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
-        {t("auth.login.noAccount")}{" "}
-        <Link to="/register" className="font-semibold text-brand-700 hover:underline">
-          {t("auth.login.registerLink")}
-        </Link>
-      </p>
+      <p className="mt-6 text-center text-sm text-slate-500">{t("auth.login.noAccount")}</p>
     </Card>
   );
 }

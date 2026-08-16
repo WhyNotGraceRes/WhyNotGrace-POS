@@ -39,6 +39,15 @@ def get_current_user(
     if payload.get("type") != TokenType.ACCESS.value:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type")
 
+    # A platform-staff token (see app.core.platform_dependencies) is a
+    # different principal entirely and must never resolve to a business
+    # User, even though its business_id claim is None the same way an
+    # unusual business token might be. This is the hard half of the wall —
+    # platform_dependencies.get_current_platform_user is the other half,
+    # requiring the claim rather than merely tolerating its absence.
+    if payload.get("actor") == "platform":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not a business account")
+
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
@@ -61,8 +70,15 @@ def get_current_business(
     return business
 
 
-def get_current_business_id(current_user: User = Depends(get_current_user)) -> uuid.UUID:
-    return current_user.business_id
+def get_current_business_id(business: Business = Depends(get_current_business)) -> uuid.UUID:
+    # Routed through get_current_business (not current_user.business_id
+    # directly) so the is_active check applies here too. Almost every
+    # business-scoped endpoint depends on this function rather than
+    # get_current_business itself, so this was previously the gap that made
+    # Business.is_active a check only a handful of routes actually honoured
+    # — a platform admin suspending a business would not, on its own, have
+    # blocked that business's dashboard at all.
+    return business.id
 
 
 def require_roles(*allowed_roles: UserRole) -> Callable[[User], User]:

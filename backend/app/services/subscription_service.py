@@ -1,50 +1,48 @@
-"""The business's own ₹699/month subscription to the WhyNotGrace platform.
+"""A business's own subscription to the WhyNotGrace platform.
 
-CRITICAL: always paid via the platform's own global Razorpay credentials
-(settings.razorpay_key_id/secret), NEVER a business's connected Razorpay
-credentials (app.services.payment_service._resolve_razorpay_credentials)
-— that resolver is for a business charging ITS OWN customers, which has
-nothing to do with the business paying the platform. Mixing these up
-would be a real security/business-logic bug, not a cosmetic one.
+This used to be flat self-serve checkout (₹699/month via the platform's
+global Razorpay). It is now platform-managed: WhyNotGrace staff decide the
+plan and price per client and provision/renew it directly (see
+app.api.platform.subscriptions) — there is no self-checkout any more, and
+no single default plan, so PLAN_NAME/PLAN_AMOUNT-style constants that used
+to live here are gone along with the checkout/verify functions that read
+them.
 
-There is exactly one plan today (see PLAN_*). No amount is ever accepted
-from the client — the server decides the charge every time, same rule as
-every other payment path in this codebase.
+try_activate_by_provider_order_id and _activate_from_payment are kept
+dormant: app.services.payment_service's shared Razorpay webhook dispatcher
+still calls the former to check whether an incoming payment belongs to a
+(now-unreachable-in-practice) legacy SubscriptionPayment before concluding
+it's not a restaurant-bill payment either. Nothing can create a new
+SubscriptionPayment any more, so this path only matters for anything still
+in flight from before this change, and costs nothing to leave as a no-op
+once those clear.
 """
 import calendar
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.config import get_settings
 from app.models.enums import PaymentStatus, SubscriptionStatus
 from app.models.subscription import Subscription, SubscriptionPayment
-from app.services.payments.base import PaymentProviderError, PaymentProviderNotConfigured
-from app.services.payments.razorpay_provider import razorpay_provider
 
-PLAN_NAME = "WHYNOTGRACE_MONTHLY"
-PLAN_AMOUNT = 699.00
-PLAN_CURRENCY = "INR"
-PLAN_INTERVAL = "monthly"
+DEFAULT_CURRENCY = "INR"
 
-
-def _platform_credentials() -> dict[str, str | None]:
-    settings = get_settings()
-    return {
-        "key_id": settings.razorpay_key_id,
-        "key_secret": settings.razorpay_key_secret,
-        "webhook_secret": settings.razorpay_webhook_secret,
-    }
+# How long a lapsed plan keeps working (with a warning) before it's
+# suspended. Confirmed with the client: 3 days from current_period_end,
+# then blocked until platform staff renews — see renew_plan for why
+# renewing is also the only reactivation path.
+GRACE_PERIOD_DAYS = 3
 
 
-def _add_one_month(dt: datetime) -> datetime:
-    """Calendar-month add with end-of-month clamping (Jan 31 -> Feb 28/29),
-    stdlib only — no new dependency for something this small.
+def _add_months(dt: datetime, months: int) -> datetime:
+    """Calendar-month add with end-of-month clamping (Jan 31 + 1 -> Feb
+    28/29), stdlib only.
     """
-    year = dt.year + (dt.month // 12)
-    month = dt.month % 12 + 1
+    total = dt.month - 1 + months
+    year = dt.year + total // 12
+    month = total % 12 + 1
     day = min(dt.day, calendar.monthrange(year, month)[1])
     return dt.replace(year=year, month=month, day=day)
 
@@ -53,83 +51,125 @@ def _get_subscription_row(db: Session, business_id: uuid.UUID) -> Subscription |
     return db.query(Subscription).filter(Subscription.business_id == business_id).first()
 
 
-def _apply_lazy_expiry(subscription: Subscription) -> None:
-    """A subscription is only ever transitioned to EXPIRED lazily, on read —
-    there is no background job in this deployment to sweep for expiries.
-    Mutates in place; caller flushes. Honest by construction: nothing ever
-    reports ACTIVE past current_period_end.
+def _get_subscription_or_404(db: Session, business_id: uuid.UUID) -> Subscription:
+    subscription = _get_subscription_row(db, business_id)
+    if subscription is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No subscription for this business yet")
+    return subscription
+
+
+def _apply_lazy_status(subscription: Subscription) -> None:
+    """ACTIVE -> GRACE -> SUSPENDED, applied lazily on read — there is no
+    background job in this deployment to sweep for lapses. Mutates in
+    place; caller flushes.
+
+    Runs for ACTIVE *and* GRACE (not just ACTIVE) so a subscription already
+    sitting in GRACE keeps getting re-evaluated on each read and can still
+    escalate to SUSPENDED once the grace window passes — the single-shot
+    "only from ACTIVE" version of this check would freeze at GRACE forever.
     """
-    if subscription.status == SubscriptionStatus.ACTIVE and subscription.current_period_end is not None:
-        if subscription.current_period_end < datetime.now(timezone.utc):
-            subscription.status = SubscriptionStatus.EXPIRED
+    if subscription.status not in (SubscriptionStatus.ACTIVE, SubscriptionStatus.GRACE):
+        return
+    if subscription.current_period_end is None:
+        return
+
+    now = datetime.now(timezone.utc)
+    grace_deadline = subscription.current_period_end + timedelta(days=GRACE_PERIOD_DAYS)
+
+    if now > grace_deadline:
+        subscription.status = SubscriptionStatus.SUSPENDED
+    elif now > subscription.current_period_end:
+        subscription.status = SubscriptionStatus.GRACE
 
 
 def get_subscription(db: Session, business_id: uuid.UUID) -> Subscription | None:
     subscription = _get_subscription_row(db, business_id)
     if subscription is not None:
-        _apply_lazy_expiry(subscription)
+        _apply_lazy_status(subscription)
         db.flush()
     return subscription
 
 
-def create_checkout(db: Session, business_id: uuid.UUID) -> tuple[SubscriptionPayment, str, str | None]:
-    """Creates (or reuses) the business's Subscription row and a new
-    SubscriptionPayment for one ₹699 charge, then a Razorpay order for it.
-    Returns (subscription_payment, provider_order_id, key_id).
+def provision_plan(
+    db: Session, business_id: uuid.UUID, *, plan_name: str, amount: float, billing_interval: str, months: int,
+    platform_user_id: uuid.UUID,
+) -> Subscription:
+    """Sets (or replaces) a business's plan and starts a fresh period from
+    now. Distinct from renew_plan: this is for a new plan or changing an
+    existing one's terms, not extending the current one — see renew_plan
+    for why a mid-cycle change should go through provision, not renew.
     """
     subscription = _get_subscription_row(db, business_id)
     now = datetime.now(timezone.utc)
+    period_end = _add_months(now, months)
 
     if subscription is None:
         subscription = Subscription(
-            business_id=business_id, plan_name=PLAN_NAME, amount=PLAN_AMOUNT, currency=PLAN_CURRENCY,
-            billing_interval=PLAN_INTERVAL, status=SubscriptionStatus.PENDING,
+            business_id=business_id, plan_name=plan_name, amount=amount, currency=DEFAULT_CURRENCY,
+            billing_interval=billing_interval, status=SubscriptionStatus.ACTIVE,
+            current_period_start=now, current_period_end=period_end,
         )
         db.add(subscription)
+    else:
+        subscription.plan_name = plan_name
+        subscription.amount = amount
+        subscription.currency = DEFAULT_CURRENCY
+        subscription.billing_interval = billing_interval
+        subscription.status = SubscriptionStatus.ACTIVE
+        subscription.current_period_start = now
+        subscription.current_period_end = period_end
+        subscription.cancelled_at = None
+    db.flush()
+    return subscription
+
+
+def renew_plan(db: Session, business_id: uuid.UUID, *, months: int, platform_user_id: uuid.UUID) -> Subscription:
+    """Extends the current plan and is the only reactivation path — there
+    is no separate "un-suspend" action.
+
+    base = max(now, current_period_end) so paying early never loses the
+    unused remainder of the current period, and paying late (from GRACE or
+    already SUSPENDED) simply starts the new period from today rather than
+    stacking it after a lapsed end date. One formula covers on-time
+    renewal, early renewal, and reactivation-after-suspension — confirmed
+    with the client as the intended behaviour ("days will be added to
+    existing remaining days").
+    """
+    subscription = _get_subscription_or_404(db, business_id)
+    now = datetime.now(timezone.utc)
+    base = subscription.current_period_end if subscription.current_period_end and subscription.current_period_end > now else now
+
+    if subscription.current_period_start is None:
+        subscription.current_period_start = now
+    subscription.current_period_end = _add_months(base, months)
+    subscription.status = SubscriptionStatus.ACTIVE
+    db.flush()
+    return subscription
+
+
+def suspend_plan(db: Session, business_id: uuid.UUID, *, platform_user_id: uuid.UUID) -> Subscription:
+    """A manual override for support/fraud cases — immediate, not tied to
+    the grace-period math. renew_plan is still the only way back in.
+    """
+    subscription = _get_subscription_or_404(db, business_id)
+    subscription.status = SubscriptionStatus.SUSPENDED
+    db.flush()
+    return subscription
+
+
+def cancel_plan(db: Session, business_id: uuid.UUID, *, platform_user_id: uuid.UUID) -> Subscription:
+    """Ends the relationship deliberately — distinct from SUSPENDED, which
+    is a billing lapse the business can still resolve by paying.
+    """
+    subscription = _get_subscription_or_404(db, business_id)
+    if subscription.status != SubscriptionStatus.CANCELLED:
+        subscription.status = SubscriptionStatus.CANCELLED
+        subscription.cancelled_at = datetime.now(timezone.utc)
         db.flush()
-    else:
-        _apply_lazy_expiry(subscription)
-
-    # Renewing before the current period ends extends from the existing
-    # end date (never shortens what's already been paid for); anything
-    # else (first subscribe, expired, cancelled, failed) starts fresh now.
-    if subscription.status == SubscriptionStatus.ACTIVE and subscription.current_period_end is not None:
-        period_start = subscription.current_period_end
-    else:
-        period_start = now
-    period_end = _add_one_month(period_start)
-
-    payment = SubscriptionPayment(
-        business_id=business_id, subscription_id=subscription.id, status=PaymentStatus.PENDING,
-        amount=PLAN_AMOUNT, currency=PLAN_CURRENCY, provider="RAZORPAY",
-        period_start=period_start, period_end=period_end,
-    )
-    db.add(payment)
-    db.flush()
-
-    credentials = _platform_credentials()
-    try:
-        provider_order = razorpay_provider.create_order(
-            credentials=credentials, amount_paise=int(round(PLAN_AMOUNT * 100)), currency=PLAN_CURRENCY,
-            receipt=f"sub-{payment.id}",
-        )
-    except PaymentProviderNotConfigured as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
-    except PaymentProviderError as exc:
-        payment.status = PaymentStatus.FAILED
-        db.commit()
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Payment provider error") from exc
-
-    payment.provider_order_id = provider_order.provider_order_id
-    db.flush()
-
-    return payment, provider_order.provider_order_id, credentials.get("key_id")
+    return subscription
 
 
 def _activate_from_payment(db: Session, payment: SubscriptionPayment) -> None:
-    """Shared by the direct /verify call and webhook activation — both are
-    just "a SubscriptionPayment's signature/webhook checked out, apply it."
-    """
     payment.status = PaymentStatus.SUCCESS
     payment.verified_at = datetime.now(timezone.utc)
     db.flush()
@@ -141,57 +181,13 @@ def _activate_from_payment(db: Session, payment: SubscriptionPayment) -> None:
     db.flush()
 
 
-def verify_checkout(db: Session, business_id: uuid.UUID, payload) -> Subscription:
-    payment = db.query(SubscriptionPayment).filter(
-        SubscriptionPayment.id == payload.subscription_payment_id, SubscriptionPayment.business_id == business_id,
-    ).first()
-    if payment is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subscription payment not found")
-
-    if payment.status == PaymentStatus.SUCCESS:
-        return db.get(Subscription, payment.subscription_id)  # idempotent: already verified
-
-    if payment.provider_order_id != payload.razorpay_order_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Order ID mismatch")
-
-    credentials = _platform_credentials()
-    valid = razorpay_provider.verify_payment_signature(
-        credentials=credentials,
-        provider_order_id=payload.razorpay_order_id,
-        provider_payment_id=payload.razorpay_payment_id,
-        signature=payload.razorpay_signature,
-    )
-    if not valid:
-        payment.status = PaymentStatus.FAILED
-        subscription = db.get(Subscription, payment.subscription_id)
-        subscription.status = SubscriptionStatus.PAYMENT_FAILED
-        db.commit()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Payment signature verification failed")
-
-    payment.provider_payment_id = payload.razorpay_payment_id
-    payment.provider_signature = payload.razorpay_signature
-    _activate_from_payment(db, payment)
-    return db.get(Subscription, payment.subscription_id)
-
-
-def cancel_subscription(db: Session, business_id: uuid.UUID) -> Subscription:
-    subscription = _get_subscription_row(db, business_id)
-    if subscription is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No subscription to cancel")
-    if subscription.status != SubscriptionStatus.CANCELLED:
-        subscription.status = SubscriptionStatus.CANCELLED
-        subscription.cancelled_at = datetime.now(timezone.utc)
-        db.flush()
-    return subscription
-
-
 def try_activate_by_provider_order_id(
     db: Session, provider_order_id: str, business_id: uuid.UUID | None, provider_payment_id: str | None
 ) -> SubscriptionPayment | None:
-    """Webhook path: mirrors payment_service's restaurant-Payment lookup,
-    for the case where the incoming order_id belongs to a subscription
-    charge rather than a restaurant bill. Returns the activated row, or
-    None if no matching (and still-pending) subscription payment exists.
+    """See the module docstring: dormant now that nothing creates new
+    SubscriptionPayment rows, kept only so the shared webhook dispatcher in
+    payment_service.py doesn't need special-casing for something that may
+    still be in flight from before this change.
     """
     query = db.query(SubscriptionPayment).filter(SubscriptionPayment.provider_order_id == provider_order_id)
     if business_id is not None:

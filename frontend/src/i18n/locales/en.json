@@ -27,38 +27,8 @@
       "passwordPlaceholder": "Your password",
       "forgotPassword": "Forgot password?",
       "submit": "Log in",
-      "noAccount": "Don't have a business account?",
-      "registerLink": "Register your business",
+      "noAccount": "Don't have a business account? Contact WhyNotGrace to get set up.",
       "success": "Logged in successfully."
-    },
-    "register": {
-      "title": "Register your business",
-      "subtitle": "Set up WhyNotGrace for your restaurant or hotel in minutes.",
-      "businessName": "Business name",
-      "businessType": "Business type",
-      "submit": "Create account",
-      "haveAccount": "Already have an account?",
-      "loginLink": "Log in",
-      "success": "Registration successful. Check your email for a verification code.",
-      "businessTypes": {
-        "RESTAURANT": "Restaurant",
-        "HOTEL": "Hotel",
-        "RESORT": "Resort",
-        "LODGE": "Lodge",
-        "LOUNGE": "Lounge",
-        "CAFE": "Cafe",
-        "CLOUD_KITCHEN": "Cloud kitchen",
-        "OTHER": "Other"
-      }
-    },
-    "verifyEmail": {
-      "title": "Verify your email",
-      "subtitle": "Enter the 6-digit code we sent to {{email}}.",
-      "codeLabel": "Verification code",
-      "submit": "Verify email",
-      "resend": "Didn't get a code? Resend",
-      "resendCooldown": "You can resend in {{seconds}}s",
-      "success": "Email verified. You can now log in."
     },
     "forgotPassword": {
       "title": "Reset your password",
@@ -332,34 +302,30 @@
     "channel": "Channel"
   },
   "subscription": {
-    "subtitle": "Your business's WhyNotGrace platform subscription.",
+    "subtitle": "Your business's WhyNotGrace platform plan.",
     "loadError": "Couldn't load your subscription.",
-    "planName": "WhyNotGrace Monthly",
+    "noPlan": "No plan set yet",
     "month": "month",
     "startedOn": "Started on",
     "nextBillingDate": "Next billing date",
-    "expiredOn": "Expired on",
     "cancelledOn": "Cancelled on",
-    "notSubscribedYet": "You're not subscribed yet. Subscribe to keep using WhyNotGrace.",
-    "lastPaymentFailed": "Your last payment attempt failed. Try again below.",
-    "subscribeNow": "Subscribe — ₹699/month",
-    "renewNow": "Renew — ₹699/month",
-    "cancelSubscription": "Cancel subscription",
-    "confirmCancel": "Cancel your WhyNotGrace subscription? You can resubscribe any time.",
-    "cancelled": "Subscription cancelled.",
-    "activated": "Subscription activated. Welcome to WhyNotGrace!",
-    "notConfigured": "Online payments aren't set up on this server yet. Contact support to subscribe.",
-    "checkoutScriptFailed": "Could not load the payment window. Check your connection and try again.",
-    "checkoutDescription": "WhyNotGrace platform subscription — ₹699/month",
-    "checkoutDismissed": "Payment window closed — nothing was charged.",
-    "verificationInconclusive": "Payment verification didn't confirm an active subscription. Please contact support before retrying.",
+    "suspendedNotice": "Your plan is suspended for non-payment. Staff cannot use the dashboard until WhyNotGrace reactivates it.",
+    "graceNotice": "Your plan payment is overdue. The dashboard keeps working for a few more days, then locks until it's renewed.",
+    "notConfiguredNotice": "WhyNotGrace hasn't set up a plan for this business yet.",
+    "contactToChange": "Plans are set by WhyNotGrace, not self-service — contact them to subscribe, change, or renew.",
     "status": {
       "NOT_CONFIGURED": "Not subscribed",
       "PENDING": "Pending",
       "ACTIVE": "Active",
+      "GRACE": "Payment overdue",
+      "SUSPENDED": "Suspended",
       "PAYMENT_FAILED": "Payment failed",
       "CANCELLED": "Cancelled",
       "EXPIRED": "Expired"
+    },
+    "banner": {
+      "grace": "Your subscription payment is overdue. Renew soon to avoid being locked out.",
+      "suspended": "Your subscription is suspended. Contact WhyNotGrace to reactivate your dashboard."
     }
   },
   "kotStatus": {
@@ -602,10 +568,11 @@
     "accessReset": "Access reset — all sessions revoked."
   },
   "featureFlags": {
-    "subtitle": "Toggle optional modules for this business. Every toggle here is enforced by the backend, not just hidden in the UI.",
+    "subtitle": "What this business is entitled to under its plan. Set by WhyNotGrace, not editable here.",
     "loadError": "Couldn't load feature flags.",
-    "enabled": "{{module}} enabled.",
-    "disabled": "{{module}} disabled."
+    "readOnlyNotice": "These are part of your plan. Contact WhyNotGrace to change what's included.",
+    "on": "On",
+    "off": "Off"
   },
   "featureModule": {
     "CORE_POS": "Core POS",

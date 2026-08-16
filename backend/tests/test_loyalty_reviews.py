@@ -3,7 +3,7 @@ from tests.helpers import create_category_and_item, create_table, enable_feature
 
 def test_loyalty_rule_fires_reward_after_order_count_threshold(client, db_session):
     owner = register_and_login(client, db_session, business_name="Loyalty Biz 1")
-    enable_feature(client, owner["headers"], "LOYALTY")
+    enable_feature(client, db_session, owner, "LOYALTY")
     _, item = create_category_and_item(client, owner["headers"], price=100)
     table = create_table(client, owner["headers"])
 
@@ -61,7 +61,7 @@ def test_review_requires_feature_flag(client, db_session):
     )
     assert resp.status_code == 403
 
-    enable_feature(client, owner["headers"], "REVIEWS")
+    enable_feature(client, db_session, owner, "REVIEWS")
     resp = client.post(
         f"/api/v1/reviews/public/{slug}",
         json={"first_name": "Diner", "mobile": "9111111111", "rating": 5, "comment": "Great!"},

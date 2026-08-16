@@ -60,7 +60,7 @@ def _place_and_pay_order(client, headers, *, item_id, customer_id, table_id):
 
 def test_real_loyalty_earn_and_redeem_lifecycle(client, db_session):
     owner = register_and_login(client, db_session, business_name="Loyalty E2E Biz 1")
-    enable_feature(client, owner["headers"], "LOYALTY")
+    enable_feature(client, db_session, owner, "LOYALTY")
     _, item = create_category_and_item(client, owner["headers"], price=500)
     customer = _create_customer(client, owner["headers"])
     rule = _create_rule(client, owner["headers"], threshold=1)
@@ -107,7 +107,7 @@ def test_real_loyalty_earn_and_redeem_lifecycle(client, db_session):
 
 def test_loyalty_second_qualifying_order_earns_a_second_independent_reward(client, db_session):
     owner = register_and_login(client, db_session, business_name="Loyalty E2E Biz 2")
-    enable_feature(client, owner["headers"], "LOYALTY")
+    enable_feature(client, db_session, owner, "LOYALTY")
     _, item = create_category_and_item(client, owner["headers"], price=300)
     customer = _create_customer(client, owner["headers"])
     _create_rule(client, owner["headers"], threshold=1)
@@ -130,8 +130,8 @@ def test_loyalty_second_qualifying_order_earns_a_second_independent_reward(clien
 def test_loyalty_redemption_is_tenant_isolated(client, db_session):
     owner_a = register_and_login(client, db_session, business_name="Loyalty E2E Biz 3a")
     owner_b = register_and_login(client, db_session, business_name="Loyalty E2E Biz 3b")
-    enable_feature(client, owner_a["headers"], "LOYALTY")
-    enable_feature(client, owner_b["headers"], "LOYALTY")
+    enable_feature(client, db_session, owner_a, "LOYALTY")
+    enable_feature(client, db_session, owner_b, "LOYALTY")
     _, item_a = create_category_and_item(client, owner_a["headers"], price=400)
     customer_a = _create_customer(client, owner_a["headers"])
     _create_rule(client, owner_a["headers"], threshold=1)

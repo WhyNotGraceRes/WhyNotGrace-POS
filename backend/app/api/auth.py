@@ -1,4 +1,11 @@
-from fastapi import APIRouter, Depends, Request, status
+"""Business staff login. There is no self-registration here — a business
+only exists because a platform admin provisioned it (see
+app.api.platform.businesses), and the owner account that creates is active
+and pre-verified from the start. Email verification accordingly has no
+remaining caller and was removed along with /register; see
+app.services.auth_service if that history is needed again.
+"""
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user
@@ -12,13 +19,9 @@ from app.schemas.auth import (
     LoginRequest,
     LogoutRequest,
     RefreshRequest,
-    RegisterRequest,
-    RegisterResponse,
-    ResendVerificationRequest,
     ResetPasswordRequest,
     TokenPairResponse,
     UserOut,
-    VerifyEmailRequest,
 )
 from app.services import auth_service
 from app.models.user import User
@@ -28,32 +31,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 def _client_ip(request: Request) -> str | None:
     return request.client.host if request.client else None
-
-
-@router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
-@limiter.limit("5/hour")
-def register(request: Request, payload: RegisterRequest, db: Session = Depends(get_db)):
-    with transaction(db):
-        owner = auth_service.register_business(db, payload)
-    return RegisterResponse(business_id=owner.business_id, user_id=owner.id, email=owner.email)
-
-
-@router.post("/verify-email", response_model=GenericMessageResponse)
-@limiter.limit("10/minute")
-def verify_email(request: Request, payload: VerifyEmailRequest, db: Session = Depends(get_db)):
-    with transaction(db):
-        auth_service.verify_email(db, payload.email, payload.code)
-    return GenericMessageResponse(message="Email verified successfully. You can now log in.")
-
-
-@router.post("/resend-verification", response_model=GenericMessageResponse)
-@limiter.limit("5/minute")
-def resend_verification(request: Request, payload: ResendVerificationRequest, db: Session = Depends(get_db)):
-    with transaction(db):
-        auth_service.resend_verification(db, payload.email)
-    return GenericMessageResponse(
-        message="If an account with that email exists and is not yet verified, a new code has been sent."
-    )
 
 
 @router.post("/login", response_model=TokenPairResponse)

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class AuditLogOut(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID | None
+    platform_user_id: uuid.UUID | None
     action: str
     resource_type: str | None
     resource_id: str | None

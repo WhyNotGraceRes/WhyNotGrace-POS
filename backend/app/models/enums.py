@@ -22,6 +22,15 @@ class UserRole(StrEnum):
     DELIVERY = "DELIVERY"
 
 
+class PlatformRole(StrEnum):
+    """Roles for WhyNotGrace's own staff — a PlatformUser, never a business
+    User (see app.models.platform_user). One value today; the enum exists
+    so a lower-privilege platform role (e.g. support, read-only) can be
+    added later without restructuring anything that depends on it.
+    """
+    SUPERADMIN = "SUPERADMIN"
+
+
 class FeatureModule(StrEnum):
     CORE_POS = "CORE_POS"
     QR_ORDERING = "QR_ORDERING"
@@ -188,3 +197,11 @@ class SubscriptionStatus(StrEnum):
     PAYMENT_FAILED = "PAYMENT_FAILED"
     CANCELLED = "CANCELLED"
     EXPIRED = "EXPIRED"
+    # Past current_period_end but within the grace window: still fully
+    # working, shown a warning. Computed lazily, same as EXPIRED above —
+    # see subscription_service._apply_lazy_status.
+    GRACE = "GRACE"
+    # Past the grace window with no renewal: dashboard login is blocked
+    # until platform staff renews or reactivates. Distinct from CANCELLED,
+    # which is a deliberate platform decision, not a billing lapse.
+    SUSPENDED = "SUSPENDED"

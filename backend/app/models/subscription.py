@@ -1,8 +1,10 @@
-"""The business's own subscription to the WhyNotGrace platform (₹699/month)
-— the platform being paid, as opposed to app.models.integration.Integration
+"""A business's subscription to the WhyNotGrace platform — the platform
+being paid, as opposed to app.models.integration.Integration
 (provider=RAZORPAY), which is a business's own account for charging ITS
-customers. Always paid via the platform's global Razorpay credentials,
-never a business's connected ones — see app/services/subscription_service.py.
+customers. Set and renewed by platform staff (see
+app.services.subscription_service and app.api.platform.subscriptions), not
+self-checkout — plan_name/amount are whatever WhyNotGrace agreed with that
+client, not a fixed price.
 """
 import uuid
 from datetime import datetime
@@ -37,9 +39,15 @@ class Subscription(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 
 class SubscriptionPayment(Base, UUIDPrimaryKeyMixin, TimestampMixin):
-    """One row per ₹699 charge attempt — mirrors app.models.payment.Payment's
-    shape (provider_order_id/provider_payment_id/provider_signature) so the
-    same Razorpay verification code path can be reused unmodified.
+    """A record of a self-checkout charge attempt from before subscriptions
+    became platform-managed. Nothing creates new rows here any more (see
+    app.services.subscription_service's module docstring) — kept only so
+    any payment still in flight from before that change can finish
+    resolving, and so the historical record isn't deleted out from under
+    itself. Mirrors app.models.payment.Payment's shape
+    (provider_order_id/provider_payment_id/provider_signature) so the same
+    Razorpay verification code path could be reused unmodified while it
+    was live.
     """
     __tablename__ = "subscription_payments"
 
@@ -59,9 +67,8 @@ class SubscriptionPayment(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     provider_signature: Mapped[str | None] = mapped_column(String(255), nullable=True)
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    # The period THIS payment buys, decided at checkout time (see
-    # subscription_service.create_checkout) so verification/webhook
-    # activation only ever has to copy these onto the Subscription row,
-    # never recompute them.
+    # The period THIS payment bought, decided at checkout time so
+    # verification/webhook activation only ever had to copy these onto the
+    # Subscription row, never recompute them.
     period_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

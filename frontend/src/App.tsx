@@ -5,14 +5,13 @@ import { Toaster } from "react-hot-toast";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { AppLayout } from "@/layouts/AppLayout";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
+import { PlatformProtectedRoute } from "@/routes/PlatformProtectedRoute";
 import { RoleRoute } from "@/routes/RoleRoute";
 import { FeatureRoute } from "@/routes/FeatureRoute";
 import { NotFoundPage } from "@/routes/NotFoundPage";
 import { ComingSoonPage } from "@/routes/ComingSoonPage";
 
 import { LoginPage } from "@/features/auth/LoginPage";
-import { RegisterPage } from "@/features/auth/RegisterPage";
-import { VerifyEmailPage } from "@/features/auth/VerifyEmailPage";
 import { ForgotPasswordPage } from "@/features/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/features/auth/ResetPasswordPage";
 import { HomePage } from "@/features/home/HomePage";
@@ -37,6 +36,11 @@ import { SubscriptionPage } from "@/features/subscription/SubscriptionPage";
 import { QrLayout } from "@/features/qr/QrLayout";
 import { QrOrderingPage } from "@/features/qr/QrOrderingPage";
 import { QrOrderStatusPage } from "@/features/qr/QrOrderStatusPage";
+
+import { PlatformLoginPage } from "@/features/platform/PlatformLoginPage";
+import { PlatformLayout } from "@/features/platform/PlatformLayout";
+import { BusinessesListPage } from "@/features/platform/BusinessesListPage";
+import { BusinessDetailPage } from "@/features/platform/BusinessDetailPage";
 
 import { NAV_ITEMS } from "@/config/navigation";
 
@@ -69,10 +73,19 @@ export function App() {
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+        </Route>
+
+        {/* WhyNotGrace's own staff — a structurally separate session from
+            everything above (see stores/platformAuthStore.ts), its own
+            login, its own shell, no restaurant sidebar/nav. */}
+        <Route path="/platform/login" element={<PlatformLoginPage />} />
+        <Route element={<PlatformProtectedRoute />}>
+          <Route element={<PlatformLayout />}>
+            <Route path="/platform/businesses" element={<BusinessesListPage />} />
+            <Route path="/platform/businesses/:businessId" element={<BusinessDetailPage />} />
+          </Route>
         </Route>
 
         {/* Public, unauthenticated customer QR ordering — never behind

@@ -42,5 +42,6 @@ from app.models.refund import Refund  # noqa: F401
 from app.models.shift import ShiftSession  # noqa: F401
 from app.models.toggle import BusinessToggle  # noqa: F401
 from app.models.partner import PartnerChannel, PartnerMenuMap, PartnerRequestNonce  # noqa: F401
+from app.models.platform_user import PlatformUser, PlatformRefreshToken  # noqa: F401
 
 __all__ = ["Base"]

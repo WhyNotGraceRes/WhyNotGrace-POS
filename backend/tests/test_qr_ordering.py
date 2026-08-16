@@ -3,7 +3,7 @@ from tests.helpers import create_category_and_item, create_table, enable_feature
 
 def test_qr_scan_menu_and_order_flow(client, db_session):
     owner = register_and_login(client, db_session, business_name="QR Biz 1")
-    enable_feature(client, owner["headers"], "QR_ORDERING")
+    enable_feature(client, db_session, owner, "QR_ORDERING")
     _, item = create_category_and_item(client, owner["headers"], price=120)
     table = create_table(client, owner["headers"], name="Q1")
 
@@ -38,7 +38,7 @@ def test_qr_scan_menu_and_order_flow(client, db_session):
 
 def test_qr_scan_fails_with_wrong_code(client, db_session):
     owner = register_and_login(client, db_session, business_name="QR Biz 2")
-    enable_feature(client, owner["headers"], "QR_ORDERING")
+    enable_feature(client, db_session, owner, "QR_ORDERING")
     table = create_table(client, owner["headers"], name="Q2")
     biz_resp = client.get("/api/v1/businesses/me", headers=owner["headers"])
     slug = biz_resp.json()["slug"]

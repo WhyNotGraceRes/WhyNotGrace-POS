@@ -1,4 +1,4 @@
-from tests.helpers import create_category_and_item, enable_feature, register_and_login
+from tests.helpers import create_category_and_item, disable_feature, enable_feature, register_and_login
 
 
 def _create_staff_and_login(client, owner_headers, role: str):
@@ -37,7 +37,7 @@ def _create_delivery_order(client, headers, item_id):
 
 def test_create_and_retrieve_delivery_order_exposes_address_and_status(client, db_session):
     owner = register_and_login(client, db_session, business_name="Delivery Biz 1")
-    enable_feature(client, owner["headers"], "DELIVERY")
+    enable_feature(client, db_session, owner, "DELIVERY")
     _, item = create_category_and_item(client, owner["headers"])
 
     order = _create_delivery_order(client, owner["headers"], item["id"])
@@ -52,7 +52,7 @@ def test_create_and_retrieve_delivery_order_exposes_address_and_status(client, d
 
 def test_delivery_status_valid_transition_updates_order_status_too(client, db_session):
     owner = register_and_login(client, db_session, business_name="Delivery Biz 2")
-    enable_feature(client, owner["headers"], "DELIVERY")
+    enable_feature(client, db_session, owner, "DELIVERY")
     _, item = create_category_and_item(client, owner["headers"])
     order = _create_delivery_order(client, owner["headers"], item["id"])
 
@@ -74,7 +74,7 @@ def test_delivery_status_valid_transition_updates_order_status_too(client, db_se
 
 def test_delivery_status_invalid_transition_rejected(client, db_session):
     owner = register_and_login(client, db_session, business_name="Delivery Biz 3")
-    enable_feature(client, owner["headers"], "DELIVERY")
+    enable_feature(client, db_session, owner, "DELIVERY")
     _, item = create_category_and_item(client, owner["headers"])
     order = _create_delivery_order(client, owner["headers"], item["id"])
 
@@ -99,7 +99,7 @@ def test_delivery_status_invalid_transition_rejected(client, db_session):
 
 def test_delivery_status_requires_delivery_role(client, db_session):
     owner = register_and_login(client, db_session, business_name="Delivery Biz 4")
-    enable_feature(client, owner["headers"], "DELIVERY")
+    enable_feature(client, db_session, owner, "DELIVERY")
     _, item = create_category_and_item(client, owner["headers"])
     order = _create_delivery_order(client, owner["headers"], item["id"])
 
@@ -118,12 +118,12 @@ def test_delivery_status_requires_delivery_role(client, db_session):
 
 def test_delivery_status_blocked_when_feature_flag_off(client, db_session):
     owner = register_and_login(client, db_session, business_name="Delivery Biz 5")
-    enable_feature(client, owner["headers"], "DELIVERY")
+    enable_feature(client, db_session, owner, "DELIVERY")
     _, item = create_category_and_item(client, owner["headers"])
     order = _create_delivery_order(client, owner["headers"], item["id"])
 
     # Disable it again after creating the order.
-    resp = client.put("/api/v1/settings/features/DELIVERY", json={"enabled": False}, headers=owner["headers"])
+    resp = disable_feature(client, db_session, owner, "DELIVERY")
     assert resp.status_code == 200
 
     resp = client.put(
@@ -135,8 +135,8 @@ def test_delivery_status_blocked_when_feature_flag_off(client, db_session):
 def test_delivery_orders_are_tenant_isolated(client, db_session):
     owner_a = register_and_login(client, db_session, business_name="Delivery Biz 6a")
     owner_b = register_and_login(client, db_session, business_name="Delivery Biz 6b")
-    enable_feature(client, owner_a["headers"], "DELIVERY")
-    enable_feature(client, owner_b["headers"], "DELIVERY")
+    enable_feature(client, db_session, owner_a, "DELIVERY")
+    enable_feature(client, db_session, owner_b, "DELIVERY")
     _, item_a = create_category_and_item(client, owner_a["headers"])
     order_a = _create_delivery_order(client, owner_a["headers"], item_a["id"])
 
@@ -152,7 +152,7 @@ def test_delivery_orders_are_tenant_isolated(client, db_session):
 
 def test_non_delivery_order_rejects_delivery_status_update(client, db_session):
     owner = register_and_login(client, db_session, business_name="Delivery Biz 7")
-    enable_feature(client, owner["headers"], "DELIVERY")
+    enable_feature(client, db_session, owner, "DELIVERY")
     _, item = create_category_and_item(client, owner["headers"])
     table = client.post(
         "/api/v1/tables", json={"location_type": "TABLE", "name": "T1"}, headers=owner["headers"]

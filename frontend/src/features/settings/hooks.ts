@@ -27,15 +27,6 @@ export function useIsFeatureEnabled(module: FeatureModule): boolean {
   return data?.find((f) => f.module === module)?.enabled ?? false;
 }
 
-export function useUpdateFeatureFlag() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ module, enabled }: { module: FeatureModule; enabled: boolean }) =>
-      featureFlagsApi.update(module, { enabled }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["feature-flags"] }),
-  });
-}
-
 export function useBusinessSettings() {
   return useQuery({
     queryKey: ["business-settings"],

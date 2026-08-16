@@ -9,8 +9,8 @@ import type { components } from "./api";
 export type Schemas = components["schemas"];
 
 // --- Auth ---
-export type RegisterRequest = Schemas["RegisterRequest"];
-export type RegisterResponse = Schemas["RegisterResponse"];
+// No self-registration any more — a business only exists because a
+// platform admin provisioned it, see the Platform section below.
 export type LoginRequest = Schemas["LoginRequest"];
 export type TokenPairResponse = Schemas["TokenPairResponse"];
 export type AccessTokenResponse = Schemas["AccessTokenResponse"];
@@ -18,8 +18,6 @@ export type RefreshRequest = Schemas["RefreshRequest"];
 export type LogoutRequest = Schemas["LogoutRequest"];
 export type ForgotPasswordRequest = Schemas["ForgotPasswordRequest"];
 export type ResetPasswordRequest = Schemas["ResetPasswordRequest"];
-export type VerifyEmailRequest = Schemas["VerifyEmailRequest"];
-export type ResendVerificationRequest = Schemas["ResendVerificationRequest"];
 export type GenericMessageResponse = Schemas["GenericMessageResponse"];
 export type UserOut = Schemas["UserOut"];
 
@@ -34,9 +32,9 @@ export type BusinessUpdateRequest = Schemas["BusinessUpdateRequest"];
 export type BusinessSettingsOut = Schemas["BusinessSettingsOut"];
 export type BusinessSettingsUpdateRequest = Schemas["BusinessSettingsUpdateRequest"];
 
-// --- Feature flags ---
+// --- Feature flags (read-only for a business — see the Platform section
+// below for the write side) ---
 export type FeatureFlagOut = Schemas["FeatureFlagOut"];
-export type FeatureFlagUpdateRequest = Schemas["FeatureFlagUpdateRequest"];
 
 // --- Dashboard ---
 export type DashboardResponse = Schemas["DashboardResponse"];
@@ -212,10 +210,9 @@ export type ConnectCredentialsRequest = Schemas["ConnectCredentialsRequest"];
 // --- Delivery (staff-facing status updates) ---
 export type DeliveryStatusUpdateRequest = Schemas["DeliveryStatusUpdateRequest"];
 
-// --- Subscription (₹699/month platform billing — see backend/app/api/subscription.py) ---
+// --- Subscription (a business's own read-only view of its WhyNotGrace
+// plan — set by platform staff, see the Platform section below) ---
 export type SubscriptionOut = Schemas["SubscriptionOut"];
-export type SubscriptionCheckoutResponse = Schemas["SubscriptionCheckoutResponse"];
-export type SubscriptionVerifyRequest = Schemas["SubscriptionVerifyRequest"];
 
 // --- Audit log ---
 export type AuditLogOut = Schemas["AuditLogOut"];
@@ -297,3 +294,20 @@ export type ShiftOut = Schemas["ShiftOut"];
 export type ShiftReportOut = Schemas["ShiftReportOut"];
 export type OpenShiftRequest = Schemas["OpenShiftRequest"];
 export type CloseShiftRequest = Schemas["CloseShiftRequest"];
+
+// --- Platform (WhyNotGrace's own staff — see backend/app/api/platform/) ---
+export type PlatformRole = Schemas["PlatformRole"];
+export type PlatformLoginRequest = Schemas["PlatformLoginRequest"];
+export type PlatformUserOut = Schemas["PlatformUserOut"];
+export type PlatformTokenPairResponse = Schemas["PlatformTokenPairResponse"];
+export type PlatformRefreshRequest = Schemas["PlatformRefreshRequest"];
+export type PlatformAccessTokenResponse = Schemas["PlatformAccessTokenResponse"];
+export type PlatformLogoutRequest = Schemas["PlatformLogoutRequest"];
+export type ProvisionBusinessRequest = Schemas["ProvisionBusinessRequest"];
+export type ProvisionBusinessResponse = Schemas["ProvisionBusinessResponse"];
+export type PlatformBusinessOut = Schemas["PlatformBusinessOut"];
+export type SetBusinessActiveRequest = Schemas["SetBusinessActiveRequest"];
+export type PlatformFeatureFlagUpdateRequest = Schemas["PlatformFeatureFlagUpdateRequest"];
+export type PlatformToggleUpdateRequest = Schemas["PlatformToggleUpdateRequest"];
+export type ProvisionSubscriptionRequest = Schemas["ProvisionSubscriptionRequest"];
+export type RenewSubscriptionRequest = Schemas["RenewSubscriptionRequest"];

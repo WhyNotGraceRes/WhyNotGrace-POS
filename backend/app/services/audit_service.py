@@ -17,6 +17,7 @@ def record(
     action: str,
     business_id: uuid.UUID | None = None,
     user_id: uuid.UUID | None = None,
+    platform_user_id: uuid.UUID | None = None,
     resource_type: str | None = None,
     resource_id: str | None = None,
     ip_address: str | None = None,
@@ -25,6 +26,7 @@ def record(
     entry = AuditLog(
         business_id=business_id,
         user_id=user_id,
+        platform_user_id=platform_user_id,
         action=action,
         resource_type=resource_type,
         resource_id=str(resource_id) if resource_id is not None else None,

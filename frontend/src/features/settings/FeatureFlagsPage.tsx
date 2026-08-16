@@ -1,35 +1,25 @@
 import { useTranslation } from "react-i18next";
-import { AlertTriangle } from "lucide-react";
-import toast from "react-hot-toast";
+import { AlertTriangle, Check, X } from "lucide-react";
 
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
-import { Switch } from "@/components/ui/Switch";
-import { parseApiError } from "@/api/errors";
-import { useFeatureFlags, useUpdateFeatureFlag } from "@/features/settings/hooks";
-import type { FeatureModule } from "@/types/models";
+import { useFeatureFlags } from "@/features/settings/hooks";
 
-const ALWAYS_ON: FeatureModule[] = ["CORE_POS"];
-
+/** Read-only. What a business is entitled to is set by WhyNotGrace, not
+ * the business itself — see backend/app/api/feature_flags.py's docstring
+ * for why the write path was removed. */
 export function FeatureFlagsPage() {
   const { t } = useTranslation();
   const { data: flags, isLoading, isError } = useFeatureFlags();
-  const updateFlag = useUpdateFeatureFlag();
-
-  const handleToggle = (module: FeatureModule, enabled: boolean) => {
-    updateFlag.mutate(
-      { module, enabled },
-      {
-        onSuccess: () => toast.success(enabled ? t("featureFlags.enabled", { module: t(`featureModule.${module}`) }) : t("featureFlags.disabled", { module: t(`featureModule.${module}`) })),
-        onError: (err) => toast.error(parseApiError(err).message),
-      }
-    );
-  };
 
   return (
     <div>
       <PageHeader title={t("nav.featureFlags")} subtitle={t("featureFlags.subtitle")} />
+
+      <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+        {t("featureFlags.readOnlyNotice")}
+      </p>
 
       {isLoading && (
         <div className="flex justify-center py-16">
@@ -52,12 +42,17 @@ export function FeatureFlagsPage() {
                 <p className="text-sm font-semibold text-slate-800">{t(`featureModule.${flag.module}`)}</p>
                 <p className="text-xs text-slate-500">{t(`featureModuleHint.${flag.module}`)}</p>
               </div>
-              <Switch
-                checked={flag.enabled}
-                disabled={ALWAYS_ON.includes(flag.module) || updateFlag.isPending}
-                onChange={(checked) => handleToggle(flag.module, checked)}
-                label={t(`featureModule.${flag.module}`)}
-              />
+              {flag.enabled ? (
+                <span className="flex items-center gap-1.5 rounded-full bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-700">
+                  <Check size={13} />
+                  {t("featureFlags.on")}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
+                  <X size={13} />
+                  {t("featureFlags.off")}
+                </span>
+              )}
             </div>
           ))}
         </Card>

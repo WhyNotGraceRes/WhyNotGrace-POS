@@ -30,7 +30,7 @@ def test_zomato_menu_sync_reports_not_configured_rather_than_faking_success(clie
     owner = register_and_login(client, db_session, business_name="Integration Biz 2")
     from tests.helpers import enable_feature
 
-    enable_feature(client, owner["headers"], "ZOMATO")
+    enable_feature(client, db_session, owner, "ZOMATO")
     resp = client.post("/api/v1/integrations/ZOMATO/menu-sync", headers=owner["headers"])
     assert resp.status_code == 503
     assert "not configured" in resp.json()["detail"].lower()

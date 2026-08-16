@@ -91,7 +91,7 @@ def test_feature_flags_are_isolated(client, db_session):
     biz_a = register_and_login(client, db_session, business_name="Tenant A Flags")
     biz_b = register_and_login(client, db_session, business_name="Tenant B Flags")
 
-    enable_feature(client, biz_a["headers"], "DELIVERY")
+    enable_feature(client, db_session, biz_a, "DELIVERY")
 
     resp = client.get("/api/v1/settings/features", headers=biz_b["headers"])
     flags = {f["module"]: f["enabled"] for f in resp.json()}

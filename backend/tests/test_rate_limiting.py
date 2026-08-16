@@ -40,28 +40,18 @@ def test_rate_limit_response_does_not_leak_internals(client, db_session):
     assert "Traceback" not in str(body)
 
 
-def test_register_endpoint_is_rate_limited(client):
-    import uuid
-
-    def _payload():
-        return {
-            "business_name": f"Spam Biz {uuid.uuid4().hex[:6]}",
-            "business_type": "CAFE",
-            "owner_first_name": "A",
-            "owner_last_name": "B",
-            "email": f"spam-{uuid.uuid4().hex[:8]}@example.com",
-            "mobile": f"9{uuid.uuid4().int % 10**9:09d}",
-            "password": "SomePass123",
-            "confirm_password": "SomePass123",
-        }
-
+def test_platform_login_endpoint_is_rate_limited(client):
+    """There is no self-registration any more (see app.api.auth) — platform
+    login is the entry point that most needs this protection now, since a
+    platform account can touch every tenant."""
     statuses = []
-    for _ in range(6):
-        resp = client.post("/api/v1/auth/register", json=_payload())
+    for _ in range(11):
+        resp = client.post(
+            "/api/v1/platform/auth/login", json={"email": "nobody@example.com", "password": "wrong-on-purpose"}
+        )
         statuses.append(resp.status_code)
 
-    assert statuses[:5] == [201, 201, 201, 201, 201]
-    assert statuses[5] == 429
+    assert statuses[-1] == 429
 
 
 def test_account_lockout_still_works_independently_of_ip_rate_limit(client, db_session):

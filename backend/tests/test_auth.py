@@ -1,77 +1,11 @@
 import uuid
 
-from app.models.user import User
-from app.services import auth_service
 from tests.helpers import register_and_login
 
 
-def _register_payload(**overrides):
-    payload = {
-        "business_name": f"Auth Test Biz {uuid.uuid4().hex[:6]}",
-        "business_type": "CAFE",
-        "owner_first_name": "Grace",
-        "owner_last_name": "Hopper",
-        "email": f"grace-{uuid.uuid4().hex[:8]}@example.com",
-        "mobile": f"9{uuid.uuid4().int % 10**9:09d}",
-        "password": "CorrectHorse123",
-        "confirm_password": "CorrectHorse123",
-    }
-    payload.update(overrides)
-    return payload
-
-
-def test_register_creates_business_and_owner(client):
-    payload = _register_payload()
-    resp = client.post("/api/v1/auth/register", json=payload)
-    assert resp.status_code == 201
-    data = resp.json()
-    assert data["email"] == payload["email"].lower()
-
-
-def test_register_duplicate_email_rejected(client):
-    payload = _register_payload()
-    client.post("/api/v1/auth/register", json=payload)
-    resp = client.post("/api/v1/auth/register", json=payload)
-    assert resp.status_code == 409
-
-
-def test_register_password_mismatch_rejected(client):
-    payload = _register_payload(confirm_password="Different123")
-    resp = client.post("/api/v1/auth/register", json=payload)
-    assert resp.status_code == 422
-
-
-def test_login_before_verification_rejected(client):
-    payload = _register_payload()
-    client.post("/api/v1/auth/register", json=payload)
-    resp = client.post("/api/v1/auth/login", json={"identifier": payload["email"], "password": payload["password"]})
-    assert resp.status_code == 403
-
-
-def test_verify_email_and_login(client, db_session):
-    payload = _register_payload()
-    client.post("/api/v1/auth/register", json=payload)
-
-    user = db_session.query(User).filter(User.email == payload["email"].lower()).first()
-    code = auth_service._issue_verification_code(db_session, user)
-    db_session.flush()
-
-    resp = client.post("/api/v1/auth/verify-email", json={"email": payload["email"], "code": code})
-    assert resp.status_code == 200
-
-    resp = client.post("/api/v1/auth/login", json={"identifier": payload["email"], "password": payload["password"]})
-    assert resp.status_code == 200
-    body = resp.json()
-    assert "access_token" in body and "refresh_token" in body
-
-
 def test_wrong_password_lockout_after_three_attempts(client, db_session):
-    payload = _register_payload()
-    client.post("/api/v1/auth/register", json=payload)
-    user = db_session.query(User).filter(User.email == payload["email"].lower()).first()
-    code = auth_service._issue_verification_code(db_session, user)
-    db_session.flush()
-    client.post("/api/v1/auth/verify-email", json={"email": payload["email"], "code": code})
+    ctx = register_and_login(client, db_session)
+    payload = ctx["payload"]
 
     for expected_remaining in (2, 1):
         resp = client.post(
@@ -92,12 +26,11 @@ def test_wrong_password_lockout_after_three_attempts(client, db_session):
 
 
 def test_successful_login_resets_failed_attempts(client, db_session):
-    payload = _register_payload()
-    client.post("/api/v1/auth/register", json=payload)
+    from app.models.user import User
+
+    ctx = register_and_login(client, db_session)
+    payload = ctx["payload"]
     user = db_session.query(User).filter(User.email == payload["email"].lower()).first()
-    code = auth_service._issue_verification_code(db_session, user)
-    db_session.flush()
-    client.post("/api/v1/auth/verify-email", json={"email": payload["email"], "code": code})
 
     client.post("/api/v1/auth/login", json={"identifier": payload["email"], "password": "wrong-password"})
     resp = client.post("/api/v1/auth/login", json={"identifier": payload["email"], "password": payload["password"]})

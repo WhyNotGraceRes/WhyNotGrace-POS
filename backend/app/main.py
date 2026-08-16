@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.gzip import GZipMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -15,7 +16,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.config import get_settings
 from app.core.rate_limit import limiter
-from app.database.session import SessionLocal, engine
+from app.database.session import SessionLocal, engine, get_db
 
 settings = get_settings()
 
@@ -98,6 +99,146 @@ class SecurityHeadersMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
+class SubscriptionGateMiddleware:
+    """Blocks a business whose subscription has lapsed past its grace
+    period — see app.services.subscription_service's ACTIVE -> GRACE ->
+    SUSPENDED lazy transition. Enforced here, once, rather than as a
+    per-router dependency, so a new router can never simply forget to
+    include it.
+
+    Deliberately plain ASGI, not BaseHTTPMiddleware — same reasoning as
+    SecurityHeadersMiddleware above. The one DB read this does per gated
+    request is offloaded via run_in_threadpool rather than called directly:
+    this __call__ runs on the event loop, and psycopg's sync driver would
+    otherwise block it for the duration of that query, for every request
+    being served by this worker, not just this one.
+    """
+
+    # Paths under the API prefix that must work even for a suspended
+    # business: logging in (so staff can even see why), the platform's own
+    # surface (a platform token never carries a business_id claim anyway,
+    # so this is belt-and-suspenders), and reading (not writing) the two
+    # things a "you're suspended" banner needs to render.
+    _EXEMPT_PREFIXES = ("/auth", "/platform")
+    _EXEMPT_GET_PATHS = ("/subscription", "/businesses/me")
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+        self._prefix = get_settings().api_v1_prefix
+
+    def _is_exempt(self, path: str, method: str) -> bool:
+        if not path.startswith(self._prefix):
+            # Not an authenticated staff API path at all (public QR/website/
+            # pickup/delivery routes, health, docs) — nothing here applies.
+            return True
+        rest = path[len(self._prefix):]
+        if rest.startswith(self._EXEMPT_PREFIXES):
+            return True
+        if method == "GET" and rest in self._EXEMPT_GET_PATHS:
+            return True
+        return False
+
+    @staticmethod
+    def _bearer_token(scope: Scope) -> str | None:
+        for name, value in scope.get("headers", ()):
+            if name == b"authorization":
+                text_value = value.decode("latin-1")
+                if text_value.lower().startswith("bearer "):
+                    return text_value[7:].strip()
+        return None
+
+    @staticmethod
+    def _is_suspended(business_id_str: str) -> bool:
+        """Runs in a worker thread (see run_in_threadpool below).
+
+        Resolves its DB session through app.dependency_overrides rather
+        than opening a bare SessionLocal() directly — the two are
+        equivalent in production (dependency_overrides is empty there, so
+        this reduces to exactly get_db()'s own body: a fresh SessionLocal()
+        per call), but they differ under test: the test suite overrides
+        get_db to hand out one connection-pinned, SAVEPOINT-scoped session
+        per test (see tests/conftest.py) so that app code's db.commit()
+        calls stay visible within that test without ever hitting the real
+        database. A bare SessionLocal() here would open an independent
+        connection blind to that session's uncommitted state — a business a
+        test just marked SUSPENDED would look untouched to this check,
+        every time, in every test, since the two connections would never
+        agree on what happened until the test's transaction actually
+        committed (never — it's rolled back at teardown for isolation).
+        """
+        import uuid as uuid_mod
+
+        from app.models.enums import SubscriptionStatus
+        from app.services import subscription_service
+
+        get_db_dependency = app.dependency_overrides.get(get_db, get_db)
+        gen = get_db_dependency()
+        db = next(gen)
+        try:
+            subscription = subscription_service.get_subscription(db, uuid_mod.UUID(business_id_str))
+            if subscription is None:
+                return False
+            is_suspended = subscription.status == SubscriptionStatus.SUSPENDED
+            db.commit()  # persists any lazy ACTIVE->GRACE->SUSPENDED transition just computed
+            return is_suspended
+        except Exception:  # noqa: BLE001
+            # A malformed business_id or a transient DB error must fail
+            # open here — this is a billing gate, not the authentication
+            # check, and the request's real auth/business-scoping still
+            # runs normally afterward regardless of what happens here.
+            db.rollback()
+            return False
+        finally:
+            # Drives get_db()'s generator to completion so its own
+            # `finally: db.close()` runs — this is exactly what FastAPI's
+            # dependency-injection machinery does automatically for a
+            # normal route; doing it by hand here is the price of calling a
+            # generator dependency directly instead of through Depends().
+            try:
+                next(gen)
+            except StopIteration:
+                pass
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http" or self._is_exempt(scope["path"], scope["method"]):
+            await self.app(scope, receive, send)
+            return
+
+        token = self._bearer_token(scope)
+        if token is None:
+            await self.app(scope, receive, send)
+            return
+
+        from app.core.security import TokenType, decode_token
+
+        try:
+            payload = decode_token(token)
+        except ValueError:
+            # Not this middleware's job to reject a bad token — let the
+            # route's own auth dependency produce the real 401.
+            await self.app(scope, receive, send)
+            return
+
+        if payload.get("type") != TokenType.ACCESS.value or payload.get("actor") == "platform":
+            await self.app(scope, receive, send)
+            return
+
+        business_id_str = payload.get("biz")
+        if not business_id_str:
+            await self.app(scope, receive, send)
+            return
+
+        if await run_in_threadpool(self._is_suspended, business_id_str):
+            response = JSONResponse(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                content={"detail": "This business's subscription is suspended. Contact WhyNotGrace to reactivate it."},
+            )
+            await response(scope, receive, send)
+            return
+
+        await self.app(scope, receive, send)
+
+
 # Added first, so it sits innermost and compresses the response body before
 # CORS/security headers are attached (Starlette runs the most recently added
 # middleware outermost).
@@ -117,6 +258,15 @@ app.add_middleware(
     minimum_size=settings.gzip_minimum_size_bytes,
     compresslevel=5,
 )
+# Registered before CORSMiddleware (and so runs INSIDE it — Starlette's
+# outermost-is-most-recently-added rule again) specifically so that a 402
+# short-circuit from this middleware still goes out through CORS. Getting
+# this backwards is a real, easy-to-hit bug, not a theoretical one: a
+# cross-origin browser request that gets rejected without CORS headers
+# doesn't surface as a clean 402 to the frontend at all — the browser
+# blocks the response outright and JS only ever sees a generic network
+# failure, with no status code and no body to read the reason from.
+app.add_middleware(SubscriptionGateMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -179,6 +329,11 @@ from app.api import charges  # noqa: E402
 from app.api import toggles as toggles_api  # noqa: E402
 from app.api import receipts  # noqa: E402
 from app.api import shifts  # noqa: E402
+from app.api.platform import auth as platform_auth  # noqa: E402
+from app.api.platform import businesses as platform_businesses  # noqa: E402
+from app.api.platform import features as platform_features  # noqa: E402
+from app.api.platform import toggles as platform_toggles  # noqa: E402
+from app.api.platform import subscriptions as platform_subscriptions  # noqa: E402
 
 prefix = settings.api_v1_prefix
 
@@ -218,3 +373,8 @@ app.include_router(charges.router, prefix=prefix)
 app.include_router(toggles_api.router, prefix=prefix)
 app.include_router(shifts.router, prefix=prefix)
 app.include_router(receipts.router, prefix=prefix)
+app.include_router(platform_auth.router, prefix=prefix)
+app.include_router(platform_businesses.router, prefix=prefix)
+app.include_router(platform_features.router, prefix=prefix)
+app.include_router(platform_toggles.router, prefix=prefix)
+app.include_router(platform_subscriptions.router, prefix=prefix)
