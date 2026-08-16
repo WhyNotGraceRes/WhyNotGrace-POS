@@ -61,9 +61,12 @@ so it went first and the rest get smaller.
   `94485e0`. Lines are soft-voided (kept, marked, excluded from totals, not
   printed on the guest copy) because the bill refresh re-adds any order item
   the bill does not already carry, so a deleted line would come back.
-- **NC / complimentary bills** — staff meals, comped dishes. Next. Builds on
-  the same line-level recompute.
-- **Split tender UI** — partial payments already work server-side, but
+- **NC / complimentary bills** — ✅ done, commit `fe401ee`. A comp is kept
+  distinct from a void throughout: a void was never supplied and leaves the
+  bill, a comp was supplied and given away so it prints marked NC. Comps are
+  reversible, voids are not, and comping has its own two toggles. A fully-NC
+  bill takes no payment row and no tax invoice number (see below).
+- **Split tender UI** — next. Partial payments already work server-side, but
   nothing in the UI lets a cashier take ₹300 cash and ₹200 card on one bill.
 - **Merge tables**, **transfer table**, **transfer item**.
 - **Split bill** — by item, by amount, equally. `OrderSession` is the right
@@ -92,6 +95,27 @@ defines "today" as a UTC day, so the dashboard's today-figures begin at 05:30
 IST and miss after-midnight trade. Reports and the dashboard therefore still
 disagree at the edges, in the other direction now. Small, separate, worth
 doing.
+
+**An NC bill does not consume a tax invoice number.** This was a judgement
+call taken while building Block 4, and it is worth an accountant's eye. The
+reasoning: Block 1 made `invoice_number` specifically the GST serial, distinct
+from the internal `bill_number`; food given away for no consideration is not a
+taxable supply; so numbering a zero-value NC bill would put a zero-value
+invoice into the return and consume a serial for a document that is not an
+invoice. The receipt labels it "No-charge bill" instead. A partly-comped bill
+is still a real supply and numbers normally at settlement. If the client's
+accountant would rather every printed document carry a serial, this is a
+one-line change in `mark_bill_nc` — but the series would then contain
+zero-value entries.
+
+**A settled table can be billed again.** `OrderSession.is_closed` is only ever
+read, never written, though its own docstring says it should close when the
+bill is paid. So after any settlement — cash or NC — the session stays open,
+the table stays on the Billing list, and generating again mints a second bill
+containing the same order items. Pre-existing, found while testing Block 4.
+The fix needs care: closing the session on first settlement would break
+ordering another round after the bill is printed, which relies on the session
+staying open.
 
 **ESC/POS has never met a printer.** Byte sequences are asserted against the
 documented command set; that is not the same as paper. Before trusting it:
