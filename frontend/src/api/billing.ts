@@ -15,4 +15,11 @@ export const billingApi = {
 
   applyDiscount: (billId: string, payload: ApplyDiscountRequest) =>
     apiClient.post<BillOut>(`/billing/${billId}/discount`, payload).then((r) => normalizeBill(r.data)),
+
+  /** Strikes one line off an open bill. Returns the recomputed bill, so the
+   * caller never has to work out the new totals itself. */
+  voidItem: (billId: string, itemId: string, reason?: string) =>
+    apiClient
+      .post<BillOut>(`/billing/${billId}/items/${itemId}/void`, { reason })
+      .then((r) => normalizeBill(r.data)),
 };

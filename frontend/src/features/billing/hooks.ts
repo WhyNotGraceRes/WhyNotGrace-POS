@@ -32,3 +32,14 @@ export function useApplyDiscount() {
     },
   });
 }
+
+export function useVoidBillItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ billId, itemId, reason }: { billId: string; itemId: string; reason?: string }) =>
+      billingApi.voidItem(billId, itemId, reason),
+    onSuccess: (bill) => {
+      queryClient.setQueryData(["billing", bill.id], bill);
+    },
+  });
+}

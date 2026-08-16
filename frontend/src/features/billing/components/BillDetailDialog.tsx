@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/format";
 import { useAuthStore } from "@/stores/authStore";
 import { useBusiness } from "@/features/business/hooks";
 import { useBill } from "@/features/billing/hooks";
+import { BillItemsList } from "@/features/billing/components/BillItemsList";
 import { BillStatusBadge } from "@/features/billing/components/BillStatusBadge";
 import { DiscountForm } from "@/features/billing/components/DiscountForm";
 import { PaymentPanel } from "@/features/billing/components/PaymentPanel";
@@ -58,16 +59,7 @@ export function BillDetailDialog({
             {table && <span className="text-sm text-slate-500">{table.name}</span>}
           </div>
 
-          <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
-            {bill.items.map((item) => (
-              <li key={item.id} className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="text-slate-700">
-                  {item.quantity} × {item.item_name_snapshot}
-                </span>
-                <span className="font-semibold text-slate-800">{formatCurrency(item.line_total)}</span>
-              </li>
-            ))}
-          </ul>
+          <BillItemsList bill={bill} />
 
           <div className="space-y-1 rounded-lg bg-slate-50 p-3 text-sm">
             <Row label={t("orders.subtotal")} value={formatCurrency(bill.subtotal)} />

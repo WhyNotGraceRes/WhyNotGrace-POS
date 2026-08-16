@@ -12,6 +12,7 @@ from app.schemas.billing import (
     BillOut,
     BillPrintOut,
     GenerateBillRequest,
+    VoidBillItemRequest,
     VoidBillRequest,
 )
 from app.services import audit_service, billing_service
@@ -84,6 +85,39 @@ def void_bill(
             db, action="bill.void", business_id=business_id, user_id=user.id,
             resource_type="bill", resource_id=str(bill.id),
             metadata={"reason": bill.void_reason, "invoice_number": bill.invoice_number},
+        )
+    return BillOut.model_validate(bill)
+
+
+@router.post("/{bill_id}/items/{item_id}/void", response_model=BillOut)
+def void_bill_item(
+    bill_id: uuid.UUID,
+    item_id: uuid.UUID,
+    payload: VoidBillItemRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_BILLING)),
+):
+    """Strikes a single line off an open bill.
+
+    Router-level role matches the whole-bill void for the same reason given
+    there: the tighter manager-only rule belongs in the service, where the
+    billing.void_requires_manager toggle can reach it.
+    """
+    with transaction(db):
+        bill = billing_service.void_bill_item(
+            db, business_id, bill_id, item_id, reason=payload.reason, user=user
+        )
+        item = next((i for i in bill.items if i.id == item_id), None)
+        audit_service.record(
+            db, action="bill.item_void", business_id=business_id, user_id=user.id,
+            resource_type="bill", resource_id=str(bill_id),
+            metadata={
+                "bill_item_id": str(item_id),
+                "item_name": item.item_name_snapshot if item else None,
+                "line_total": float(item.line_total) if item else None,
+                "reason": item.void_reason if item else None,
+            },
         )
     return BillOut.model_validate(bill)
 

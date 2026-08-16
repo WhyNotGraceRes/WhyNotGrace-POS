@@ -411,7 +411,12 @@
     "printAgain": "Print again ({{count}} printed)",
     "preview": "Preview",
     "previewTitle": "Bill preview",
-    "reprintWarning": "This bill has been printed. Any further copy is marked DUPLICATE."
+    "reprintWarning": "This bill has been printed. Any further copy is marked DUPLICATE.",
+    "voidItem": "Void item",
+    "voidItemConfirm": "Void {{item}}? It stays on the record but is removed from the total and won't print on the guest's bill.",
+    "voidReasonPlaceholder": "Reason (e.g. sent back, rung up twice)",
+    "voided": "Voided",
+    "itemVoided": "Item voided."
   },
   "payment": {
     "cash": "Cash",

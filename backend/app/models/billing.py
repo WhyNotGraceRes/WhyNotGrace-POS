@@ -67,7 +67,14 @@ class Bill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     # refund is a second event — netting them off would erase both.
     amount_refunded: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
 
-    items: Mapped[list["BillItem"]] = relationship(back_populates="bill", cascade="all, delete-orphan")
+    # Ordered explicitly: without this the lines come back in whatever order
+    # Postgres returns them, so updating one row (voiding it, say) reshuffles
+    # the bill under the cashier's eyes and can reorder a reprinted receipt
+    # against the original. Insertion order is also the order the guest was
+    # served in, which is the order they expect to read.
+    items: Mapped[list["BillItem"]] = relationship(
+        back_populates="bill", cascade="all, delete-orphan", order_by="BillItem.created_at"
+    )
     taxes: Mapped[list["BillTax"]] = relationship(back_populates="bill", cascade="all, delete-orphan")
     discounts: Mapped[list["BillDiscount"]] = relationship(back_populates="bill", cascade="all, delete-orphan")
     service_charges: Mapped[list["BillServiceCharge"]] = relationship(
@@ -92,7 +99,23 @@ class BillItem(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     unit_price: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
     line_total: Mapped[float] = mapped_column(Numeric(10, 2), nullable=False)
 
+    # A voided line is kept, not deleted. Two reasons: a bill is refreshed by
+    # adding order items it does not already carry, so a deleted row would
+    # simply reappear on the next refresh; and the record of what was struck
+    # off, by whom and why, is exactly what an owner reviewing a shift wants
+    # to see. Voided lines are excluded from every total and do not print on
+    # the guest's bill.
+    voided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    void_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    voided_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+
     bill: Mapped["Bill"] = relationship(back_populates="items")
+
+    @property
+    def is_voided(self) -> bool:
+        return self.voided_at is not None
 
 
 class BillTax(Base, UUIDPrimaryKeyMixin, TimestampMixin):

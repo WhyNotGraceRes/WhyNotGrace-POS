@@ -118,6 +118,12 @@ def build_bill_receipt(
     doc.divider()
 
     for item in bill.items:
+        # A struck line is not the guest's business — it contributes nothing
+        # to the total, so printing it only invites an argument about a dish
+        # they are not being charged for. It stays on the bill record and in
+        # the audit log, where someone reviewing the shift can find it.
+        if item.is_voided:
+            continue
         qty = int(float(item.quantity)) if float(item.quantity).is_integer() else float(item.quantity)
         doc.item(
             item.item_name_snapshot,

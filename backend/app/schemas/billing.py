@@ -29,6 +29,11 @@ class BillItemOut(BaseModel):
     quantity: float
     unit_price: float
     line_total: float
+    # Voided lines are still returned. The counter screen needs to show the
+    # cashier what was struck off — a line that silently disappears looks like
+    # a bug to the person who just struck it.
+    voided_at: datetime | None = None
+    void_reason: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -49,6 +54,10 @@ class VoidBillRequest(BaseModel):
     reach."""
 
     reason: str | None = Field(default=None, max_length=255)
+
+
+class VoidBillItemRequest(VoidBillRequest):
+    """Same shape and the same toggle-driven reason rule as voiding a bill."""
 
 
 class BillOut(BaseModel):

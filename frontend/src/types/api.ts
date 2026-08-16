@@ -990,6 +990,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/{bill_id}/items/{item_id}/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Void Bill Item
+         * @description Strikes a single line off an open bill.
+         *
+         *     Router-level role matches the whole-bill void for the same reason given
+         *     there: the tighter manager-only rule belongs in the service, where the
+         *     billing.void_requires_manager toggle can reach it.
+         */
+        post: operations["void_bill_item_api_v1_billing__bill_id__items__item_id__void_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/billing/{bill_id}/print": {
         parameters: {
             query?: never;
@@ -2257,6 +2281,10 @@ export interface components {
             unit_price: number;
             /** Line Total */
             line_total: number;
+            /** Voided At */
+            voided_at?: string | null;
+            /** Void Reason */
+            void_reason?: string | null;
         };
         /** BillLineOut */
         BillLineOut: {
@@ -4432,6 +4460,14 @@ export interface components {
             email: string;
             /** Code */
             code: string;
+        };
+        /**
+         * VoidBillItemRequest
+         * @description Same shape and the same toggle-driven reason rule as voiding a bill.
+         */
+        VoidBillItemRequest: {
+            /** Reason */
+            reason?: string | null;
         };
         /**
          * VoidBillRequest
@@ -6716,6 +6752,42 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["VoidBillRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    void_bill_item_api_v1_billing__bill_id__items__item_id__void_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bill_id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoidBillItemRequest"];
             };
         };
         responses: {

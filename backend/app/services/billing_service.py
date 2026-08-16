@@ -60,7 +60,7 @@ def _recompute_totals(db: Session, business_id: uuid.UUID, bill: Bill) -> None:
     reason as the tax: a 10% service charge on food the guest was never
     billed for is a charge on nothing.
     """
-    subtotal = sum(float(i.line_total) for i in bill.items)
+    subtotal = sum(float(i.line_total) for i in bill.items if not i.is_voided)
     discount_total = sum(float(d.amount) for d in bill.discounts)
 
     # A discount can never take the bill below zero. A data-entry slip
@@ -378,6 +378,57 @@ def void_bill(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, *, reason
             location.status = LocationStatus.AVAILABLE
             db.flush()
 
+    return bill
+
+
+def void_bill_item(
+    db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, item_id: uuid.UUID, *, reason: str | None, user
+) -> Bill:
+    """Strikes one line off a bill and recomputes the totals.
+
+    Voiding a whole bill is a different act with a different record — this is
+    the everyday one: a dish sent back, rung up twice, or ordered by mistake.
+    The line is marked rather than deleted (see BillItem.voided_at) and the
+    bill's totals, tax and charges all fall out of the existing recompute, so
+    a struck line reduces the taxable value the same way it would have raised
+    it.
+
+    The same two toggles that guard a whole-bill void guard this one. A
+    counter that requires a manager to void a bill plainly does not intend a
+    cashier to be able to empty that bill one line at a time.
+    """
+    bill = get_bill_or_404(db, business_id, bill_id)
+    if bill.status in (BillStatus.PAID, BillStatus.CANCELLED):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot modify a closed bill")
+
+    item = next((i for i in bill.items if i.id == item_id), None)
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill item not found")
+    if item.is_voided:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Item is already voided")
+
+    if toggles.is_enabled(db, business_id, toggles.VOID_REQUIRES_MANAGER):
+        if user.role not in ROLE_OPERATIONAL:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only a manager or owner can void an item",
+            )
+
+    if toggles.is_enabled(db, business_id, toggles.VOID_REQUIRES_REASON):
+        if not reason or not reason.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A reason is required to void an item",
+            )
+
+    item.voided_at = datetime.now(timezone.utc)
+    item.void_reason = (reason or "").strip() or None
+    item.voided_by_user_id = user.id
+    db.flush()
+
+    bill = get_bill_or_404(db, business_id, bill_id)
+    _recompute_totals(db, business_id, bill)
+    db.flush()
     return bill
 
 
