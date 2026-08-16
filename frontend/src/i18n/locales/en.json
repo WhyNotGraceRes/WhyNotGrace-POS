@@ -105,7 +105,6 @@
     "loyaltyPoints": "Points outstanding",
     "pickupToday": "Pickup orders",
     "deliveryToday": "Delivery orders",
-    "websiteToday": "Website orders",
     "popularItems": "Popular items",
     "popularItemsSubtitle": "By quantity sold",
     "noPopularItems": "No orders yet. Popular items will show up here once orders come in.",
@@ -113,7 +112,13 @@
     "loadErrorSubtitle": "Check your connection and try again.",
     "retry": "Retry",
     "of": "of {{total}}",
-    "avgOrderValue": "Average order value"
+    "avgOrderValue": "Average order value",
+    "needsAttention": "Needs attention",
+    "channelBreakdown": "Orders by channel",
+    "channelBreakdownSubtitle": "Where today's orders are coming from",
+    "channelDineIn": "Dine-in",
+    "channelPickup": "Pickup",
+    "channelDelivery": "Delivery"
   },
   "roleHome": {
     "welcome": "Welcome, {{name}}",

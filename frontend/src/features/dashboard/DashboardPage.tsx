@@ -2,18 +2,16 @@ import { useTranslation } from "react-i18next";
 import {
   IndianRupee,
   ShoppingBag,
+  TrendingUp,
   Clock,
   ChefHat,
   CheckCircle2,
+  Receipt,
   UtensilsCrossed,
   BedDouble,
-  Receipt,
   CreditCard,
   Users,
   Gift,
-  Package,
-  Truck,
-  Globe,
   AlertTriangle,
   RotateCcw,
 } from "lucide-react";
@@ -24,7 +22,10 @@ import { Button } from "@/components/ui/Button";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { useDashboard } from "@/features/dashboard/hooks";
 import { useFeatureFlags } from "@/features/settings/hooks";
-import { StatCard, StatCardSkeleton } from "@/features/dashboard/components/StatCard";
+import { StatCard } from "@/features/dashboard/components/StatCard";
+import { HeroStatCard, HeroStatCardSkeleton } from "@/features/dashboard/components/HeroStatCard";
+import { ActionCard, ActionCardSkeleton } from "@/features/dashboard/components/ActionCard";
+import { ChannelBreakdown } from "@/features/dashboard/components/ChannelBreakdown";
 
 export function DashboardPage() {
   const { t } = useTranslation();
@@ -54,91 +55,100 @@ export function DashboardPage() {
       )}
 
       {isLoading && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <StatCardSkeleton key={i} />
-          ))}
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <HeroStatCardSkeleton key={i} />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ActionCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       )}
 
       {data && (
-        <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            <StatCard label={t("dashboard.salesToday")} value={formatCurrency(data.sales_today)} icon={IndianRupee} />
-            <StatCard label={t("dashboard.ordersToday")} value={formatNumber(data.orders_today)} icon={ShoppingBag} />
-            <StatCard
-              label={t("dashboard.pendingOrders")}
-              value={formatNumber(data.pending_orders)}
-              icon={Clock}
-              tone={data.pending_orders > 0 ? "warning" : "default"}
+        <div className="space-y-6">
+          {/* Tier 1 — headline totals. The 3-5 numbers an owner scans first;
+              deliberately not clickable, these are totals to read, not
+              queues to work through (see the action strip below). */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <HeroStatCard label={t("dashboard.salesToday")} value={formatCurrency(data.sales_today)} icon={IndianRupee} />
+            <HeroStatCard label={t("dashboard.ordersToday")} value={formatNumber(data.orders_today)} icon={ShoppingBag} />
+            <HeroStatCard
+              label={t("dashboard.avgOrderValue")}
+              value={data.orders_today > 0 ? formatCurrency(data.sales_today / data.orders_today) : formatCurrency(0)}
+              icon={TrendingUp}
             />
-            <StatCard
-              label={t("dashboard.kotQueue")}
-              value={formatNumber(data.kot_queue)}
-              icon={ChefHat}
-              tone={data.kot_queue > 0 ? "warning" : "default"}
-            />
-            <StatCard
-              label={t("dashboard.readyOrders")}
-              value={formatNumber(data.ready_orders)}
-              icon={CheckCircle2}
-              tone={data.ready_orders > 0 ? "success" : "default"}
-            />
-            {data.tables_total > 0 && (
-              <StatCard
-                label={t("dashboard.tables")}
-                value={`${data.tables_occupied}/${data.tables_total}`}
-                icon={UtensilsCrossed}
-              />
-            )}
-            {data.rooms_total > 0 && (
-              <StatCard
-                label={t("dashboard.rooms")}
-                value={`${data.rooms_occupied}/${data.rooms_total}`}
-                icon={BedDouble}
-              />
-            )}
-            <StatCard
-              label={t("dashboard.pendingBills")}
-              value={formatNumber(data.pending_bills)}
-              icon={Receipt}
-              tone={data.pending_bills > 0 ? "warning" : "default"}
-            />
-            <StatCard
-              label={t("dashboard.paymentsToday")}
-              value={formatNumber(data.payments_today_count)}
-              hint={formatCurrency(data.payments_today_amount)}
-              icon={CreditCard}
-            />
-            {data.orders_today > 0 && (
-              <StatCard
-                label={t("dashboard.avgOrderValue")}
-                value={formatCurrency(data.sales_today / data.orders_today)}
-                icon={IndianRupee}
-              />
-            )}
-            <StatCard label={t("dashboard.customers")} value={formatNumber(data.customer_count)} icon={Users} />
-
-            {isEnabled("LOYALTY") && (
-              <StatCard
-                label={t("dashboard.loyaltyAccounts")}
-                value={formatNumber(data.loyalty_accounts)}
-                hint={`${formatNumber(data.loyalty_points_outstanding)} ${t("dashboard.loyaltyPoints").toLowerCase()}`}
-                icon={Gift}
-              />
-            )}
-            {isEnabled("PICKUP") && (
-              <StatCard label={t("dashboard.pickupToday")} value={formatNumber(data.pickup_orders_today)} icon={Package} />
-            )}
-            {isEnabled("DELIVERY") && (
-              <StatCard label={t("dashboard.deliveryToday")} value={formatNumber(data.delivery_orders_today)} icon={Truck} />
-            )}
-            {isEnabled("ONLINE_WEBSITE") && (
-              <StatCard label={t("dashboard.websiteToday")} value={formatNumber(data.website_orders_today)} icon={Globe} />
-            )}
           </div>
 
-          <Card className="mt-6 p-5">
+          {/* Tier 2 — needs attention right now. Every card is a queue with
+              a real destination (Orders/Kitchen/Billing), not a dead end —
+              the dashboard doubles as a launch pad into the work itself. */}
+          <div>
+            <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+              {t("dashboard.needsAttention")}
+            </h2>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <ActionCard label={t("dashboard.pendingOrders")} count={data.pending_orders} icon={Clock} to="/orders" />
+              <ActionCard label={t("dashboard.kotQueue")} count={data.kot_queue} icon={ChefHat} to="/kitchen" />
+              <ActionCard
+                label={t("dashboard.readyOrders")}
+                count={data.ready_orders}
+                icon={CheckCircle2}
+                to="/kitchen"
+                positiveWhenNonZero
+              />
+              <ActionCard label={t("dashboard.pendingBills")} count={data.pending_bills} icon={Receipt} to="/billing" />
+            </div>
+          </div>
+
+          {/* Tier 3 — grouped channel comparison and reference figures. */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ChannelBreakdown
+              ordersToday={data.orders_today}
+              pickupToday={data.pickup_orders_today}
+              deliveryToday={data.delivery_orders_today}
+              pickupEnabled={isEnabled("PICKUP")}
+              deliveryEnabled={isEnabled("DELIVERY")}
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              {data.tables_total > 0 && (
+                <StatCard
+                  label={t("dashboard.tables")}
+                  value={`${data.tables_occupied}/${data.tables_total}`}
+                  icon={UtensilsCrossed}
+                />
+              )}
+              {data.rooms_total > 0 && (
+                <StatCard
+                  label={t("dashboard.rooms")}
+                  value={`${data.rooms_occupied}/${data.rooms_total}`}
+                  icon={BedDouble}
+                />
+              )}
+              <StatCard
+                label={t("dashboard.paymentsToday")}
+                value={formatNumber(data.payments_today_count)}
+                hint={formatCurrency(data.payments_today_amount)}
+                icon={CreditCard}
+              />
+              <StatCard label={t("dashboard.customers")} value={formatNumber(data.customer_count)} icon={Users} />
+              {isEnabled("LOYALTY") && (
+                <StatCard
+                  label={t("dashboard.loyaltyAccounts")}
+                  value={formatNumber(data.loyalty_accounts)}
+                  hint={`${formatNumber(data.loyalty_points_outstanding)} ${t("dashboard.loyaltyPoints").toLowerCase()}`}
+                  icon={Gift}
+                />
+              )}
+            </div>
+          </div>
+
+          <Card className="p-5">
             <h2 className="text-sm font-bold text-slate-900">{t("dashboard.popularItems")}</h2>
             <p className="text-xs text-slate-500">{t("dashboard.popularItemsSubtitle")}</p>
 
@@ -162,7 +172,7 @@ export function DashboardPage() {
               </ul>
             )}
           </Card>
-        </>
+        </div>
       )}
     </div>
   );

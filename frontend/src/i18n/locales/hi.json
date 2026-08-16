@@ -105,7 +105,6 @@
     "loyaltyPoints": "बकाया पॉइंट्स",
     "pickupToday": "पिकअप ऑर्डर",
     "deliveryToday": "डिलीवरी ऑर्डर",
-    "websiteToday": "वेबसाइट ऑर्डर",
     "popularItems": "लोकप्रिय आइटम",
     "popularItemsSubtitle": "बिकी हुई मात्रा के अनुसार",
     "noPopularItems": "अभी तक कोई ऑर्डर नहीं। ऑर्डर आने पर लोकप्रिय आइटम यहां दिखाई देंगे।",
@@ -113,7 +112,13 @@
     "loadErrorSubtitle": "अपना कनेक्शन जांचें और पुनः प्रयास करें।",
     "retry": "पुनः प्रयास करें",
     "of": "{{total}} में से",
-    "avgOrderValue": "औसत ऑर्डर मूल्य"
+    "avgOrderValue": "औसत ऑर्डर मूल्य",
+    "needsAttention": "ध्यान देने योग्य",
+    "channelBreakdown": "चैनल के अनुसार ऑर्डर",
+    "channelBreakdownSubtitle": "आज के ऑर्डर कहाँ से आ रहे हैं",
+    "channelDineIn": "डाइन-इन",
+    "channelPickup": "पिकअप",
+    "channelDelivery": "डिलीवरी"
   },
   "roleHome": {
     "welcome": "स्वागत है, {{name}}",
