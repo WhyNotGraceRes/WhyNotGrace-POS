@@ -13,8 +13,14 @@ settings = get_settings()
 
 
 def _qr_url(business: Business, location: Location, qr: QRCode) -> str:
+    """A scanned QR always lands on the business's public website first
+    (see PublicWebsitePage) — the table/room context rides along as query
+    params so the site's "Order Now" CTA can hand off into the actual
+    ordering session (/qr/menu/...) without a second scan. If the website
+    is off or unpublished for this business, the page itself falls back to
+    sending the visitor straight into ordering (see its own gating)."""
     kind = "table" if location.location_type == LocationType.TABLE else "room" if location.location_type == LocationType.ROOM else "location"
-    return f"{settings.frontend_base_url}/qr/menu/{business.slug}/{kind}/{location.id}?c={qr.code}"
+    return f"{settings.frontend_base_url}/site/{business.slug}?kind={kind}&location_id={location.id}&c={qr.code}"
 
 
 def list_locations(db: Session, business_id: uuid.UUID, location_type: LocationType | None = None) -> list[Location]:

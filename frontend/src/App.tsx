@@ -36,6 +36,7 @@ import { SubscriptionPage } from "@/features/subscription/SubscriptionPage";
 import { QrLayout } from "@/features/qr/QrLayout";
 import { QrOrderingPage } from "@/features/qr/QrOrderingPage";
 import { QrOrderStatusPage } from "@/features/qr/QrOrderStatusPage";
+import { PublicWebsitePage } from "@/features/website/PublicWebsitePage";
 
 import { PlatformLoginPage } from "@/features/platform/PlatformLoginPage";
 import { PlatformLayout } from "@/features/platform/PlatformLayout";
@@ -96,6 +97,13 @@ export function App() {
           <Route path="/qr/menu/:businessSlug/:kind/:locationId" element={<QrOrderingPage />} />
           <Route path="/qr/menu/:businessSlug/:kind/:locationId/order/:orderId" element={<QrOrderStatusPage />} />
         </Route>
+
+        {/* Every business's public site — one shared template, content and
+            colors set by platform staff (see BusinessDetailPage's Website
+            panel). In production this is what a restaurant's own subdomain
+            (e.g. slug.whynotgrace.com) resolves to; here it's a path so it
+            works without per-tenant DNS in dev. */}
+        <Route path="/site/:businessSlug" element={<PublicWebsitePage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>

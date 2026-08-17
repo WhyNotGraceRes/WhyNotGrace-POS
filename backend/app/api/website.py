@@ -5,7 +5,9 @@ from app.core.dependencies import get_current_business_id, require_feature, requ
 from app.core.permissions import ROLE_FULL_ACCESS
 from app.database.session import get_db
 from app.database.transaction import transaction
+from app.models.business import Business
 from app.models.enums import FeatureModule
+from app.schemas.qr import QRMenuCategoryOut
 from app.schemas.website import PublicWebsiteResponse, WebsiteConfigOut, WebsiteConfigUpdateRequest
 from app.services import audit_service, website_service
 
@@ -47,3 +49,10 @@ def get_public_website(business_slug: str, db: Session = Depends(get_db)):
         pickup_enabled=pickup_enabled,
         delivery_enabled=delivery_enabled,
     )
+
+
+@router.get("/public/{business_slug}/menu", response_model=list[QRMenuCategoryOut])
+def get_public_website_menu(business_slug: str, language: str = "en", db: Session = Depends(get_db)):
+    business: Business
+    business, _config, _pickup_enabled, _delivery_enabled = website_service.get_public_website(db, business_slug)
+    return website_service.get_public_menu(db, business, language)

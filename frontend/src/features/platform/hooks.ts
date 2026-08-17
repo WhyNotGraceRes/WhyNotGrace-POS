@@ -5,6 +5,7 @@ import {
   platformFeaturesApi,
   platformSubscriptionApi,
   platformTogglesApi,
+  platformWebsiteApi,
 } from "@/api/platform";
 import { usePlatformAuthStore } from "@/stores/platformAuthStore";
 import type {
@@ -13,6 +14,7 @@ import type {
   ProvisionBusinessRequest,
   ProvisionSubscriptionRequest,
   RenewSubscriptionRequest,
+  WebsiteConfigUpdateRequest,
 } from "@/types/models";
 
 export function usePlatformLogin() {
@@ -150,5 +152,22 @@ export function useCancelSubscription(businessId: string) {
   return useMutation({
     mutationFn: () => platformSubscriptionApi.cancel(businessId),
     onSuccess: invalidate,
+  });
+}
+
+export function usePlatformWebsite(businessId: string | null) {
+  return useQuery({
+    queryKey: ["platform", "website", businessId],
+    queryFn: ({ signal }) => platformWebsiteApi.get(businessId as string, signal),
+    enabled: Boolean(businessId),
+    staleTime: 15_000,
+  });
+}
+
+export function useSetPlatformWebsite(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: WebsiteConfigUpdateRequest) => platformWebsiteApi.set(businessId, payload),
+    onSuccess: (data) => queryClient.setQueryData(["platform", "website", businessId], data),
   });
 }

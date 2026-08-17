@@ -535,6 +535,20 @@
       }
     }
   },
+  "website": {
+    "viewMenu": "View Menu",
+    "orderNow": "Order Now",
+    "signature": "Chef's Signature",
+    "todaysSpecial": "Today's Special",
+    "ourStory": "Our Story",
+    "menu": "Menu",
+    "contact": "Contact",
+    "noMenuYet": "Menu coming soon.",
+    "poweredBy": "Powered by WhyNotGrace",
+    "notFoundTitle": "This page isn't available",
+    "notFoundHint": "This website may not be published yet, or the link is incorrect.",
+    "loadError": "Something went wrong loading this page."
+  },
   "menuAdmin": {
     "subtitle": "Real menu data from the backend — categories, items, variants, options, and pricing.",
     "loadError": "Couldn't load the menu.",

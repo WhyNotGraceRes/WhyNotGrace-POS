@@ -19,6 +19,8 @@ import type {
   SetBusinessActiveRequest,
   SubscriptionOut,
   ToggleOut,
+  WebsiteConfigOut,
+  WebsiteConfigUpdateRequest,
 } from "@/types/models";
 
 export const platformAuthApi = {
@@ -97,5 +99,15 @@ export const platformSubscriptionApi = {
   cancel: (businessId: string) =>
     platformApiClient
       .post<SubscriptionOut>(`/platform/businesses/${businessId}/subscription/cancel`, {})
+      .then((r) => r.data),
+};
+
+export const platformWebsiteApi = {
+  get: (businessId: string, signal?: AbortSignal) =>
+    platformApiClient.get<WebsiteConfigOut>(`/platform/businesses/${businessId}/website`, { signal }).then((r) => r.data),
+
+  set: (businessId: string, payload: WebsiteConfigUpdateRequest) =>
+    platformApiClient
+      .put<WebsiteConfigOut>(`/platform/businesses/${businessId}/website`, payload)
       .then((r) => r.data),
 };

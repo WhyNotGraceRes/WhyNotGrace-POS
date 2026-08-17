@@ -14,11 +14,13 @@ import {
   usePlatformFeatures,
   usePlatformSubscription,
   usePlatformToggles,
+  usePlatformWebsite,
   useSetBusinessActive,
   useSetPlatformFeature,
   useSetPlatformToggle,
 } from "@/features/platform/hooks";
 import { SubscriptionPanel } from "@/features/platform/components/SubscriptionPanel";
+import { WebsiteConfigPanel } from "@/features/platform/components/WebsiteConfigPanel";
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -33,6 +35,7 @@ export function BusinessDetailPage() {
   const { data: features } = usePlatformFeatures(id);
   const { data: toggleRows } = usePlatformToggles(id);
   const { data: subscription } = usePlatformSubscription(id);
+  const { data: websiteConfig } = usePlatformWebsite(id);
 
   const setActive = useSetBusinessActive();
   const setFeature = useSetPlatformFeature(id ?? "");
@@ -134,6 +137,15 @@ export function BusinessDetailPage() {
             </div>
           ))}
         </div>
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="mb-1 text-sm font-bold text-stone-800">Website</h2>
+        <p className="mb-4 text-xs text-stone-500">
+          Paste in their logo, hero image, story, and colors — the QR code sends customers here. Requires the
+          ONLINE_WEBSITE module enabled above to go live.
+        </p>
+        <WebsiteConfigPanel businessId={id} businessSlug={business.slug} config={websiteConfig} />
       </Card>
 
       <Card className="p-5">

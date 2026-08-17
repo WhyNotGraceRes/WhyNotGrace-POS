@@ -318,3 +318,10 @@ export type PlatformFeatureFlagUpdateRequest = Schemas["PlatformFeatureFlagUpdat
 export type PlatformToggleUpdateRequest = Schemas["PlatformToggleUpdateRequest"];
 export type ProvisionSubscriptionRequest = Schemas["ProvisionSubscriptionRequest"];
 export type RenewSubscriptionRequest = Schemas["RenewSubscriptionRequest"];
+
+// --- Website (the single-template public site — platform staff manage
+// its content via /platform/businesses/{id}/website, see WebsiteConfigPanel;
+// a business owner can also edit it later via /website/config) ---
+export type WebsiteConfigOut = Schemas["WebsiteConfigOut"];
+export type WebsiteConfigUpdateRequest = Schemas["WebsiteConfigUpdateRequest"];
+export type PublicWebsiteResponse = Schemas["PublicWebsiteResponse"];

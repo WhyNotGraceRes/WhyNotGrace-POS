@@ -723,6 +723,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orders/sessions/{session_id}/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Transfer Session */
+        post: operations["transfer_session_api_v1_orders_sessions__session_id__transfer_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/sessions/{session_id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Merge Sessions */
+        post: operations["merge_sessions_api_v1_orders_sessions__session_id__merge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/kot": {
         parameters: {
             query?: never;
@@ -1345,6 +1379,23 @@ export interface paths {
         };
         /** Get Public Website */
         get: operations["get_public_website_api_v1_website_public__business_slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/website/public/{business_slug}/menu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Public Website Menu */
+        get: operations["get_public_website_menu_api_v1_website_public__business_slug__menu_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2508,6 +2559,32 @@ export interface paths {
         put?: never;
         /** Cancel */
         post: operations["cancel_api_v1_platform_businesses__business_id__subscription_cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/businesses/{business_id}/website": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Website */
+        get: operations["get_website_api_v1_platform_businesses__business_id__website_get"];
+        /**
+         * Update Website
+         * @description The onboarding-time content editor: pasting in a logo/hero image
+         *     URL, the restaurant's story, a theme color, and publishing — the
+         *     "we paste images and menu, they get their site" step. The owner's own
+         *     PUT /website/config (app/api/website.py) still exists for a business
+         *     that wants to maintain its own content later; this is the same
+         *     underlying config, just writable by platform staff too.
+         */
+        put: operations["update_website_api_v1_platform_businesses__business_id__website_put"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3745,6 +3822,14 @@ export interface components {
             /** Is Active */
             is_active?: boolean | null;
         };
+        /** MergeSessionsRequest */
+        MergeSessionsRequest: {
+            /**
+             * Into Session Id
+             * Format: uuid
+             */
+            into_session_id: string;
+        };
         /** NotificationListOut */
         NotificationListOut: {
             /** Notifications */
@@ -4887,6 +4972,14 @@ export interface components {
             name: string;
             /** Quantity Sold */
             quantity_sold: number;
+        };
+        /** TransferSessionRequest */
+        TransferSessionRequest: {
+            /**
+             * Location Id
+             * Format: uuid
+             */
+            location_id: string;
         };
         /** UserOut */
         UserOut: {
@@ -6770,6 +6863,76 @@ export interface operations {
             };
         };
     };
+    transfer_session_api_v1_orders_sessions__session_id__transfer_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferSessionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    merge_sessions_api_v1_orders_sessions__session_id__merge_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeSessionsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_kots_api_v1_kot_get: {
         parameters: {
             query?: {
@@ -7859,6 +8022,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublicWebsiteResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_public_website_menu_api_v1_website_public__business_slug__menu_get: {
+        parameters: {
+            query?: {
+                language?: string;
+            };
+            header?: never;
+            path: {
+                business_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QRMenuCategoryOut"][];
                 };
             };
             /** @description Validation Error */
@@ -9973,6 +10169,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SubscriptionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_website_api_v1_platform_businesses__business_id__website_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                business_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebsiteConfigOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_website_api_v1_platform_businesses__business_id__website_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                business_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WebsiteConfigUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebsiteConfigOut"];
                 };
             };
             /** @description Validation Error */
