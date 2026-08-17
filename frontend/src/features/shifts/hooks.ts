@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shiftsApi } from "@/api/shifts";
 import type { CloseShiftRequest } from "@/types/models";
 
-export function useCurrentShift() {
+export function useCurrentShift(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["shift-current"],
     queryFn: ({ signal }) => shiftsApi.current(signal),
@@ -10,6 +10,7 @@ export function useCurrentShift() {
     // do — a stale answer here means offering Close on a shift somebody
     // already closed on another terminal.
     staleTime: 5_000,
+    enabled: options.enabled ?? true,
   });
 }
 

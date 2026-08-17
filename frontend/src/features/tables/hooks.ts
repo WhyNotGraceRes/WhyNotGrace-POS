@@ -3,12 +3,13 @@ import { tablesApi } from "@/api/tables";
 import { locationsApi } from "@/api/locations";
 import type { LocationCreate, LocationUpdate } from "@/types/models";
 
-export function useTables() {
+export function useTables(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["tables"],
     queryFn: ({ signal }) => tablesApi.list(signal),
     staleTime: 15_000,
     refetchInterval: 30_000,
+    enabled: options.enabled ?? true,
   });
 }
 

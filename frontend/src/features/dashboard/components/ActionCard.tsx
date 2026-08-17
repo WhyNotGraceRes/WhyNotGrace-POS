@@ -13,6 +13,9 @@ interface ActionCardProps {
    * needs someone to act on it, but isn't a problem the way a stuck queue
    * is) — shown in success rather than warning color. */
   positiveWhenNonZero?: boolean;
+  /** Small line under the count — e.g. "Oldest: 18m" or a status
+   * breakdown. Context for the number, not a second thing to read first. */
+  hint?: string;
 }
 
 /** The "needs attention right now" strip — every card here is a queue with
@@ -22,7 +25,7 @@ interface ActionCardProps {
  * stay visually quiet on purpose, so a real queue is the only thing that
  * draws the eye.
  */
-export function ActionCard({ label, count, icon: Icon, to, positiveWhenNonZero }: ActionCardProps) {
+export function ActionCard({ label, count, icon: Icon, to, positiveWhenNonZero, hint }: ActionCardProps) {
   const isIdle = count === 0;
   const tone = isIdle ? "idle" : positiveWhenNonZero ? "success" : "warning";
 
@@ -46,6 +49,7 @@ export function ActionCard({ label, count, icon: Icon, to, positiveWhenNonZero }
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-medium text-slate-500">{label}</p>
           <p className="mt-0.5 text-xl font-bold tabular-nums text-slate-900">{count}</p>
+          {hint && <p className="mt-0.5 truncate text-xs text-slate-400">{hint}</p>}
         </div>
         <ChevronRight size={16} className="shrink-0 text-slate-300" />
       </Card>

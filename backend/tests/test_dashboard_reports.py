@@ -61,6 +61,40 @@ def test_reports_channel_breakdown(client, db_session):
     assert channels["DINE_IN"]["order_count"] >= 1
 
 
+def test_dashboard_payment_method_breakdown_matches_payments_today(client, db_session):
+    """The breakdown must sum to payments_today_amount/count exactly — both
+    are "today" on the same response, and they used to risk disagreeing if
+    the breakdown reused reports_service's business-timezone "today"
+    instead of this endpoint's own (see dashboard_service.py)."""
+    owner = register_and_login(client, db_session, business_name="Dashboard Biz 5")
+    _, item = create_category_and_item(client, owner["headers"], price=100)
+    table = create_table(client, owner["headers"])
+
+    order = _place_order(client, owner["headers"], table, item)
+    resp = client.post(
+        "/api/v1/billing/generate", json={"session_id": order["session_id"]}, headers=owner["headers"]
+    )
+    bill = resp.json()
+    resp = client.post(
+        "/api/v1/payments/cash",
+        json={"bill_id": bill["id"], "amount": bill["grand_total"], "method": "CASH"},
+        headers=owner["headers"],
+    )
+    assert resp.status_code == 201, resp.text
+
+    resp = client.get("/api/v1/dashboard", headers=owner["headers"])
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+
+    breakdown = body["payment_method_breakdown"]
+    cash_row = next(r for r in breakdown if r["method"] == "CASH")
+    assert cash_row["count"] >= 1
+    assert cash_row["total_amount"] == bill["grand_total"]
+
+    assert sum(r["count"] for r in breakdown) == body["payments_today_count"]
+    assert sum(r["total_amount"] for r in breakdown) == body["payments_today_amount"]
+
+
 def test_report_range_includes_its_final_day(client, db_session):
     """A range whose end is today must count today.
 

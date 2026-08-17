@@ -39,6 +39,31 @@ def test_additional_order_only_sends_new_items_to_kitchen(client, db_session):
     assert kots_for_order2[0]["items"][0]["quantity"] == 1
 
 
+def test_active_only_filter_excludes_served_orders(client, db_session):
+    owner = register_and_login(client, db_session, business_name="Flow Biz Active Only")
+    _, item = create_category_and_item(client, owner["headers"])
+    table1 = create_table(client, owner["headers"])
+    table2 = create_table(client, owner["headers"])
+
+    active_order = _place_order(client, owner["headers"], table1, item)
+    served_order = _place_order(client, owner["headers"], table2, item)
+
+    served_kot = next(
+        k for k in client.get("/api/v1/kot", headers=owner["headers"]).json() if k["order_id"] == served_order["id"]
+    )
+    for target in ("ACCEPTED", "PREPARING", "READY"):
+        client.put(f"/api/v1/kot/{served_kot['id']}/status", json={"status": target}, headers=owner["headers"])
+    resp = client.post(f"/api/v1/kitchen/service/{served_kot['id']}/serve", headers=owner["headers"])
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "SERVED"
+
+    resp = client.get("/api/v1/orders", params={"active_only": True}, headers=owner["headers"])
+    assert resp.status_code == 200
+    order_ids = {o["id"] for o in resp.json()}
+    assert active_order["id"] in order_ids
+    assert served_order["id"] not in order_ids
+
+
 def test_kot_lifecycle_and_service_counter(client, db_session):
     owner = register_and_login(client, db_session, business_name="Flow Biz 2")
     _, item = create_category_and_item(client, owner["headers"])
@@ -99,6 +124,44 @@ def test_billing_and_cash_payment_clears_table(client, db_session):
     resp = client.get(f"/api/v1/billing/{bill['id']}", headers=owner["headers"])
     assert resp.json()["status"] == "PAID"
     assert resp.json()["amount_paid"] == 300.0
+
+
+def test_unbilled_orders_excludes_settled_sessions_but_shows_new_rounds(client, db_session):
+    owner = register_and_login(client, db_session, business_name="Flow Biz Unbilled")
+    _, item = create_category_and_item(client, owner["headers"], price=100)
+    table1 = create_table(client, owner["headers"])
+    table2 = create_table(client, owner["headers"])
+
+    # Table 1: never billed — should show up as needing billing.
+    open_order = _place_order(client, owner["headers"], table1, item)
+
+    # Table 2: ordered, billed, and paid in full — should NOT show up.
+    settled_order = _place_order(client, owner["headers"], table2, item)
+    bill = client.post(
+        "/api/v1/billing/generate",
+        json={"session_id": settled_order["session_id"], "use_default_tax": False, "use_default_service_charge": False},
+        headers=owner["headers"],
+    ).json()
+    client.post("/api/v1/payments/cash", json={"bill_id": bill["id"], "amount": 100.0}, headers=owner["headers"])
+
+    resp = client.get("/api/v1/billing/unbilled-orders", headers=owner["headers"])
+    assert resp.status_code == 200
+    order_ids = {o["id"] for o in resp.json()}
+    assert open_order["id"] in order_ids
+    assert settled_order["id"] not in order_ids
+
+    # A new round at the same table after settlement — same session_id
+    # (OrderSession.is_closed is never written, see billing_service.py) —
+    # must still surface as needing billing, without resurfacing the
+    # already-paid order from before.
+    new_round_order = _place_order(client, owner["headers"], table2, item)
+    assert new_round_order["session_id"] == settled_order["session_id"]
+
+    resp = client.get("/api/v1/billing/unbilled-orders", headers=owner["headers"])
+    order_ids = {o["id"] for o in resp.json()}
+    assert new_round_order["id"] in order_ids
+    assert settled_order["id"] not in order_ids
+    assert open_order["id"] in order_ids
 
 
 def test_discount_reduces_grand_total(client, db_session):

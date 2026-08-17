@@ -39,6 +39,7 @@ export type FeatureFlagOut = Schemas["FeatureFlagOut"];
 // --- Dashboard ---
 export type DashboardResponse = Schemas["DashboardResponse"];
 export type TopMenuItemOut = Schemas["TopMenuItemOut"];
+export type PaymentMethodBreakdownOut = Schemas["PaymentMethodBreakdownOut"];
 
 // --- Menu ---
 export type MenuVariantOut = Schemas["MenuVariantOut"];

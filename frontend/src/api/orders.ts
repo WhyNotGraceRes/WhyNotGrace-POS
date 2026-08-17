@@ -3,7 +3,7 @@ import { normalizeOrder } from "@/api/normalize";
 import type { OrderCreateRequest, OrderOut, OrderSource, OrderStatus } from "@/types/models";
 
 export const ordersApi = {
-  list: (params: { status_filter?: OrderStatus; source?: OrderSource } = {}, signal?: AbortSignal) =>
+  list: (params: { status_filter?: OrderStatus; source?: OrderSource; active_only?: boolean } = {}, signal?: AbortSignal) =>
     apiClient.get<OrderOut[]>("/orders", { params, signal }).then((r) => r.data.map(normalizeOrder)),
 
   get: (id: string, signal?: AbortSignal) =>

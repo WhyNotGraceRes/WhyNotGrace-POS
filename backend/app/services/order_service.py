@@ -26,6 +26,19 @@ _DEFAULT_CONTEXT_BY_LOCATION_TYPE = {
 
 _SOURCES_WITHOUT_PERSISTENT_LOCATION = {OrderSource.PICKUP, OrderSource.DELIVERY}
 
+# Every status an order can sit in before it's served/delivered/completed/
+# cancelled — i.e. still somebody's job to move forward. Used by
+# list_orders(active_only=True) so counter-facing screens can get a bounded
+# "what's still open" count instead of pulling a business's entire order
+# history.
+_ACTIVE_ORDER_STATUSES = (
+    OrderStatus.PLACED,
+    OrderStatus.CONFIRMED,
+    OrderStatus.PREPARING,
+    OrderStatus.READY,
+    OrderStatus.OUT_FOR_DELIVERY,
+)
+
 
 def _order_query(db: Session, business_id: uuid.UUID):
     return (
@@ -42,10 +55,19 @@ def get_order_or_404(db: Session, business_id: uuid.UUID, order_id: uuid.UUID) -
     return order
 
 
-def list_orders(db: Session, business_id: uuid.UUID, *, status_filter: OrderStatus | None = None, source: OrderSource | None = None) -> list[Order]:
+def list_orders(
+    db: Session,
+    business_id: uuid.UUID,
+    *,
+    status_filter: OrderStatus | None = None,
+    source: OrderSource | None = None,
+    active_only: bool = False,
+) -> list[Order]:
     query = _order_query(db, business_id)
     if status_filter:
         query = query.filter(Order.status == status_filter)
+    elif active_only:
+        query = query.filter(Order.status.in_(_ACTIVE_ORDER_STATUSES))
     if source:
         query = query.filter(Order.source == source)
     return query.order_by(Order.created_at.desc()).all()

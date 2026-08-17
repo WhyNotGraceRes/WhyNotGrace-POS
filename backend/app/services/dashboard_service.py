@@ -107,6 +107,26 @@ def build_dashboard(db: Session, business_id: uuid.UUID):
     pickup_today = _count_source_today(OrderSource.PICKUP)
     delivery_today = _count_source_today(OrderSource.DELIVERY)
 
+    # Deliberately NOT reusing reports_service.payment_breakdown_report
+    # here, even though it does the same grouping — that function resolves
+    # "today" in the business's own timezone (see its module docstring),
+    # while every other figure on this endpoint uses today_start above
+    # (a naive UTC day). Reusing it would put two numbers labelled "today"
+    # on the same screen that don't actually agree with each other. Same
+    # filter as the payments_today_row query just above, grouped by method.
+    payment_rows = (
+        db.query(Payment.method, func.count(Payment.id), func.coalesce(func.sum(Payment.amount), 0))
+        .filter(
+            Payment.business_id == business_id, Payment.status == PaymentStatus.SUCCESS,
+            Payment.created_at >= today_start,
+        )
+        .group_by(Payment.method)
+        .all()
+    )
+    payment_method_breakdown = [
+        {"method": r[0].value, "count": r[1], "total_amount": float(r[2])} for r in payment_rows
+    ]
+
     return {
         "sales_today": payments_today_amount,
         "orders_today": orders_today,
@@ -129,4 +149,5 @@ def build_dashboard(db: Session, business_id: uuid.UUID):
         "website_orders_today": pickup_today + delivery_today,
         "pickup_orders_today": pickup_today,
         "delivery_orders_today": delivery_today,
+        "payment_method_breakdown": payment_method_breakdown,
     }

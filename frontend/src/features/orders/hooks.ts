@@ -2,12 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ordersApi } from "@/api/orders";
 import type { OrderCreateRequest, OrderSource, OrderStatus } from "@/types/models";
 
-export function useOrders(filters: { status_filter?: OrderStatus; source?: OrderSource } = {}) {
+export function useOrders(
+  filters: { status_filter?: OrderStatus; source?: OrderSource; active_only?: boolean } = {},
+  options: { enabled?: boolean } = {}
+) {
   return useQuery({
     queryKey: ["orders", filters],
     queryFn: ({ signal }) => ordersApi.list(filters, signal),
     staleTime: 10_000,
     refetchInterval: 20_000,
+    enabled: options.enabled ?? true,
   });
 }
 

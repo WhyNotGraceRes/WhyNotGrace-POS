@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { AlertTriangle, ChefHat } from "lucide-react";
 
 import { PageHeader } from "@/components/PageHeader";
+import { FreshnessIndicator } from "@/components/FreshnessIndicator";
 import { Spinner } from "@/components/ui/Spinner";
 import { parseApiError } from "@/api/errors";
 import { useKitchenQueue } from "@/features/kitchen/hooks";
@@ -12,7 +13,7 @@ import type { KOTOut, KOTStatus } from "@/types/models";
 
 export function KitchenPage() {
   const { t } = useTranslation();
-  const { data: kots, isLoading, isError, refetch, isFetching } = useKitchenQueue();
+  const { data: kots, isLoading, isError, refetch, isFetching, dataUpdatedAt } = useKitchenQueue();
   const updateStatus = useUpdateKotStatus();
 
   const handleAdvance = (kot: KOTOut, next: KOTStatus) => {
@@ -40,7 +41,9 @@ export function KitchenPage() {
         title={t("nav.kitchen")}
         subtitle={t("kitchen.subtitle")}
         actions={
-          isFetching ? <Spinner size={16} className="text-slate-400" /> : undefined
+          kots ? (
+            <FreshnessIndicator dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} onRefresh={() => void refetch()} />
+          ) : undefined
         }
       />
 

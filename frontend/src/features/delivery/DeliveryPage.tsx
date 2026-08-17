@@ -3,6 +3,7 @@ import { AlertTriangle, MapPin, Phone, StickyNote, Truck } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { PageHeader } from "@/components/PageHeader";
+import { FreshnessIndicator } from "@/components/FreshnessIndicator";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Select } from "@/components/ui/Select";
@@ -28,7 +29,7 @@ const DELIVERY_TRANSITIONS: Record<string, DeliveryStatus[]> = {
 
 export function DeliveryPage() {
   const { t } = useTranslation();
-  const { data: orders, isLoading, isError } = useDeliveryOrders();
+  const { data: orders, isLoading, isError, isFetching, dataUpdatedAt, refetch } = useDeliveryOrders();
   const updateStatus = useUpdateDeliveryStatus();
 
   const handleUpdate = (orderId: string, status: DeliveryStatus) => {
@@ -43,7 +44,15 @@ export function DeliveryPage() {
 
   return (
     <div>
-      <PageHeader title={t("nav.delivery")} subtitle={t("deliveryStaff.subtitle")} />
+      <PageHeader
+        title={t("nav.delivery")}
+        subtitle={t("deliveryStaff.subtitle")}
+        actions={
+          orders ? (
+            <FreshnessIndicator dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} onRefresh={() => void refetch()} />
+          ) : undefined
+        }
+      />
 
       {isLoading && (
         <div className="flex justify-center py-16">

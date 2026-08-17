@@ -69,9 +69,14 @@ def list_delivery_orders(
     _user=Depends(require_roles(*ROLE_DELIVERY)),
     _feature=Depends(require_feature(FeatureModule.DELIVERY)),
 ):
+    """The delivery worklist — orders still on their way out the door, not
+    a lifetime history. Once DELIVERED there's nothing left to act on (see
+    DELIVERY_STATUS_TRANSITIONS: DELIVERED has no further transitions), so
+    it drops off this list the same way a served KOT drops off the kitchen
+    queue."""
     return [
         OrderOut.model_validate(o)
-        for o in order_service.list_orders(db, business_id, source=OrderSource.DELIVERY)
+        for o in order_service.list_orders(db, business_id, source=OrderSource.DELIVERY, active_only=True)
     ]
 
 

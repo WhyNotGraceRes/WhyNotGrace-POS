@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { kitchenApi } from "@/api/kitchen";
 
-export function useKitchenQueue() {
+export function useKitchenQueue(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ["kitchen", "queue"],
     queryFn: ({ signal }) => kitchenApi.queue(signal),
     staleTime: 5_000,
     refetchInterval: 15_000,
+    enabled: options.enabled ?? true,
   });
 }
 

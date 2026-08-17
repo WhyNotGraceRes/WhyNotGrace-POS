@@ -20,11 +20,13 @@ _STAFF_ORDER_ROLES = ROLE_BILLING | ROLE_SERVICE
 def list_orders(
     status_filter: OrderStatus | None = None,
     source: OrderSource | None = None,
+    active_only: bool = False,
     business_id=Depends(get_current_business_id),
     db: Session = Depends(get_db),
     _user=Depends(require_roles(*_STAFF_ORDER_ROLES)),
 ):
-    return [OrderOut.model_validate(o) for o in order_service.list_orders(db, business_id, status_filter=status_filter, source=source)]
+    orders = order_service.list_orders(db, business_id, status_filter=status_filter, source=source, active_only=active_only)
+    return [OrderOut.model_validate(o) for o in orders]
 
 
 @router.get("/{order_id}", response_model=OrderOut)

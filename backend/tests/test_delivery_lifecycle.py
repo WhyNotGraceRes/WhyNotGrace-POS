@@ -72,6 +72,28 @@ def test_delivery_status_valid_transition_updates_order_status_too(client, db_se
         assert resp.json()["status"] == next_status
 
 
+def test_delivery_orders_list_excludes_delivered(client, db_session):
+    owner = register_and_login(client, db_session, business_name="Delivery Biz Active Only")
+    enable_feature(client, db_session, owner, "DELIVERY")
+    _, item = create_category_and_item(client, owner["headers"])
+
+    active_order = _create_delivery_order(client, owner["headers"], item["id"])
+    delivered_order = _create_delivery_order(client, owner["headers"], item["id"])
+
+    for next_status in ["CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"]:
+        resp = client.put(
+            f"/api/v1/delivery/orders/{delivered_order['id']}/status",
+            json={"status": next_status}, headers=owner["headers"],
+        )
+        assert resp.status_code == 200, resp.text
+
+    resp = client.get("/api/v1/delivery/orders", headers=owner["headers"])
+    assert resp.status_code == 200
+    order_ids = {o["id"] for o in resp.json()}
+    assert active_order["id"] in order_ids
+    assert delivered_order["id"] not in order_ids
+
+
 def test_delivery_status_invalid_transition_rejected(client, db_session):
     owner = register_and_login(client, db_session, business_name="Delivery Biz 3")
     enable_feature(client, db_session, owner, "DELIVERY")

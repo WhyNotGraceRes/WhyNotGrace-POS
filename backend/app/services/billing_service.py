@@ -33,6 +33,55 @@ def get_bill_or_404(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID) -> 
     return bill
 
 
+def list_unbilled_orders(db: Session, business_id: uuid.UUID) -> list[Order]:
+    """Orders that still need billing attention right now.
+
+    There is no "list all bills" endpoint by design (see billing.py's
+    module docstring) — this answers a narrower, safer question: which
+    orders have no money settled against them yet.
+
+    `OrderSession.is_closed` cannot answer this — it is written nowhere in
+    the codebase (see docs/billing-counter-plan.md, "A settled table can be
+    billed again"), so a table's very first session is reused forever and
+    naively grouping "all orders for this session" would resurface a whole
+    table's history on every visit. Instead this looks at each session's
+    most recent bill: no bill, or one still OPEN/PARTIALLY_PAID, means the
+    whole session needs billing; a PAID/CANCELLED bill means only whatever
+    was ordered *after* that bill last changed (a genuine new round at a
+    table that already settled) still needs it — everything settled on that
+    bill itself is correctly left out.
+    """
+    orders = (
+        db.query(Order)
+        .options(joinedload(Order.items), joinedload(Order.customer))
+        .filter(Order.business_id == business_id, Order.status != OrderStatus.CANCELLED)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+    if not orders:
+        return []
+
+    session_ids = {o.session_id for o in orders}
+    bills = (
+        db.query(Bill)
+        .filter(Bill.business_id == business_id, Bill.session_id.in_(session_ids))
+        .order_by(Bill.created_at.desc())
+        .all()
+    )
+    latest_bill_by_session: dict[uuid.UUID, Bill] = {}
+    for bill in bills:
+        latest_bill_by_session.setdefault(bill.session_id, bill)
+
+    result = []
+    for order in orders:
+        bill = latest_bill_by_session.get(order.session_id)
+        if bill is None or bill.status in (BillStatus.OPEN, BillStatus.PARTIALLY_PAID):
+            result.append(order)
+        elif order.created_at > bill.updated_at:
+            result.append(order)
+    return result
+
+
 def _recompute_totals(db: Session, business_id: uuid.UUID, bill: Bill) -> None:
     """Recomputes every derived total on the bill.
 

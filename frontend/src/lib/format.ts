@@ -39,3 +39,18 @@ export function minutesSince(isoTimestamp: string): number {
   const elapsedMs = Date.now() - new Date(isoTimestamp).getTime();
   return Math.max(0, Math.floor(elapsedMs / 60_000));
 }
+
+/** Pure arithmetic only — no English text baked in here, since this is
+ * used for a translated "updated Xs/Xm ago" label and every caller must
+ * go through i18next's own pluralization (see dashboard.updatedJustNow /
+ * updatedSecondsAgo / updatedMinutesAgo / updatedHoursAgo keys) rather
+ * than a hardcoded "ago" string that Hindi/Marathi readers would see
+ * untranslated in the middle of an otherwise-localized sentence. */
+export function elapsedSince(sinceMs: number): { unit: "now" | "seconds" | "minutes" | "hours"; count: number } {
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - sinceMs) / 1000));
+  if (elapsedSeconds < 5) return { unit: "now", count: 0 };
+  if (elapsedSeconds < 60) return { unit: "seconds", count: elapsedSeconds };
+  const minutes = Math.floor(elapsedSeconds / 60);
+  if (minutes < 60) return { unit: "minutes", count: minutes };
+  return { unit: "hours", count: Math.floor(minutes / 60) };
+}

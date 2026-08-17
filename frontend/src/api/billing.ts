@@ -1,6 +1,6 @@
 import { apiClient } from "@/api/client";
-import { normalizeBill } from "@/api/normalize";
-import type { ApplyDiscountRequest, BillOut, GenerateBillRequest } from "@/types/models";
+import { normalizeBill, normalizeOrder } from "@/api/normalize";
+import type { ApplyDiscountRequest, BillOut, GenerateBillRequest, OrderOut } from "@/types/models";
 
 export const billingApi = {
   /** Idempotent get-or-create: returns the existing OPEN/PARTIALLY_PAID
@@ -9,6 +9,14 @@ export const billingApi = {
    * backend — see BillingPage for how bills are discovered via orders. */
   generate: (payload: GenerateBillRequest) =>
     apiClient.post<BillOut>("/billing/generate", payload).then((r) => normalizeBill(r.data)),
+
+  /** Orders with no money settled against them yet — what the Billing page
+   * groups into sessions. Not the same as GET /orders: a session's history
+   * can span settled AND unsettled visits (see backend's
+   * billing_service.list_unbilled_orders), so this scopes correctly where
+   * a raw order list can't. */
+  unbilledOrders: (signal?: AbortSignal) =>
+    apiClient.get<OrderOut[]>("/billing/unbilled-orders", { signal }).then((r) => r.data.map(normalizeOrder)),
 
   get: (billId: string, signal?: AbortSignal) =>
     apiClient.get<BillOut>(`/billing/${billId}`, { signal }).then((r) => normalizeBill(r.data)),

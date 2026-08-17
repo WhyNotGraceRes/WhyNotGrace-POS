@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { AlertTriangle } from "lucide-react";
 
 import { PageHeader } from "@/components/PageHeader";
+import { FreshnessIndicator } from "@/components/FreshnessIndicator";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Input } from "@/components/ui/Input";
@@ -36,9 +37,14 @@ export function OrdersPage() {
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<OrderOut | null>(null);
 
-  const { data: orders, isLoading, isError } = useOrders(
-    statusFilter === "ALL" ? {} : { status_filter: statusFilter }
-  );
+  const {
+    data: orders,
+    isLoading,
+    isError,
+    isFetching,
+    dataUpdatedAt,
+    refetch,
+  } = useOrders(statusFilter === "ALL" ? {} : { status_filter: statusFilter });
   const hotelRoomsEnabled = useIsFeatureEnabled("HOTEL_ROOMS");
   const { data: tables } = useTables();
   const { data: rooms } = useRooms({ enabled: hotelRoomsEnabled });
@@ -68,7 +74,14 @@ export function OrdersPage() {
 
   return (
     <div>
-      <PageHeader title={t("nav.orders")} />
+      <PageHeader
+        title={t("nav.orders")}
+        actions={
+          orders ? (
+            <FreshnessIndicator dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} onRefresh={() => void refetch()} />
+          ) : undefined
+        }
+      />
 
       <div className="mb-4 max-w-xs">
         <Input

@@ -11,6 +11,15 @@ export function useBill(billId: string | null) {
   });
 }
 
+export function useUnbilledOrders() {
+  return useQuery({
+    queryKey: ["billing", "unbilled-orders"],
+    queryFn: ({ signal }) => billingApi.unbilledOrders(signal),
+    staleTime: 10_000,
+    refetchInterval: 20_000,
+  });
+}
+
 export function useGenerateBill() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -18,6 +27,7 @@ export function useGenerateBill() {
     onSuccess: (bill) => {
       queryClient.setQueryData(["billing", bill.id], bill);
       void queryClient.invalidateQueries({ queryKey: ["orders"] });
+      void queryClient.invalidateQueries({ queryKey: ["billing", "unbilled-orders"] });
     },
   });
 }
@@ -77,6 +87,7 @@ export function useMarkBillNoCharge() {
       // plan and the open-sessions list are both stale now.
       void queryClient.invalidateQueries({ queryKey: ["orders"] });
       void queryClient.invalidateQueries({ queryKey: ["tables"] });
+      void queryClient.invalidateQueries({ queryKey: ["billing", "unbilled-orders"] });
     },
   });
 }

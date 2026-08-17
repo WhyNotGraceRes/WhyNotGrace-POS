@@ -4,6 +4,7 @@ import { AlertTriangle, Pencil, Plus, QrCode, Trash2, Users } from "lucide-react
 import toast from "react-hot-toast";
 
 import { PageHeader } from "@/components/PageHeader";
+import { FreshnessIndicator } from "@/components/FreshnessIndicator";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/Button";
@@ -28,7 +29,7 @@ const STATUS_CLASSES: Record<LocationStatus, string> = {
 
 export function TablesPage() {
   const { t } = useTranslation();
-  const { data: tables, isLoading, isError } = useTables();
+  const { data: tables, isLoading, isError, isFetching, dataUpdatedAt, refetch } = useTables();
   const deleteTable = useDeleteTable();
   const [qrTable, setQrTable] = useState<LocationOut | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -49,15 +50,20 @@ export function TablesPage() {
       <PageHeader
         title={t("nav.tables")}
         actions={
-          <Button
-            onClick={() => {
-              setEditingTable(null);
-              setFormOpen(true);
-            }}
-          >
-            <Plus size={16} />
-            {t("tables.addTable")}
-          </Button>
+          <div className="flex items-center gap-3">
+            {tables && (
+              <FreshnessIndicator dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} onRefresh={() => void refetch()} />
+            )}
+            <Button
+              onClick={() => {
+                setEditingTable(null);
+                setFormOpen(true);
+              }}
+            >
+              <Plus size={16} />
+              {t("tables.addTable")}
+            </Button>
+          </div>
         }
       />
 

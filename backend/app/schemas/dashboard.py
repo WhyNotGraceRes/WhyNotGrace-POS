@@ -9,6 +9,12 @@ class TopMenuItemOut(BaseModel):
     quantity_sold: int
 
 
+class PaymentMethodBreakdownOut(BaseModel):
+    method: str
+    count: int
+    total_amount: float
+
+
 class DashboardResponse(BaseModel):
     sales_today: float
     orders_today: int
@@ -29,3 +35,4 @@ class DashboardResponse(BaseModel):
     website_orders_today: int
     pickup_orders_today: int
     delivery_orders_today: int
+    payment_method_breakdown: list[PaymentMethodBreakdownOut]

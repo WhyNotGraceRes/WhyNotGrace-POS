@@ -11,6 +11,7 @@ function useInvalidateBillingViews() {
   const queryClient = useQueryClient();
   return (billId: string) => {
     void queryClient.invalidateQueries({ queryKey: ["billing", billId] });
+    void queryClient.invalidateQueries({ queryKey: ["billing", "unbilled-orders"] });
     void queryClient.invalidateQueries({ queryKey: ["orders"] });
     void queryClient.invalidateQueries({ queryKey: ["tables"] });
     void queryClient.invalidateQueries({ queryKey: ["dashboard"] });

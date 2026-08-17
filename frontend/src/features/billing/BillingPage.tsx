@@ -1,17 +1,17 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import { AlertTriangle, Info, Receipt } from "lucide-react";
+import { AlertTriangle, Receipt } from "lucide-react";
 
 import { PageHeader } from "@/components/PageHeader";
+import { FreshnessIndicator } from "@/components/FreshnessIndicator";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { parseApiError } from "@/api/errors";
-import { useOrders } from "@/features/orders/hooks";
 import { useTables } from "@/features/tables/hooks";
 import { useRooms } from "@/features/rooms/hooks";
 import { useIsFeatureEnabled } from "@/features/settings/hooks";
-import { useGenerateBill } from "@/features/billing/hooks";
+import { useGenerateBill, useUnbilledOrders } from "@/features/billing/hooks";
 import { BillDetailDialog } from "@/features/billing/components/BillDetailDialog";
 import type { OrderOut } from "@/types/models";
 
@@ -19,14 +19,18 @@ import type { OrderOut } from "@/types/models";
  * The backend has no "list all bills" endpoint (only POST /billing/generate,
  * which is an idempotent get-or-create by session_id, and GET /billing/{id}
  * by id — see backend/app/api/billing.py). So this page discovers billable
- * sessions from real orders (GET /orders, already used by the Orders page)
- * instead of inventing a fake bill list. Opening a session generates/fetches
- * its real bill from the backend.
+ * sessions from GET /billing/unbilled-orders — orders with no money settled
+ * against them yet — rather than a raw unfiltered order list. A table's
+ * session is reused across every visit it's ever had (see
+ * billing_service.list_unbilled_orders for why), so grouping straight from
+ * GET /orders would resurface a table's entire history on every visit;
+ * this endpoint already excludes whatever a previous, settled bill covered.
+ * Opening a session generates/fetches its real bill from the backend.
  */
 export function BillingPage() {
   const { t } = useTranslation();
   const hotelRoomsEnabled = useIsFeatureEnabled("HOTEL_ROOMS");
-  const { data: orders, isLoading, isError } = useOrders();
+  const { data: orders, isLoading, isError, isFetching, dataUpdatedAt, refetch } = useUnbilledOrders();
   const { data: tables } = useTables();
   const { data: rooms } = useRooms({ enabled: hotelRoomsEnabled });
   // A billable session's location can be a table OR a hotel room — both
@@ -68,12 +72,15 @@ export function BillingPage() {
 
   return (
     <div>
-      <PageHeader title={t("nav.billing")} subtitle={t("billing.subtitle")} />
-
-      <div className="mb-4 flex items-start gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2.5 text-xs text-brand-800">
-        <Info size={15} className="mt-0.5 shrink-0" />
-        <p>{t("billing.missingListEndpoint")}</p>
-      </div>
+      <PageHeader
+        title={t("nav.billing")}
+        subtitle={t("billing.subtitle")}
+        actions={
+          orders ? (
+            <FreshnessIndicator dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} onRefresh={() => void refetch()} />
+          ) : undefined
+        }
+      />
 
       {isLoading && (
         <div className="flex justify-center py-16">

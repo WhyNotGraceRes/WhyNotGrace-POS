@@ -16,6 +16,7 @@ from app.schemas.billing import (
     VoidBillItemRequest,
     VoidBillRequest,
 )
+from app.schemas.order import OrderOut
 from app.services import audit_service, billing_service
 
 router = APIRouter(prefix="/billing", tags=["billing"])
@@ -35,6 +36,19 @@ def generate_bill(
             resource_type="bill", resource_id=str(bill.id),
         )
     return BillOut.model_validate(bill)
+
+
+@router.get("/unbilled-orders", response_model=list[OrderOut])
+def unbilled_orders(
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    _user=Depends(require_roles(*ROLE_BILLING)),
+):
+    """Powers the Billing page's session list — orders with no money
+    settled against them yet, not a raw unbounded order history. See
+    billing_service.list_unbilled_orders for why this can't just be
+    "every order for a session"."""
+    return [OrderOut.model_validate(o) for o in billing_service.list_unbilled_orders(db, business_id)]
 
 
 @router.get("/{bill_id}", response_model=BillOut)

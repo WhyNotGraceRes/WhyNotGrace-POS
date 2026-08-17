@@ -3046,6 +3046,8 @@ export interface components {
             pickup_orders_today: number;
             /** Delivery Orders Today */
             delivery_orders_today: number;
+            /** Payment Method Breakdown */
+            payment_method_breakdown: components["schemas"]["PaymentMethodBreakdownOut"][];
         };
         /** DeliveryCheckoutRequest */
         DeliveryCheckoutRequest: {
@@ -3930,6 +3932,15 @@ export interface components {
          * @enum {string}
          */
         PaymentMethod: "CASH" | "UPI" | "CARD" | "ONLINE" | "OTHER";
+        /** PaymentMethodBreakdownOut */
+        PaymentMethodBreakdownOut: {
+            /** Method */
+            method: string;
+            /** Count */
+            count: number;
+            /** Total Amount */
+            total_amount: number;
+        };
         /** PaymentOut */
         PaymentOut: {
             /**
