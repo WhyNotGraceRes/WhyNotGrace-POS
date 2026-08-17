@@ -23,8 +23,8 @@ const STATUS_CLASSES: Record<LocationStatus, string> = {
   READY: "border-brand-300 bg-brand-50 text-brand-700",
   SERVED: "border-brand-300 bg-brand-50 text-brand-700",
   BILL_PENDING: "border-danger-300 bg-danger-50 text-danger-700",
-  PAID: "border-slate-300 bg-slate-100 text-slate-500",
-  CLOSED: "border-slate-300 bg-slate-100 text-slate-500",
+  PAID: "border-stone-300 bg-stone-100 text-stone-500",
+  CLOSED: "border-stone-300 bg-stone-100 text-stone-500",
 };
 
 export function TablesPage() {
@@ -81,7 +81,7 @@ export function TablesPage() {
       )}
 
       {!isLoading && !isError && tables && tables.length === 0 && (
-        <p className="py-16 text-center text-sm text-slate-400">{t("pos.noTables")}</p>
+        <p className="py-16 text-center text-sm text-stone-400">{t("pos.noTables")}</p>
       )}
 
       {!isLoading && !isError && tables && tables.length > 0 && (
@@ -138,8 +138,8 @@ export function TablesPage() {
       <Dialog open={Boolean(qrTable)} onClose={() => setQrTable(null)} title={t("tables.qrDialogTitle", { name: qrTable?.name })} size="sm">
         {qrTable?.qr_url && (
           <div className="space-y-3">
-            <p className="text-sm text-slate-500">{t("tables.qrDialogHint")}</p>
-            <p className="break-all rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+            <p className="text-sm text-stone-500">{t("tables.qrDialogHint")}</p>
+            <p className="break-all rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-700">
               {qrTable.qr_url}
             </p>
             <div className="flex gap-2">

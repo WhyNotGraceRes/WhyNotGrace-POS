@@ -37,8 +37,8 @@ export function PaymentMixCard({ breakdown }: { breakdown: PaymentMethodBreakdow
 
   return (
     <Card className="p-5">
-      <h2 className="text-sm font-bold text-slate-900">{t("dashboard.paymentMix")}</h2>
-      <p className="text-xs text-slate-500">{t("dashboard.paymentMixSubtitle")}</p>
+      <h2 className="text-sm font-bold text-stone-900">{t("dashboard.paymentMix")}</h2>
+      <p className="text-xs text-stone-500">{t("dashboard.paymentMixSubtitle")}</p>
 
       <ul className="mt-4 space-y-3">
         {rows.map((row) => {
@@ -46,17 +46,17 @@ export function PaymentMixCard({ breakdown }: { breakdown: PaymentMethodBreakdow
           const labelKey = METHOD_LABEL_KEY[row.method];
           return (
             <li key={row.method} className="flex items-center gap-3">
-              <Icon size={16} className="shrink-0 text-slate-400" />
-              <span className="w-16 shrink-0 text-xs font-medium text-slate-600">
+              <Icon size={16} className="shrink-0 text-stone-400" />
+              <span className="w-16 shrink-0 text-xs font-medium text-stone-600">
                 {labelKey ? t(labelKey) : row.method}
               </span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-100">
                 <div
                   className="h-full rounded-full bg-brand-500"
                   style={{ width: `${(row.total_amount / max) * 100}%` }}
                 />
               </div>
-              <span className="w-20 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-800">
+              <span className="w-20 shrink-0 text-right text-sm font-semibold tabular-nums text-stone-800">
                 {formatCurrency(row.total_amount)}
               </span>
             </li>
@@ -64,9 +64,9 @@ export function PaymentMixCard({ breakdown }: { breakdown: PaymentMethodBreakdow
         })}
       </ul>
 
-      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
-        <span className="font-medium text-slate-500">{t("dashboard.paymentMixTotal")}</span>
-        <span className="font-bold tabular-nums text-slate-800">{formatCurrency(total)}</span>
+      <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-xs">
+        <span className="font-medium text-stone-500">{t("dashboard.paymentMixTotal")}</span>
+        <span className="font-bold tabular-nums text-stone-800">{formatCurrency(total)}</span>
       </div>
     </Card>
   );

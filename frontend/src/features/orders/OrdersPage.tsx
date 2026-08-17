@@ -99,7 +99,7 @@ export function OrdersPage() {
             onClick={() => setStatusFilter(tab)}
             className={
               "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors focus-ring " +
-              (statusFilter === tab ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200")
+              (statusFilter === tab ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200")
             }
           >
             {tab === "ALL" ? t("orders.all") : t(`orderStatus.${tab}`)}
@@ -122,7 +122,7 @@ export function OrdersPage() {
         )}
 
         {!isLoading && !isError && rows.length === 0 && (
-          <p className="py-16 text-center text-sm text-slate-400">
+          <p className="py-16 text-center text-sm text-stone-400">
             {search ? t("orders.noSearchResults", { query: search }) : t("orders.empty")}
           </p>
         )}
@@ -131,7 +131,7 @@ export function OrdersPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <tr className="border-b border-stone-100 text-left text-xs font-semibold uppercase tracking-wide text-stone-400">
                   <th className="px-4 py-3">{t("orders.orderNumber")}</th>
                   <th className="px-4 py-3">{t("orders.table")}</th>
                   <th className="px-4 py-3">{t("orders.source")}</th>
@@ -144,9 +144,9 @@ export function OrdersPage() {
                   <tr
                     key={order.id}
                     onClick={() => setSelectedOrder(order)}
-                    className="cursor-pointer border-b border-slate-50 hover:bg-slate-50"
+                    className="cursor-pointer border-b border-stone-50 hover:bg-stone-50"
                   >
-                    <td className="px-4 py-3 font-medium text-slate-800">
+                    <td className="px-4 py-3 font-medium text-stone-800">
                       {order.order_number}
                       {order.is_additional && (
                         <span className="ml-2 rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700">
@@ -154,12 +154,12 @@ export function OrdersPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{tableName(order.location_id)}</td>
-                    <td className="px-4 py-3 text-slate-600">{t(`orderSource.${order.source}`)}</td>
+                    <td className="px-4 py-3 text-stone-600">{tableName(order.location_id)}</td>
+                    <td className="px-4 py-3 text-stone-600">{t(`orderSource.${order.source}`)}</td>
                     <td className="px-4 py-3">
                       <OrderStatusBadge status={order.status} />
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-slate-800">
+                    <td className="px-4 py-3 text-right font-semibold text-stone-800">
                       {formatCurrency(order.subtotal)}
                     </td>
                   </tr>

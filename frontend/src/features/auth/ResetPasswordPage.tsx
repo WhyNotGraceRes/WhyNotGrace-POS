@@ -46,7 +46,7 @@ export function ResetPasswordPage() {
 
   return (
     <Card className="p-8">
-      <h1 className="text-2xl font-bold text-slate-900">{t("auth.resetPassword.title")}</h1>
+      <h1 className="text-2xl font-bold text-stone-900">{t("auth.resetPassword.title")}</h1>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
         {formError && (
@@ -84,7 +84,7 @@ export function ResetPasswordPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-stone-500">
         <Link to="/login" className="font-semibold text-brand-700 hover:underline">
           {t("auth.forgotPassword.backToLogin")}
         </Link>

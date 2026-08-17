@@ -62,12 +62,12 @@ export function BillDetailDialog({
                 {bill.nc_reason ? `${t("billing.nc")}: ${bill.nc_reason}` : t("billing.nc")}
               </span>
             )}
-            {table && <span className="text-sm text-slate-500">{table.name}</span>}
+            {table && <span className="text-sm text-stone-500">{table.name}</span>}
           </div>
 
           <BillItemsList bill={bill} />
 
-          <div className="space-y-1 rounded-lg bg-slate-50 p-3 text-sm">
+          <div className="space-y-1 rounded-lg bg-stone-50 p-3 text-sm">
             <Row label={t("orders.subtotal")} value={formatCurrency(bill.subtotal)} />
             {bill.discounts.map((d) => (
               <Row key={d.id} label={`${t("billing.discount")}: ${d.name}`} value={`-${formatCurrency(d.amount)}`} tone="success" />
@@ -78,7 +78,7 @@ export function BillDetailDialog({
             {bill.service_charges.map((sc) => (
               <Row key={sc.id} label={`${sc.name}${sc.percent != null ? ` (${sc.percent}%)` : ""}`} value={formatCurrency(sc.amount)} />
             ))}
-            <div className="my-1 border-t border-slate-200" />
+            <div className="my-1 border-t border-stone-200" />
             <Row label={t("billing.grandTotal")} value={formatCurrency(bill.grand_total)} bold />
             <Row label={t("billing.amountPaid")} value={formatCurrency(bill.amount_paid)} />
             {remaining > 0 && <Row label={t("billing.remaining")} value={formatCurrency(remaining)} tone="danger" bold />}
@@ -92,7 +92,7 @@ export function BillDetailDialog({
           )}
 
           {bill.status !== "PAID" && bill.status !== "CANCELLED" && (
-            <div className="border-t border-slate-100 pt-4">
+            <div className="border-t border-stone-100 pt-4">
               <PaymentPanel bill={bill} />
             </div>
           )}
@@ -100,12 +100,12 @@ export function BillDetailDialog({
           {/* Printing is offered for any bill that exists, not only paid
               ones — a counter routinely hands a guest the bill before they
               pay. The server marks an unsettled copy as such. */}
-          <div className="border-t border-slate-100 pt-4">
+          <div className="border-t border-stone-100 pt-4">
             <PrintBillButtons bill={bill} />
           </div>
 
           {bill.status === "PAID" && business && (
-            <div className="border-t border-slate-100 pt-4">
+            <div className="border-t border-stone-100 pt-4">
               <ReceiptView bill={bill} businessName={business.name} tableName={table?.name} source={source} />
             </div>
           )}
@@ -130,7 +130,7 @@ function Row({
     <div
       className={
         "flex items-center justify-between " +
-        (bold ? "text-base font-bold text-slate-900" : "text-slate-600") +
+        (bold ? "text-base font-bold text-stone-900" : "text-stone-600") +
         (tone === "success" ? " text-success-700" : tone === "danger" ? " text-danger-600" : "")
       }
     >

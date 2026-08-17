@@ -119,7 +119,7 @@ export function ProvisionBusinessDialog({ open, onClose }: { open: boolean; onCl
             {...register("owner_password")}
           />
           <FieldError message={errors.owner_password?.message} />
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-stone-500">
             Share this with the owner directly — the account is created active, ready to log in immediately.
           </p>
         </div>

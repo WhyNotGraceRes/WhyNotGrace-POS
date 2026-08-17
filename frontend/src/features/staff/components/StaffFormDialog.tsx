@@ -129,7 +129,7 @@ export function StaffFormDialog({
           </Select>
         </div>
         {isEdit && (
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-stone-700">
             <Switch checked={isActive} onChange={setIsActive} label={t("menuAdmin.isActive")} />
             {t("menuAdmin.isActive")}
           </label>

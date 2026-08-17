@@ -96,7 +96,7 @@ export function BillingPage() {
       )}
 
       {!isLoading && !isError && sessions.length === 0 && (
-        <p className="py-16 text-center text-sm text-slate-400">{t("billing.noSessions")}</p>
+        <p className="py-16 text-center text-sm text-stone-400">{t("billing.noSessions")}</p>
       )}
 
       {!isLoading && !isError && sessions.length > 0 && (
@@ -105,16 +105,16 @@ export function BillingPage() {
             <Card key={session.sessionId} className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-bold text-slate-900">{tableName(session.locationId)}</p>
-                  <p className="text-xs text-slate-500">{t(`orderSource.${session.orders[0].source}`)}</p>
+                  <p className="font-bold text-stone-900">{tableName(session.locationId)}</p>
+                  <p className="text-xs text-stone-500">{t(`orderSource.${session.orders[0].source}`)}</p>
                 </div>
-                <Receipt size={18} className="text-slate-300" />
+                <Receipt size={18} className="text-stone-300" />
               </div>
 
-              <p className="mt-2 text-xs text-slate-500">{t("billing.ordersInSession", { count: session.orders.length })}</p>
+              <p className="mt-2 text-xs text-stone-500">{t("billing.ordersInSession", { count: session.orders.length })}</p>
               <ul className="mt-1 space-y-0.5">
                 {session.orders.map((o) => (
-                  <li key={o.id} className="truncate text-xs text-slate-400">
+                  <li key={o.id} className="truncate text-xs text-stone-400">
                     {o.order_number}
                   </li>
                 ))}

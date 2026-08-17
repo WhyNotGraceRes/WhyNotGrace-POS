@@ -90,14 +90,14 @@ export function DashboardPage() {
               placeholder shape that first load doesn't pop in a big empty
               gap where the channel/payment/reference cards land. */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="h-48 animate-pulse rounded-card bg-slate-100" />
+            <div className="h-48 animate-pulse rounded-card bg-stone-100" />
             <div className="grid grid-cols-2 gap-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <StatCardSkeleton key={i} />
               ))}
             </div>
           </div>
-          <div className="h-40 animate-pulse rounded-card bg-slate-100" />
+          <div className="h-40 animate-pulse rounded-card bg-stone-100" />
         </div>
       )}
 
@@ -120,7 +120,7 @@ export function DashboardPage() {
               a real destination (Orders/Kitchen/Billing), not a dead end —
               the dashboard doubles as a launch pad into the work itself. */}
           <div>
-            <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+            <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-stone-400">
               {t("dashboard.needsAttention")}
             </h2>
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -186,22 +186,22 @@ export function DashboardPage() {
           </div>
 
           <Card className="p-5">
-            <h2 className="text-sm font-bold text-slate-900">{t("dashboard.popularItems")}</h2>
-            <p className="text-xs text-slate-500">{t("dashboard.popularItemsSubtitle")}</p>
+            <h2 className="text-sm font-bold text-stone-900">{t("dashboard.popularItems")}</h2>
+            <p className="text-xs text-stone-500">{t("dashboard.popularItemsSubtitle")}</p>
 
             {data.top_menu_items.length === 0 ? (
-              <p className="mt-4 text-sm text-slate-400">{t("dashboard.noPopularItems")}</p>
+              <p className="mt-4 text-sm text-stone-400">{t("dashboard.noPopularItems")}</p>
             ) : (
-              <ul className="mt-4 divide-y divide-slate-100">
+              <ul className="mt-4 divide-y divide-stone-100">
                 {data.top_menu_items.map((item, index) => (
                   <li key={item.menu_item_id} className="flex items-center justify-between gap-3 py-2.5">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-500">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-100 text-xs font-semibold text-stone-500">
                         {index + 1}
                       </span>
-                      <span className="text-sm font-medium text-slate-800">{item.name}</span>
+                      <span className="text-sm font-medium text-stone-800">{item.name}</span>
                     </div>
-                    <span className="text-sm font-semibold tabular-nums text-slate-600">
+                    <span className="text-sm font-semibold tabular-nums text-stone-600">
                       {formatNumber(item.quantity_sold)}
                     </span>
                   </li>

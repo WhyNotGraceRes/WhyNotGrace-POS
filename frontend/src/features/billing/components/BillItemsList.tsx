@@ -21,7 +21,7 @@ export function BillItemsList({ bill }: { bill: BillOut }) {
   const isOpen = bill.status !== "PAID" && bill.status !== "CANCELLED";
 
   return (
-    <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+    <ul className="divide-y divide-stone-100 rounded-lg border border-stone-100">
       {bill.items.map((item) =>
         pending?.itemId === item.id ? (
           <ConfirmRow
@@ -68,7 +68,7 @@ function ItemRow({
 
   return (
     <li className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
-      <span className={struck ? "text-slate-400 line-through" : "text-slate-700"}>
+      <span className={struck ? "text-stone-400 line-through" : "text-stone-700"}>
         {item.quantity} × {item.item_name_snapshot}
       </span>
 
@@ -89,7 +89,7 @@ function ItemRow({
 
         <span
           className={
-            struck || comped ? "text-slate-400 line-through" : "font-semibold text-slate-800"
+            struck || comped ? "text-stone-400 line-through" : "font-semibold text-stone-800"
           }
         >
           {formatCurrency(item.line_total)}
@@ -172,8 +172,8 @@ function ConfirmRow({
   };
 
   return (
-    <li className="space-y-2 bg-slate-50 px-3 py-2.5 text-sm">
-      <p className="text-slate-700">
+    <li className="space-y-2 bg-stone-50 px-3 py-2.5 text-sm">
+      <p className="text-stone-700">
         {kind === "void"
           ? t("billing.voidItemConfirm", { item: label })
           : t("billing.compItemConfirm", { item: label })}
@@ -213,7 +213,7 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: "slate" | 
     <span
       className={
         "rounded px-1.5 py-0.5 text-xs font-medium " +
-        (tone === "brand" ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-500")
+        (tone === "brand" ? "bg-brand-50 text-brand-700" : "bg-stone-100 text-stone-500")
       }
     >
       {children}
@@ -239,7 +239,7 @@ function IconButton({
       ? "hover:bg-danger-50 hover:text-danger-600"
       : tone === "brand"
         ? "hover:bg-brand-50 hover:text-brand-700"
-        : "hover:bg-slate-100 hover:text-slate-700";
+        : "hover:bg-stone-100 hover:text-stone-700";
   return (
     <button
       type="button"
@@ -247,7 +247,7 @@ function IconButton({
       disabled={disabled}
       aria-label={label}
       title={label}
-      className={`rounded p-1 text-slate-400 disabled:opacity-40 ${hover}`}
+      className={`rounded p-1 text-stone-400 disabled:opacity-40 ${hover}`}
     >
       {children}
     </button>

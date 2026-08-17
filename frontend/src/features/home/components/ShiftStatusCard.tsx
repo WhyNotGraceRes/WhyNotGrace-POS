@@ -40,25 +40,25 @@ export function ShiftStatusCard({ shift }: { shift: ShiftOut | null }) {
 
   return (
     <Link to="/shift" className="block">
-      <Card className={cn("flex items-center gap-3 p-4 transition-shadow hover:shadow-md", toneClasses.ring)}>
-        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", toneClasses.icon)}>
+      <Card className={cn("interactive-card flex items-center gap-3 p-4", toneClasses.ring)}>
+        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", toneClasses.icon)}>
           <Wallet size={19} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-slate-500">
+          <p className="text-xs font-medium text-stone-500">
             {isOpen ? t("roleHome.shiftOpen") : t("roleHome.shiftClosed")}
           </p>
-          <p className="mt-0.5 truncate text-sm font-bold text-slate-900">
+          <p className="mt-0.5 truncate text-sm font-bold text-stone-900">
             {isOpen ? openedLabel : t("roleHome.openShiftCta")}
           </p>
           {isOpen && (
-            <p className="mt-0.5 truncate text-xs text-slate-400">
+            <p className="mt-0.5 truncate text-xs text-stone-400">
               {t("roleHome.shiftOpeningFloat", { amount: formatCurrency(shift.opening_float) })}
               {report && ` · ${t("roleHome.shiftCollected", { amount: formatCurrency(report.gross_takings) })}`}
             </p>
           )}
         </div>
-        <ChevronRight size={16} className="shrink-0 text-slate-300" />
+        <ChevronRight size={16} className="shrink-0 text-stone-300" />
       </Card>
     </Link>
   );
@@ -67,10 +67,10 @@ export function ShiftStatusCard({ shift }: { shift: ShiftOut | null }) {
 export function ShiftStatusCardSkeleton() {
   return (
     <Card className="flex items-center gap-3 p-4">
-      <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-slate-200" />
+      <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-stone-200" />
       <div className="min-w-0 flex-1 space-y-2">
-        <div className="h-3 w-16 animate-pulse rounded bg-slate-200" />
-        <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
+        <div className="h-3 w-16 animate-pulse rounded bg-stone-200" />
+        <div className="h-4 w-24 animate-pulse rounded bg-stone-200" />
       </div>
     </Card>
   );

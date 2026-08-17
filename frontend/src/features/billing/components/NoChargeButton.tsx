@@ -49,8 +49,8 @@ export function NoChargeButton({ bill }: { bill: BillOut }) {
   }
 
   return (
-    <div className="w-full rounded-lg border border-slate-200 p-3">
-      <p className="mb-2 text-sm text-slate-700">
+    <div className="w-full rounded-lg border border-stone-200 p-3">
+      <p className="mb-2 text-sm text-stone-700">
         {t("billing.markNoChargeConfirm", { amount: formatCurrency(bill.grand_total) })}
       </p>
       {error && <p className="mb-2 text-xs text-danger-600">{error}</p>}

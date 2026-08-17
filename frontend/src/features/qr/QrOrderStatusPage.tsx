@@ -44,7 +44,7 @@ export function QrOrderStatusPage() {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 px-6 text-center">
         <Spinner size={26} className="text-brand-600" />
-        <p className="text-sm text-slate-500">{t("qr.loadingSession")}</p>
+        <p className="text-sm text-stone-500">{t("qr.loadingSession")}</p>
       </div>
     );
   }
@@ -53,8 +53,8 @@ export function QrOrderStatusPage() {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 px-6 text-center">
         <AlertTriangle size={28} className="text-danger-500" />
-        <p className="text-base font-semibold text-slate-800">{t("qr.invalidLink")}</p>
-        <p className="text-sm text-slate-500">{errorMessage || t("qr.invalidLinkHint")}</p>
+        <p className="text-base font-semibold text-stone-800">{t("qr.invalidLink")}</p>
+        <p className="text-sm text-stone-500">{errorMessage || t("qr.invalidLinkHint")}</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ export function QrOrderStatusPage() {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 px-6 text-center">
         <AlertTriangle size={28} className="text-danger-500" />
-        <p className="text-sm font-medium text-slate-700">{t("qr.status.loadError")}</p>
+        <p className="text-sm font-medium text-stone-700">{t("qr.status.loadError")}</p>
       </div>
     );
   }
@@ -93,10 +93,10 @@ export function QrOrderStatusPage() {
             <Check size={24} />
           </span>
         )}
-        <h1 className="text-lg font-bold text-slate-900">
+        <h1 className="text-lg font-bold text-stone-900">
           {isCancelled ? t("qr.status.cancelledTitle") : t("qr.status.confirmedTitle")}
         </h1>
-        <p className="text-sm text-slate-500">{t("qr.status.orderNumber", { number: order.order_number })}</p>
+        <p className="text-sm text-stone-500">{t("qr.status.orderNumber", { number: order.order_number })}</p>
       </div>
 
       {!isCancelled && (
@@ -108,21 +108,21 @@ export function QrOrderStatusPage() {
               <div key={step.status} className="flex flex-1 flex-col items-center gap-1.5">
                 <div className="flex w-full items-center">
                   {idx > 0 && (
-                    <span className={cn("h-0.5 flex-1", idx <= currentStep ? "bg-brand-500" : "bg-slate-200")} />
+                    <span className={cn("h-0.5 flex-1", idx <= currentStep ? "bg-brand-500" : "bg-stone-200")} />
                   )}
                   <span
                     className={cn(
                       "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-                      reached ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-400"
+                      reached ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-400"
                     )}
                   >
                     <Icon size={15} />
                   </span>
                   {idx < PROGRESS_STEPS.length - 1 && (
-                    <span className={cn("h-0.5 flex-1", idx < currentStep ? "bg-brand-500" : "bg-slate-200")} />
+                    <span className={cn("h-0.5 flex-1", idx < currentStep ? "bg-brand-500" : "bg-stone-200")} />
                   )}
                 </div>
-                <span className={cn("text-center text-[10px] font-semibold", reached ? "text-brand-700" : "text-slate-400")}>
+                <span className={cn("text-center text-[10px] font-semibold", reached ? "text-brand-700" : "text-stone-400")}>
                   {t(`qr.status.steps.${step.status}`)}
                 </span>
               </div>
@@ -137,24 +137,24 @@ export function QrOrderStatusPage() {
         </p>
       )}
 
-      <div className="mt-6 rounded-card border border-slate-100 p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("qr.status.items")}</p>
+      <div className="mt-6 rounded-card border border-stone-100 p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">{t("qr.status.items")}</p>
         <ul className="space-y-2">
           {order.items.map((item) => (
             <li key={item.id} className="flex items-start justify-between gap-2 text-sm">
               <div>
-                <p className="font-medium text-slate-800">
+                <p className="font-medium text-stone-800">
                   {item.quantity} × {item.item_name_snapshot}
                 </p>
                 {item.options.length > 0 && (
-                  <p className="text-xs text-slate-500">{item.options.map((o) => o.option_name_snapshot).join(", ")}</p>
+                  <p className="text-xs text-stone-500">{item.options.map((o) => o.option_name_snapshot).join(", ")}</p>
                 )}
               </div>
-              <span className="shrink-0 font-semibold text-slate-700">{formatCurrency(item.line_total)}</span>
+              <span className="shrink-0 font-semibold text-stone-700">{formatCurrency(item.line_total)}</span>
             </li>
           ))}
         </ul>
-        <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-sm font-bold text-slate-900">
+        <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3 text-sm font-bold text-stone-900">
           <span>{t("orders.subtotal")}</span>
           <span>{formatCurrency(order.subtotal)}</span>
         </div>

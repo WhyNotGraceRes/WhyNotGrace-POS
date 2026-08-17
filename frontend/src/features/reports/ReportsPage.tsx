@@ -34,7 +34,7 @@ function ReportSection<T>({
   const { t } = useTranslation();
   return (
     <Card className="p-4">
-      <p className="mb-3 text-sm font-bold text-slate-900">{title}</p>
+      <p className="mb-3 text-sm font-bold text-stone-900">{title}</p>
       {isLoading && (
         <div className="flex justify-center py-8">
           <Spinner className="text-brand-600" />
@@ -47,7 +47,7 @@ function ReportSection<T>({
         </div>
       )}
       {!isLoading && !isError && (!rows || rows.length === 0) && (
-        <p className="py-8 text-center text-xs text-slate-400">{t("reports.empty")}</p>
+        <p className="py-8 text-center text-xs text-stone-400">{t("reports.empty")}</p>
       )}
       {!isLoading && !isError && rows && rows.length > 0 && children(rows)}
     </Card>
@@ -103,20 +103,20 @@ export function ReportsPage() {
 
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("reports.totalSales")}</p>
-          <p className="mt-1 text-xl font-bold text-slate-900">
+          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("reports.totalSales")}</p>
+          <p className="mt-1 text-xl font-bold text-stone-900">
             {sales.isLoading ? <Spinner className="text-brand-600" size={16} /> : formatCurrency(salesTotal)}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("reports.totalOrders")}</p>
-          <p className="mt-1 text-xl font-bold text-slate-900">
+          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("reports.totalOrders")}</p>
+          <p className="mt-1 text-xl font-bold text-stone-900">
             {orders.isLoading ? <Spinner className="text-brand-600" size={16} /> : formatNumber(ordersTotal)}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("reports.avgOrderValue")}</p>
-          <p className="mt-1 text-xl font-bold text-slate-900">
+          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("reports.avgOrderValue")}</p>
+          <p className="mt-1 text-xl font-bold text-stone-900">
             {sales.isLoading || orders.isLoading ? <Spinner className="text-brand-600" size={16} /> : formatCurrency(avgOrderValue)}
           </p>
         </Card>
@@ -127,7 +127,7 @@ export function ReportsPage() {
           {(rows) => (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-400">
+                <tr className="text-left text-xs text-stone-400">
                   <th className="pb-1.5 font-medium">{t("reports.period")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.sales")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.billsPaid")}</th>
@@ -135,10 +135,10 @@ export function ReportsPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.period} className="border-t border-slate-100">
-                    <td className="py-1.5 text-slate-700">{new Date(r.period).toLocaleDateString()}</td>
-                    <td className="py-1.5 text-right font-medium text-slate-900">{formatCurrency(r.total_sales)}</td>
-                    <td className="py-1.5 text-right text-slate-600">{formatNumber(r.bills_paid)}</td>
+                  <tr key={r.period} className="border-t border-stone-100">
+                    <td className="py-1.5 text-stone-700">{new Date(r.period).toLocaleDateString()}</td>
+                    <td className="py-1.5 text-right font-medium text-stone-900">{formatCurrency(r.total_sales)}</td>
+                    <td className="py-1.5 text-right text-stone-600">{formatNumber(r.bills_paid)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -150,16 +150,16 @@ export function ReportsPage() {
           {(rows) => (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-400">
+                <tr className="text-left text-xs text-stone-400">
                   <th className="pb-1.5 font-medium">{t("reports.source")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.orderCount")}</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.source} className="border-t border-slate-100">
-                    <td className="py-1.5 text-slate-700">{t(`orderSource.${r.source}`, r.source)}</td>
-                    <td className="py-1.5 text-right font-medium text-slate-900">{formatNumber(r.order_count)}</td>
+                  <tr key={r.source} className="border-t border-stone-100">
+                    <td className="py-1.5 text-stone-700">{t(`orderSource.${r.source}`, r.source)}</td>
+                    <td className="py-1.5 text-right font-medium text-stone-900">{formatNumber(r.order_count)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -171,7 +171,7 @@ export function ReportsPage() {
           {(rows) => (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-400">
+                <tr className="text-left text-xs text-stone-400">
                   <th className="pb-1.5 font-medium">{t("reports.method")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.count")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.amount")}</th>
@@ -179,10 +179,10 @@ export function ReportsPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.method} className="border-t border-slate-100">
-                    <td className="py-1.5 text-slate-700">{t(`paymentMethod.${r.method}`, r.method)}</td>
-                    <td className="py-1.5 text-right text-slate-600">{formatNumber(r.count)}</td>
-                    <td className="py-1.5 text-right font-medium text-slate-900">{formatCurrency(r.total_amount)}</td>
+                  <tr key={r.method} className="border-t border-stone-100">
+                    <td className="py-1.5 text-stone-700">{t(`paymentMethod.${r.method}`, r.method)}</td>
+                    <td className="py-1.5 text-right text-stone-600">{formatNumber(r.count)}</td>
+                    <td className="py-1.5 text-right font-medium text-stone-900">{formatCurrency(r.total_amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -194,7 +194,7 @@ export function ReportsPage() {
           {(rows) => (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-400">
+                <tr className="text-left text-xs text-stone-400">
                   <th className="pb-1.5 font-medium">{t("reports.item")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.quantitySold")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.revenue")}</th>
@@ -202,10 +202,10 @@ export function ReportsPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.menu_item_id} className="border-t border-slate-100">
-                    <td className="py-1.5 text-slate-700">{r.name}</td>
-                    <td className="py-1.5 text-right text-slate-600">{formatNumber(r.quantity_sold)}</td>
-                    <td className="py-1.5 text-right font-medium text-slate-900">{formatCurrency(r.revenue)}</td>
+                  <tr key={r.menu_item_id} className="border-t border-stone-100">
+                    <td className="py-1.5 text-stone-700">{r.name}</td>
+                    <td className="py-1.5 text-right text-stone-600">{formatNumber(r.quantity_sold)}</td>
+                    <td className="py-1.5 text-right font-medium text-stone-900">{formatCurrency(r.revenue)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -217,16 +217,16 @@ export function ReportsPage() {
           {(rows) => (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-400">
+                <tr className="text-left text-xs text-stone-400">
                   <th className="pb-1.5 font-medium">{t("reports.category")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.revenue")}</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.category_id} className="border-t border-slate-100">
-                    <td className="py-1.5 text-slate-700">{r.category_name}</td>
-                    <td className="py-1.5 text-right font-medium text-slate-900">{formatCurrency(r.revenue)}</td>
+                  <tr key={r.category_id} className="border-t border-stone-100">
+                    <td className="py-1.5 text-stone-700">{r.category_name}</td>
+                    <td className="py-1.5 text-right font-medium text-stone-900">{formatCurrency(r.revenue)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -238,7 +238,7 @@ export function ReportsPage() {
           {(rows) => (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-slate-400">
+                <tr className="text-left text-xs text-stone-400">
                   <th className="pb-1.5 font-medium">{t("reports.channel")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.orderCount")}</th>
                   <th className="pb-1.5 text-right font-medium">{t("reports.revenue")}</th>
@@ -246,10 +246,10 @@ export function ReportsPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.channel} className="border-t border-slate-100">
-                    <td className="py-1.5 text-slate-700">{t(`orderSource.${r.channel}`, r.channel)}</td>
-                    <td className="py-1.5 text-right text-slate-600">{formatNumber(r.order_count)}</td>
-                    <td className="py-1.5 text-right font-medium text-slate-900">{formatCurrency(r.revenue)}</td>
+                  <tr key={r.channel} className="border-t border-stone-100">
+                    <td className="py-1.5 text-stone-700">{t(`orderSource.${r.channel}`, r.channel)}</td>
+                    <td className="py-1.5 text-right text-stone-600">{formatNumber(r.order_count)}</td>
+                    <td className="py-1.5 text-right font-medium text-stone-900">{formatCurrency(r.revenue)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -267,7 +267,7 @@ export function ReportsPage() {
         (sales.data ?? []).length === 0 &&
         (orders.data ?? []).length === 0 &&
         (payments.data ?? []).length === 0 && (
-          <div className="mt-4 flex flex-col items-center gap-2 py-10 text-center text-slate-400">
+          <div className="mt-4 flex flex-col items-center gap-2 py-10 text-center text-stone-400">
             <BarChart3 size={22} />
             <p className="text-sm">{t("reports.noDataForRange")}</p>
           </div>

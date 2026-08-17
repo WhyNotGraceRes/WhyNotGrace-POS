@@ -60,7 +60,7 @@ export function DiscountForm({ bill }: { bill: BillOut }) {
   }
 
   return (
-    <div className="w-full rounded-lg border border-slate-200 p-3">
+    <div className="w-full rounded-lg border border-stone-200 p-3">
       {error && <p className="mb-2 text-xs text-danger-600">{error}</p>}
       <div className="space-y-2">
         <div>
@@ -74,7 +74,7 @@ export function DiscountForm({ bill }: { bill: BillOut }) {
             onClick={() => setMode("percent")}
             className={cn(
               "flex-1 rounded-lg border px-2 py-1.5 text-xs font-semibold",
-              mode === "percent" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-slate-200 text-slate-500"
+              mode === "percent" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-stone-200 text-stone-500"
             )}
           >
             {t("billing.percent")}
@@ -84,7 +84,7 @@ export function DiscountForm({ bill }: { bill: BillOut }) {
             onClick={() => setMode("amount")}
             className={cn(
               "flex-1 rounded-lg border px-2 py-1.5 text-xs font-semibold",
-              mode === "amount" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-slate-200 text-slate-500"
+              mode === "amount" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-stone-200 text-stone-500"
             )}
           >
             {t("billing.flatAmount")}

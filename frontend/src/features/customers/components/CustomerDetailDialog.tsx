@@ -15,9 +15,9 @@ const LOYALTY_VIEW_ROLES = new Set(["OWNER", "MANAGER"]);
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-slate-100 py-2.5 last:border-0">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="text-sm font-medium text-slate-800">{children}</span>
+    <div className="flex items-center justify-between gap-4 border-b border-stone-100 py-2.5 last:border-0">
+      <span className="text-sm text-stone-500">{label}</span>
+      <span className="text-sm font-medium text-stone-800">{children}</span>
     </div>
   );
 }
@@ -58,8 +58,8 @@ export function CustomerDetailDialog({ customer, onClose }: { customer: Customer
       </div>
 
       {canViewLoyalty && (
-        <div className="mt-4 rounded-lg border border-slate-100 p-3">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="mt-4 rounded-lg border border-stone-100 p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
             <Gift size={14} />
             {t("customers.loyalty")}
           </p>
@@ -70,7 +70,7 @@ export function CustomerDetailDialog({ customer, onClose }: { customer: Customer
             </div>
           )}
 
-          {accountError && <p className="text-sm text-slate-400">{t("customers.loyaltyNotEnrolled")}</p>}
+          {accountError && <p className="text-sm text-stone-400">{t("customers.loyaltyNotEnrolled")}</p>}
 
           {account && (
             <div>
@@ -105,7 +105,7 @@ export function CustomerDetailDialog({ customer, onClose }: { customer: Customer
         </div>
       )}
 
-      <div className="mt-4 flex items-start gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+      <div className="mt-4 flex items-start gap-2 rounded-lg bg-stone-50 px-3 py-2 text-xs text-stone-500">
         <Info size={13} className="mt-0.5 shrink-0" />
         <p>{t("customers.noCustomerHistoryNote")}</p>
       </div>

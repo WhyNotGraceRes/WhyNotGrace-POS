@@ -142,12 +142,12 @@ export function BusinessSettingsPage() {
             <div>
               <Label htmlFor="biz-tax">{t("businessSettings.defaultTax")}</Label>
               <Input id="biz-tax" type="number" min={0} max={100} step="0.01" value={tax} onChange={(e) => setTax(e.target.value)} />
-              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.taxHint")}</p>
+              <p className="mt-1 text-xs text-stone-500">{t("businessSettings.taxHint")}</p>
             </div>
             <div>
               <Label htmlFor="biz-service">{t("businessSettings.defaultServiceCharge")}</Label>
               <Input id="biz-service" type="number" min={0} max={100} step="0.01" value={serviceCharge} onChange={(e) => setServiceCharge(e.target.value)} />
-              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.serviceChargeHint")}</p>
+              <p className="mt-1 text-xs text-stone-500">{t("businessSettings.serviceChargeHint")}</p>
             </div>
           </div>
 
@@ -161,12 +161,12 @@ export function BusinessSettingsPage() {
                 placeholder="27AAPFU0939F1ZV"
                 maxLength={15}
               />
-              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.gstinHint")}</p>
+              <p className="mt-1 text-xs text-stone-500">{t("businessSettings.gstinHint")}</p>
             </div>
             <div>
               <Label htmlFor="biz-tax-label">{t("businessSettings.taxLabel")}</Label>
               <Input id="biz-tax-label" value={taxLabel} onChange={(e) => setTaxLabel(e.target.value)} />
-              <p className="mt-1 text-xs text-slate-500">{t("businessSettings.taxLabelHint")}</p>
+              <p className="mt-1 text-xs text-stone-500">{t("businessSettings.taxLabelHint")}</p>
             </div>
           </div>
 
@@ -175,10 +175,10 @@ export function BusinessSettingsPage() {
               by default and the consequence of turning it off is spelled
               out rather than left to the owner to discover on a printed
               bill. */}
-          <div className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2">
+          <div className="flex items-start justify-between gap-3 rounded-lg border border-stone-200 px-3 py-2">
             <div>
-              <p className="text-sm font-medium text-slate-800">{t("businessSettings.splitTax")}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-sm font-medium text-stone-800">{t("businessSettings.splitTax")}</p>
+              <p className="text-xs text-stone-500">
                 {splitTax
                   ? t("businessSettings.splitTaxOn", {
                       label: taxLabel || "GST",
@@ -193,7 +193,7 @@ export function BusinessSettingsPage() {
           <div>
             <Label htmlFor="biz-fssai">{t("businessSettings.fssai")}</Label>
             <Input id="biz-fssai" value={fssai} onChange={(e) => setFssai(e.target.value)} maxLength={30} />
-            <p className="mt-1 text-xs text-slate-500">{t("businessSettings.fssaiHint")}</p>
+            <p className="mt-1 text-xs text-stone-500">{t("businessSettings.fssaiHint")}</p>
           </div>
 
           <div>
@@ -203,9 +203,9 @@ export function BusinessSettingsPage() {
               rows={2}
               value={receiptHeader}
               onChange={(e) => setReceiptHeader(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus-ring"
+              className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus-ring"
             />
-            <p className="mt-1 text-xs text-slate-500">{t("businessSettings.receiptHeaderHint")}</p>
+            <p className="mt-1 text-xs text-stone-500">{t("businessSettings.receiptHeaderHint")}</p>
           </div>
 
           <div>
@@ -215,9 +215,9 @@ export function BusinessSettingsPage() {
               rows={2}
               value={receiptFooter}
               onChange={(e) => setReceiptFooter(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus-ring"
+              className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm focus-ring"
             />
-            <p className="mt-1 text-xs text-slate-500">{t("businessSettings.receiptFooterHint")}</p>
+            <p className="mt-1 text-xs text-stone-500">{t("businessSettings.receiptFooterHint")}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

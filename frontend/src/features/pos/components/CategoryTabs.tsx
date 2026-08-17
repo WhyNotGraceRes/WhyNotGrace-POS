@@ -20,7 +20,7 @@ export function CategoryTabs({
         onClick={() => onSelect(null)}
         className={cn(
           "shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors focus-ring",
-          selectedId === null ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          selectedId === null ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
         )}
       >
         {t("pos.allCategories")}
@@ -32,7 +32,7 @@ export function CategoryTabs({
           onClick={() => onSelect(category.id)}
           className={cn(
             "shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors focus-ring",
-            selectedId === category.id ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            selectedId === category.id ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
           )}
         >
           {category.name}

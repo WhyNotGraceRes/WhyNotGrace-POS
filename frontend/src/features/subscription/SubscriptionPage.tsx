@@ -45,13 +45,13 @@ export function SubscriptionPage() {
                 <CreditCard size={20} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-500">
+                <p className="text-sm font-semibold text-stone-500">
                   {subscription.plan_name ?? t("subscription.noPlan")}
                 </p>
                 {subscription.amount != null && (
-                  <p className="text-lg font-bold text-slate-900">
+                  <p className="text-lg font-bold text-stone-900">
                     {formatCurrency(subscription.amount)}
-                    <span className="text-sm font-normal text-slate-500">/{t("subscription.month")}</span>
+                    <span className="text-sm font-normal text-stone-500">/{t("subscription.month")}</span>
                   </p>
                 )}
               </div>
@@ -59,17 +59,17 @@ export function SubscriptionPage() {
             <SubscriptionStatusBadge status={subscription.status} />
           </div>
 
-          <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm">
+          <div className="mt-4 space-y-2 border-t border-stone-100 pt-4 text-sm">
             {subscription.current_period_start && (
               <div className="flex justify-between">
-                <span className="text-slate-500">{t("subscription.startedOn")}</span>
-                <span className="font-medium text-slate-800">{formatDate(subscription.current_period_start)}</span>
+                <span className="text-stone-500">{t("subscription.startedOn")}</span>
+                <span className="font-medium text-stone-800">{formatDate(subscription.current_period_start)}</span>
               </div>
             )}
             {(subscription.status === "ACTIVE" || subscription.status === "GRACE") && subscription.current_period_end && (
               <div className="flex justify-between">
-                <span className="text-slate-500">{t("subscription.nextBillingDate")}</span>
-                <span className="font-medium text-slate-800">{formatDate(subscription.current_period_end)}</span>
+                <span className="text-stone-500">{t("subscription.nextBillingDate")}</span>
+                <span className="font-medium text-stone-800">{formatDate(subscription.current_period_end)}</span>
               </div>
             )}
             {subscription.status === "SUSPENDED" && (
@@ -78,16 +78,16 @@ export function SubscriptionPage() {
             {subscription.status === "GRACE" && <p className="text-warning-700">{t("subscription.graceNotice")}</p>}
             {subscription.status === "CANCELLED" && subscription.cancelled_at && (
               <div className="flex justify-between">
-                <span className="text-slate-500">{t("subscription.cancelledOn")}</span>
-                <span className="font-medium text-slate-800">{formatDate(subscription.cancelled_at)}</span>
+                <span className="text-stone-500">{t("subscription.cancelledOn")}</span>
+                <span className="font-medium text-stone-800">{formatDate(subscription.cancelled_at)}</span>
               </div>
             )}
             {subscription.status === "NOT_CONFIGURED" && (
-              <p className="text-slate-500">{t("subscription.notConfiguredNotice")}</p>
+              <p className="text-stone-500">{t("subscription.notConfiguredNotice")}</p>
             )}
           </div>
 
-          <p className="mt-5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+          <p className="mt-5 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs text-stone-600">
             {t("subscription.contactToChange")}
           </p>
         </Card>

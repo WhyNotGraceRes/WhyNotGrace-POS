@@ -32,20 +32,20 @@ export function OrderSuccessDialog({ order, onClose }: { order: OrderOut | null;
             </div>
           </div>
 
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-stone-100">
             {order.items.map((item) => (
               <li key={item.id} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-slate-700">
+                <span className="text-stone-700">
                   {item.quantity} × {item.item_name_snapshot}
                 </span>
-                <span className="font-semibold text-slate-800">{formatCurrency(item.line_total)}</span>
+                <span className="font-semibold text-stone-800">{formatCurrency(item.line_total)}</span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-            <span className="text-sm font-semibold text-slate-600">{t("pos.confirmedSubtotal")}</span>
-            <span className="text-lg font-bold text-slate-900">{formatCurrency(order.subtotal)}</span>
+          <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
+            <span className="text-sm font-semibold text-stone-600">{t("pos.confirmedSubtotal")}</span>
+            <span className="text-lg font-bold text-stone-900">{formatCurrency(order.subtotal)}</span>
           </div>
         </div>
       )}

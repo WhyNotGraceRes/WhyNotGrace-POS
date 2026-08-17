@@ -19,7 +19,7 @@ const NEXT_LABEL_KEY: Partial<Record<KOTStatus, string>> = {
 };
 
 const AGE_TONE = (minutes: number) =>
-  minutes >= 15 ? "border-danger-300 bg-danger-50" : minutes >= 8 ? "border-warning-300 bg-warning-50" : "border-slate-200 bg-white";
+  minutes >= 15 ? "border-danger-300 bg-danger-50" : minutes >= 8 ? "border-warning-300 bg-warning-50" : "border-stone-200 bg-white";
 
 export function KotCard({
   kot,
@@ -40,13 +40,13 @@ export function KotCard({
     <Card className={cn("flex flex-col gap-3 border-2 p-4", AGE_TONE(age))}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-bold text-slate-900">{kot.kot_number}</p>
-          <p className="flex items-center gap-1 text-xs text-slate-500">
+          <p className="text-sm font-bold text-stone-900">{kot.kot_number}</p>
+          <p className="flex items-center gap-1 text-xs text-stone-500">
             <Clock size={12} />
             {t("kitchen.minutesAgo", { count: age })}
           </p>
         </div>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+        <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-stone-500">
           {t(`kotStatus.${kot.status}`)}
         </span>
       </div>
@@ -54,9 +54,9 @@ export function KotCard({
       <ul className="space-y-1.5">
         {kot.items.map((item) => (
           <li key={item.id} className="text-sm">
-            <span className="font-semibold text-slate-800">{item.quantity} × </span>
-            <span className="text-slate-700">{item.item_name_snapshot}</span>
-            {item.options_summary && <p className="pl-5 text-xs text-slate-500">{item.options_summary}</p>}
+            <span className="font-semibold text-stone-800">{item.quantity} × </span>
+            <span className="text-stone-700">{item.item_name_snapshot}</span>
+            {item.options_summary && <p className="pl-5 text-xs text-stone-500">{item.options_summary}</p>}
           </li>
         ))}
       </ul>

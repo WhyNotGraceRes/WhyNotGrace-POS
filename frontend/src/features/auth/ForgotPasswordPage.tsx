@@ -39,8 +39,8 @@ export function ForgotPasswordPage() {
 
   return (
     <Card className="p-8">
-      <h1 className="text-2xl font-bold text-slate-900">{t("auth.forgotPassword.title")}</h1>
-      <p className="mt-1.5 text-sm text-slate-500">{t("auth.forgotPassword.subtitle")}</p>
+      <h1 className="text-2xl font-bold text-stone-900">{t("auth.forgotPassword.title")}</h1>
+      <p className="mt-1.5 text-sm text-stone-500">{t("auth.forgotPassword.subtitle")}</p>
 
       {message ? (
         <div className="mt-6 rounded-lg border border-success-500/30 bg-success-50 px-3 py-3 text-sm text-success-600">
@@ -66,7 +66,7 @@ export function ForgotPasswordPage() {
         </form>
       )}
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-stone-500">
         <Link to="/login" className="font-semibold text-brand-700 hover:underline">
           {t("auth.forgotPassword.backToLogin")}
         </Link>

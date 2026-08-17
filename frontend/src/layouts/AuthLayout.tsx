@@ -6,13 +6,13 @@ export function AuthLayout() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-stone-50">
       <header className="flex items-center justify-between px-6 py-5 sm:px-10">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
             W
           </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900">{t("common.appName")}</span>
+          <span className="text-lg font-bold tracking-tight text-stone-900">{t("common.appName")}</span>
         </div>
         <LanguageSwitcher />
       </header>

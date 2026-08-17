@@ -19,13 +19,13 @@ const toneClasses: Record<NonNullable<StatCardProps["tone"]>, string> = {
 export function StatCard({ label, value, icon: Icon, hint, tone = "default" }: StatCardProps) {
   return (
     <Card className="flex items-start gap-3 p-4">
-      <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", toneClasses[tone])}>
+      <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", toneClasses[tone])}>
         <Icon size={18} />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-xs font-medium text-slate-500">{label}</p>
-        <p className="mt-0.5 text-xl font-bold tabular-nums text-slate-900">{value}</p>
-        {hint && <p className="mt-0.5 truncate text-xs text-slate-400">{hint}</p>}
+        <p className="truncate text-xs font-medium text-stone-500">{label}</p>
+        <p className="mt-0.5 text-xl font-bold tracking-tight tabular-nums text-stone-900">{value}</p>
+        {hint && <p className="mt-0.5 truncate text-xs text-stone-400">{hint}</p>}
       </div>
     </Card>
   );
@@ -34,10 +34,10 @@ export function StatCard({ label, value, icon: Icon, hint, tone = "default" }: S
 export function StatCardSkeleton() {
   return (
     <Card className="flex items-start gap-3 p-4">
-      <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-slate-200" />
+      <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-stone-200" />
       <div className="min-w-0 flex-1 space-y-2">
-        <div className="h-3 w-20 animate-pulse rounded bg-slate-200" />
-        <div className="h-6 w-14 animate-pulse rounded bg-slate-200" />
+        <div className="h-3 w-20 animate-pulse rounded bg-stone-200" />
+        <div className="h-6 w-14 animate-pulse rounded bg-stone-200" />
       </div>
     </Card>
   );

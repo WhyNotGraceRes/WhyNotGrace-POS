@@ -86,8 +86,8 @@ export function QrItemDialog({ item, onClose }: { item: QRMenuItemOut | null; on
       footer={
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs text-slate-500">{t("pos.estimatedTotal")}</p>
-            <p className="text-lg font-bold text-slate-900">{formatCurrency(lineEstimate)}</p>
+            <p className="text-xs text-stone-500">{t("pos.estimatedTotal")}</p>
+            <p className="text-lg font-bold text-stone-900">{formatCurrency(lineEstimate)}</p>
           </div>
           <Button size="lg" onClick={handleAdd} disabled={!canAdd}>
             {t("pos.addToCart")}
@@ -97,19 +97,19 @@ export function QrItemDialog({ item, onClose }: { item: QRMenuItemOut | null; on
     >
       <div className="flex items-start gap-2">
         <VegIndicator isVeg={item.is_veg} />
-        <div>{item.description && <p className="text-sm text-slate-500">{item.description}</p>}</div>
+        <div>{item.description && <p className="text-sm text-stone-500">{item.description}</p>}</div>
       </div>
 
       {item.variants.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("pos.selectSize")}</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">{t("pos.selectSize")}</p>
           <div className="space-y-1.5">
             {item.variants.map((v) => (
               <label
                 key={v.id}
                 className={cn(
                   "flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm",
-                  variantId === v.id ? "border-brand-500 bg-brand-50" : "border-slate-200 hover:bg-slate-50"
+                  variantId === v.id ? "border-brand-500 bg-brand-50" : "border-stone-200 hover:bg-stone-50"
                 )}
               >
                 <span className="flex items-center gap-2">
@@ -122,7 +122,7 @@ export function QrItemDialog({ item, onClose }: { item: QRMenuItemOut | null; on
                   />
                   {v.name}
                 </span>
-                <span className="font-medium text-slate-600">{formatCurrency(item.price + v.price_delta)}</span>
+                <span className="font-medium text-stone-600">{formatCurrency(item.price + v.price_delta)}</span>
               </label>
             ))}
           </div>
@@ -131,7 +131,7 @@ export function QrItemDialog({ item, onClose }: { item: QRMenuItemOut | null; on
 
       {item.option_groups.map((group) => (
         <div key={group.id} className="mt-4">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
             {group.name}
             {group.is_required && <span className="text-danger-500">*</span>}
           </p>
@@ -143,7 +143,7 @@ export function QrItemDialog({ item, onClose }: { item: QRMenuItemOut | null; on
                   key={o.id}
                   className={cn(
                     "flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm",
-                    checked ? "border-brand-500 bg-brand-50" : "border-slate-200 hover:bg-slate-50"
+                    checked ? "border-brand-500 bg-brand-50" : "border-stone-200 hover:bg-stone-50"
                   )}
                 >
                   <span className="flex items-center gap-2">
@@ -157,7 +157,7 @@ export function QrItemDialog({ item, onClose }: { item: QRMenuItemOut | null; on
                     {o.name}
                   </span>
                   {o.price_delta !== 0 && (
-                    <span className="font-medium text-slate-600">+{formatCurrency(o.price_delta)}</span>
+                    <span className="font-medium text-stone-600">+{formatCurrency(o.price_delta)}</span>
                   )}
                 </label>
               );
@@ -167,19 +167,19 @@ export function QrItemDialog({ item, onClose }: { item: QRMenuItemOut | null; on
       ))}
 
       <div className="mt-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("pos.notes")}</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">{t("pos.notes")}</p>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
           maxLength={500}
           placeholder={t("pos.notesPlaceholder")}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus-ring"
+          className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus-ring"
         />
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("pos.quantity")}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("pos.quantity")}</p>
         <QuantityStepper value={quantity} onChange={setQuantity} min={1} />
       </div>
     </Dialog>

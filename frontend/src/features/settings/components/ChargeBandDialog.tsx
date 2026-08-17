@@ -109,7 +109,7 @@ export function ChargeBandDialog({
             onChange={(e) => setName(e.target.value)}
             placeholder={t("charges.chargeNamePlaceholder")}
           />
-          <p className="mt-1 text-xs text-slate-500">{t("charges.chargeNameHint")}</p>
+          <p className="mt-1 text-xs text-stone-500">{t("charges.chargeNameHint")}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -139,7 +139,7 @@ export function ChargeBandDialog({
         </div>
         {/* The half-open boundary is the single most confusable thing on
             this screen, so it is spelled out rather than implied. */}
-        <p className="-mt-2 text-xs text-slate-500">{t("charges.rangeHint")}</p>
+        <p className="-mt-2 text-xs text-stone-500">{t("charges.rangeHint")}</p>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -163,7 +163,7 @@ export function ChargeBandDialog({
             />
           </div>
         </div>
-        <p className="-mt-2 text-xs text-slate-500">{t("charges.zeroHint")}</p>
+        <p className="-mt-2 text-xs text-stone-500">{t("charges.zeroHint")}</p>
 
         <div>
           <Label htmlFor="band-context">{t("charges.appliesTo")}</Label>
@@ -177,16 +177,16 @@ export function ChargeBandDialog({
           </Select>
         </div>
 
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2">
+        <div className="flex items-center justify-between rounded-lg border border-stone-200 px-3 py-2">
           <div>
-            <p className="text-sm font-medium text-slate-800">{t("charges.taxable")}</p>
-            <p className="text-xs text-slate-500">{t("charges.taxableHint")}</p>
+            <p className="text-sm font-medium text-stone-800">{t("charges.taxable")}</p>
+            <p className="text-xs text-stone-500">{t("charges.taxableHint")}</p>
           </div>
           <Switch checked={isTaxable} onChange={setIsTaxable} label={t("charges.taxable")} />
         </div>
 
-        <div className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2">
-          <p className="text-sm font-medium text-slate-800">{t("charges.active")}</p>
+        <div className="flex items-center justify-between rounded-lg border border-stone-200 px-3 py-2">
+          <p className="text-sm font-medium text-stone-800">{t("charges.active")}</p>
           <Switch checked={isActive} onChange={setIsActive} label={t("charges.active")} />
         </div>
       </div>

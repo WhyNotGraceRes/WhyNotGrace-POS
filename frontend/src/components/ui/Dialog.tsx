@@ -31,7 +31,7 @@ export function Dialog({ open, onClose, title, children, footer, size = "md" }: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/50" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 bg-stone-900/50" onClick={onClose} aria-hidden="true" />
       <div
         role="dialog"
         aria-modal="true"
@@ -41,12 +41,12 @@ export function Dialog({ open, onClose, title, children, footer, size = "md" }: 
           sizeClasses[size]
         )}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h2 className="text-base font-bold text-slate-900">{title}</h2>
+        <div className="flex shrink-0 items-center justify-between border-b border-stone-100 px-5 py-4">
+          <h2 className="text-base font-bold text-stone-900">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-ring"
+            className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600 focus-ring"
             aria-label="Close"
           >
             <X size={18} />
@@ -55,7 +55,7 @@ export function Dialog({ open, onClose, title, children, footer, size = "md" }: 
 
         <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
 
-        {footer && <div className="shrink-0 border-t border-slate-100 px-5 py-4">{footer}</div>}
+        {footer && <div className="shrink-0 border-t border-stone-100 px-5 py-4">{footer}</div>}
       </div>
     </div>
   );

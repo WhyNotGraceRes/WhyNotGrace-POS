@@ -48,7 +48,7 @@ export function OrderDetailDialog({
     <Dialog open={Boolean(order)} onClose={onClose} title={order.order_number} size="lg">
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <OrderStatusBadge status={order.status} />
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+        <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-600">
           {t(`orderSource.${order.source}`)}
         </span>
         {order.is_additional && (
@@ -56,35 +56,35 @@ export function OrderDetailDialog({
             {t("orders.additional")}
           </span>
         )}
-        <span className="text-sm text-slate-500">{table?.name ?? "—"}</span>
+        <span className="text-sm text-stone-500">{table?.name ?? "—"}</span>
       </div>
 
-      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+      <ul className="divide-y divide-stone-100 rounded-lg border border-stone-100">
         {order.items.map((item) => (
           <li key={item.id} className="p-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-stone-800">
                 {item.quantity} × {item.item_name_snapshot}
               </span>
-              <span className="font-semibold text-slate-800">{formatCurrency(item.line_total)}</span>
+              <span className="font-semibold text-stone-800">{formatCurrency(item.line_total)}</span>
             </div>
             {item.options.length > 0 && (
-              <p className="mt-0.5 text-xs text-slate-500">{item.options.map((o) => o.option_name_snapshot).join(", ")}</p>
+              <p className="mt-0.5 text-xs text-stone-500">{item.options.map((o) => o.option_name_snapshot).join(", ")}</p>
             )}
             {item.special_instructions && (
-              <p className="mt-0.5 text-xs italic text-slate-400">"{item.special_instructions}"</p>
+              <p className="mt-0.5 text-xs italic text-stone-400">"{item.special_instructions}"</p>
             )}
           </li>
         ))}
       </ul>
 
       <div className="mt-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-slate-600">{t("orders.subtotal")}</span>
-        <span className="text-lg font-bold text-slate-900">{formatCurrency(order.subtotal)}</span>
+        <span className="text-sm font-semibold text-stone-600">{t("orders.subtotal")}</span>
+        <span className="text-lg font-bold text-stone-900">{formatCurrency(order.subtotal)}</span>
       </div>
 
       {order.notes && (
-        <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+        <p className="mt-3 rounded-lg bg-stone-50 p-3 text-sm text-stone-600">
           <span className="font-semibold">{t("orders.notes")}: </span>
           {order.notes}
         </p>
@@ -92,13 +92,13 @@ export function OrderDetailDialog({
 
       {orderKots.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("orders.kots")}</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">{t("orders.kots")}</p>
           <ul className="space-y-2">
             {orderKots.map((kot) => (
-              <li key={kot.id} className="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-2 text-sm">
-                <span className="font-medium text-slate-700">{kot.kot_number}</span>
+              <li key={kot.id} className="flex items-center justify-between rounded-lg border border-stone-100 px-3 py-2 text-sm">
+                <span className="font-medium text-stone-700">{kot.kot_number}</span>
                 <span className="flex items-center gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-stone-500">
                     {t(`kotStatus.${kot.status}`)}
                   </span>
                   {kot.status === "READY" && canServe && (

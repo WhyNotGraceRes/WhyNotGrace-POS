@@ -48,7 +48,7 @@ export function LoyaltyPage() {
       )}
 
       {!isLoading && !isError && (rules ?? []).length === 0 && (
-        <div className="flex flex-col items-center gap-2 py-16 text-center text-slate-400">
+        <div className="flex flex-col items-center gap-2 py-16 text-center text-stone-400">
           <Gift size={24} />
           <p className="text-sm">{t("loyaltyAdmin.noRules")}</p>
         </div>
@@ -60,8 +60,8 @@ export function LoyaltyPage() {
             <Card key={rule.id} className={`p-4 ${!rule.is_active ? "opacity-60" : ""}`}>
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="font-bold text-slate-900">{rule.name}</p>
-                  <p className="text-xs text-slate-500">{t(`loyaltyAdmin.ruleTypeLabel.${rule.rule_type}`)}</p>
+                  <p className="font-bold text-stone-900">{rule.name}</p>
+                  <p className="text-xs text-stone-500">{t(`loyaltyAdmin.ruleTypeLabel.${rule.rule_type}`)}</p>
                 </div>
                 {canManage && (
                   <Switch
@@ -71,14 +71,14 @@ export function LoyaltyPage() {
                   />
                 )}
               </div>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-stone-600">
                 {t("loyaltyAdmin.thresholdLabel")}: <span className="font-semibold">{rule.threshold}</span>
               </p>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-stone-600">
                 {t("loyaltyAdmin.rewardLabel")}: <span className="font-semibold">{t(`loyaltyAdmin.rewardType.${rule.reward_type}`)}</span>
                 {rule.reward_value != null && ` (${rule.reward_value})`}
               </p>
-              {rule.description && <p className="mt-1.5 text-xs text-slate-400">{rule.description}</p>}
+              {rule.description && <p className="mt-1.5 text-xs text-stone-400">{rule.description}</p>}
             </Card>
           ))}
         </div>

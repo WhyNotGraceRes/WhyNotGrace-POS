@@ -20,7 +20,7 @@ export function NotificationsButton() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-ring"
+        className="rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus-ring"
         aria-label={t("shell.notifications")}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -31,10 +31,10 @@ export function NotificationsButton() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-64 rounded-lg border border-slate-200 bg-white p-4 shadow-popover"
+          className="absolute right-0 z-50 mt-2 w-64 rounded-lg border border-stone-200 bg-white p-4 shadow-popover"
         >
-          <p className="text-sm font-semibold text-slate-800">{t("shell.notifications")}</p>
-          <p className="mt-1 text-sm text-slate-500">{t("shell.noNotifications")}</p>
+          <p className="text-sm font-semibold text-stone-800">{t("shell.notifications")}</p>
+          <p className="mt-1 text-sm text-stone-500">{t("shell.noNotifications")}</p>
         </div>
       )}
     </div>

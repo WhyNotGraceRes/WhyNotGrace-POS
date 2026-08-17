@@ -28,10 +28,10 @@ export function ReceiptView({
 
   return (
     <div>
-      <div className="receipt-print-area mx-auto max-w-sm rounded-lg border border-dashed border-slate-300 p-5 font-mono text-sm">
+      <div className="receipt-print-area mx-auto max-w-sm rounded-lg border border-dashed border-stone-300 p-5 font-mono text-sm">
         <div className="text-center">
           <p className="text-base font-bold">{businessName}</p>
-          <p className="mt-0.5 text-xs text-slate-500">{t("receipt.printedOn", { datetime: new Date().toLocaleString() })}</p>
+          <p className="mt-0.5 text-xs text-stone-500">{t("receipt.printedOn", { datetime: new Date().toLocaleString() })}</p>
           {bill.nc_at && (
             <p className="mt-1 text-xs font-bold">
               ** {t("billing.noChargeBanner")} **
@@ -40,7 +40,7 @@ export function ReceiptView({
           )}
         </div>
 
-        <div className="my-3 border-t border-dashed border-slate-300" />
+        <div className="my-3 border-t border-dashed border-stone-300" />
 
         <div className="space-y-0.5 text-xs">
           <div className="flex justify-between">
@@ -61,7 +61,7 @@ export function ReceiptView({
           )}
         </div>
 
-        <div className="my-3 border-t border-dashed border-slate-300" />
+        <div className="my-3 border-t border-dashed border-stone-300" />
 
         {/* This is the guest's copy on screen, so it follows the same rules as
             the printed one (see services/receipt/builder.py): a voided line
@@ -82,7 +82,7 @@ export function ReceiptView({
             ))}
         </ul>
 
-        <div className="my-3 border-t border-dashed border-slate-300" />
+        <div className="my-3 border-t border-dashed border-stone-300" />
 
         <div className="space-y-0.5 text-xs">
           <div className="flex justify-between">
@@ -115,7 +115,7 @@ export function ReceiptView({
           ))}
         </div>
 
-        <div className="my-3 border-t border-dashed border-slate-300" />
+        <div className="my-3 border-t border-dashed border-stone-300" />
 
         <div className="flex justify-between text-base font-bold">
           <span>{t("billing.grandTotal")}</span>
@@ -132,7 +132,7 @@ export function ReceiptView({
           </div>
         )}
 
-        <p className="mt-4 text-center text-xs text-slate-400">{t("receipt.thankYou")}</p>
+        <p className="mt-4 text-center text-xs text-stone-400">{t("receipt.thankYou")}</p>
       </div>
 
       <Button variant="secondary" className="mt-4 w-full print:hidden" onClick={() => window.print()}>

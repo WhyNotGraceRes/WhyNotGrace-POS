@@ -70,7 +70,7 @@ export function QrOrderingPage() {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 px-6 text-center">
         <Spinner size={26} className="text-brand-600" />
-        <p className="text-sm text-slate-500">{t("qr.loadingSession")}</p>
+        <p className="text-sm text-stone-500">{t("qr.loadingSession")}</p>
       </div>
     );
   }
@@ -79,8 +79,8 @@ export function QrOrderingPage() {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 px-6 text-center">
         <AlertTriangle size={28} className="text-danger-500" />
-        <p className="text-base font-semibold text-slate-800">{t("qr.invalidLink")}</p>
-        <p className="text-sm text-slate-500">{errorMessage || t("qr.invalidLinkHint")}</p>
+        <p className="text-base font-semibold text-stone-800">{t("qr.invalidLink")}</p>
+        <p className="text-sm text-stone-500">{errorMessage || t("qr.invalidLinkHint")}</p>
       </div>
     );
   }
@@ -88,7 +88,7 @@ export function QrOrderingPage() {
   return (
     <div className="pb-24">
       {menu && (
-        <div className="sticky top-[57px] z-30 space-y-2.5 border-b border-slate-100 bg-white px-4 py-2.5">
+        <div className="sticky top-[57px] z-30 space-y-2.5 border-b border-stone-100 bg-white px-4 py-2.5">
           <MenuSearch value={search} onChange={setSearch} placeholder={t("qr.searchPlaceholder")} />
           <div className="flex gap-2 overflow-x-auto">
             <button
@@ -96,7 +96,7 @@ export function QrOrderingPage() {
               onClick={() => setSelectedCategoryId(null)}
               className={cn(
                 "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors focus-ring",
-                selectedCategoryId === null ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600"
+                selectedCategoryId === null ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600"
               )}
             >
               {t("pos.allCategories")}
@@ -108,7 +108,7 @@ export function QrOrderingPage() {
                 onClick={() => setSelectedCategoryId(category.id)}
                 className={cn(
                   "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors focus-ring",
-                  selectedCategoryId === category.id ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600"
+                  selectedCategoryId === category.id ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600"
                 )}
               >
                 {category.name}
@@ -132,7 +132,7 @@ export function QrOrderingPage() {
       )}
 
       {menu && !hasAnyVisibleItems && (
-        <p className="px-6 py-16 text-center text-sm text-slate-400">
+        <p className="px-6 py-16 text-center text-sm text-stone-400">
           {search ? t("qr.noSearchResults", { query: search }) : t("qr.noItems")}
         </p>
       )}
@@ -142,7 +142,7 @@ export function QrOrderingPage() {
           (category) =>
             category.items.length > 0 && (
               <div key={category.id}>
-                <h2 className="px-4 pt-4 pb-1 text-sm font-bold text-slate-900">{category.name}</h2>
+                <h2 className="px-4 pt-4 pb-1 text-sm font-bold text-stone-900">{category.name}</h2>
                 <div>
                   {category.items.map((item) => (
                     <QrItemRow key={item.id} item={item} onSelect={handleSelectItem} />

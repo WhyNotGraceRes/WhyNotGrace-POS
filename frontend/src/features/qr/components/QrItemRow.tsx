@@ -16,8 +16,8 @@ export function QrItemRow({ item, onSelect }: { item: QRMenuItemOut; onSelect: (
       onClick={() => onSelect(item)}
       disabled={item.is_sold_out}
       className={cn(
-        "flex w-full items-start gap-3 border-b border-slate-100 px-4 py-4 text-left transition-colors last:border-b-0",
-        item.is_sold_out ? "cursor-not-allowed opacity-50" : "active:bg-slate-50"
+        "flex w-full items-start gap-3 border-b border-stone-100 px-4 py-4 text-left transition-colors last:border-b-0",
+        item.is_sold_out ? "cursor-not-allowed opacity-50" : "active:bg-stone-50"
       )}
     >
       <div className="min-w-0 flex-1">
@@ -29,14 +29,14 @@ export function QrItemRow({ item, onSelect }: { item: QRMenuItemOut; onSelect: (
             </span>
           )}
         </div>
-        <p className="mt-1 text-sm font-semibold leading-snug text-slate-900">{item.name}</p>
-        {item.description && <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{item.description}</p>}
-        <p className="mt-1.5 text-sm font-bold text-slate-800">
+        <p className="mt-1 text-sm font-semibold leading-snug text-stone-900">{item.name}</p>
+        {item.description && <p className="mt-0.5 line-clamp-2 text-xs text-stone-500">{item.description}</p>}
+        <p className="mt-1.5 text-sm font-bold text-stone-800">
           {hasVariants && lowestVariantDelta !== 0 ? `${t("pos.from")} ` : ""}
           {formatCurrency(displayPrice)}
         </p>
         {item.is_sold_out && (
-          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{t("pos.soldOut")}</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-stone-400">{t("pos.soldOut")}</p>
         )}
       </div>
 
@@ -49,12 +49,12 @@ export function QrItemRow({ item, onSelect }: { item: QRMenuItemOut; onSelect: (
             loading="lazy"
           />
         ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-slate-100 text-xl font-bold text-slate-300">
+          <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-stone-100 text-xl font-bold text-stone-300">
             {item.name[0]}
           </div>
         )}
         {!item.is_sold_out && (
-          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-md border border-brand-200 bg-white px-2.5 py-0.5 text-xs font-bold text-brand-600 shadow-sm">
+          <span className="absolute -bottom-2 left-1/2 -transtone-x-1/2 rounded-md border border-brand-200 bg-white px-2.5 py-0.5 text-xs font-bold text-brand-600 shadow-sm">
             {t("qr.add")}
           </span>
         )}

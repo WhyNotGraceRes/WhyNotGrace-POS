@@ -91,9 +91,9 @@ export function PaymentPanel({ bill }: { bill: BillOut }) {
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-        <span className="text-sm text-slate-500">{t("billing.remaining")}</span>
-        <span className="text-lg font-bold text-slate-900">{formatCurrency(remaining)}</span>
+      <div className="mb-3 flex items-center justify-between rounded-lg bg-stone-50 px-3 py-2">
+        <span className="text-sm text-stone-500">{t("billing.remaining")}</span>
+        <span className="text-lg font-bold text-stone-900">{formatCurrency(remaining)}</span>
       </div>
 
       <div className="mb-3 grid grid-cols-4 gap-1.5">
@@ -111,7 +111,7 @@ export function PaymentPanel({ bill }: { bill: BillOut }) {
             }}
             className={cn(
               "flex flex-col items-center gap-1 rounded-lg border px-2 py-2 text-xs font-semibold transition-colors focus-ring",
-              tab === method ? "border-brand-500 bg-brand-50 text-brand-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              tab === method ? "border-brand-500 bg-brand-50 text-brand-700" : "border-stone-200 text-stone-600 hover:bg-stone-50"
             )}
           >
             <Icon size={16} />

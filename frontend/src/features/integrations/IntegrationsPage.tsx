@@ -71,13 +71,13 @@ export function IntegrationsPage() {
             <Card key={integration.provider} className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-bold text-slate-900">{t(`integrationsAdmin.provider.${integration.provider}`)}</p>
+                  <p className="font-bold text-stone-900">{t(`integrationsAdmin.provider.${integration.provider}`)}</p>
                   {integration.is_connected ? (
                     <span className="mt-1 inline-block rounded-full bg-success-50 px-2 py-0.5 text-xs font-semibold text-success-700">
                       {t("integrationsAdmin.connectedStatus")}
                     </span>
                   ) : (
-                    <span className="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                    <span className="mt-1 inline-block rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-500">
                       {t("integrationsAdmin.notConnected")}
                     </span>
                   )}
@@ -86,13 +86,13 @@ export function IntegrationsPage() {
                       "ml-1.5 mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold",
                       featureEnabledFor(integration.provider)
                         ? "bg-brand-50 text-brand-700"
-                        : "bg-slate-100 text-slate-500"
+                        : "bg-stone-100 text-stone-500"
                     )}
                   >
                     {featureEnabledFor(integration.provider) ? t("integrationsAdmin.featureEnabled") : t("integrationsAdmin.featureDisabled")}
                   </span>
                   {integration.is_connected && integration.masked_key_id && (
-                    <p className="mt-1.5 font-mono text-xs text-slate-500">{integration.masked_key_id}</p>
+                    <p className="mt-1.5 font-mono text-xs text-stone-500">{integration.masked_key_id}</p>
                   )}
                   {!featureEnabledFor(integration.provider) && (
                     <p className="mt-1.5 text-xs text-warning-700">{t("integrationsAdmin.featureDisabledHint")}</p>

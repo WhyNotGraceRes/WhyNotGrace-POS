@@ -40,22 +40,22 @@ export function BusinessesListPage() {
       )}
 
       {!isLoading && !isError && businesses && businesses.length === 0 && (
-        <Card className="p-8 text-center text-sm text-slate-500">
+        <Card className="p-8 text-center text-sm text-stone-500">
           No businesses yet. Provision the first one to get started.
         </Card>
       )}
 
       {!isLoading && !isError && businesses && businesses.length > 0 && (
-        <Card className="divide-y divide-slate-100">
+        <Card className="divide-y divide-stone-100">
           {businesses.map((business) => (
             <Link
               key={business.id}
               to={`/platform/businesses/${business.id}`}
-              className="flex items-center justify-between gap-4 px-4 py-3.5 hover:bg-slate-50"
+              className="flex items-center justify-between gap-4 px-4 py-3.5 hover:bg-stone-50"
             >
               <div>
-                <p className="text-sm font-semibold text-slate-800">{business.name}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm font-semibold text-stone-800">{business.name}</p>
+                <p className="text-xs text-stone-500">
                   {business.business_type.replace(/_/g, " ")} · {business.slug}
                 </p>
               </div>

@@ -47,15 +47,15 @@ export function PlatformLoginPage() {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-stone-950 px-4">
       <Card className="w-full max-w-sm p-8">
         <div className="mb-1 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-900 text-sm font-bold text-white">
             W
           </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900">WhyNotGrace Platform</span>
+          <span className="text-lg font-bold tracking-tight text-stone-900">WhyNotGrace Platform</span>
         </div>
-        <p className="mb-6 text-sm text-slate-500">Staff sign-in — not a business account.</p>
+        <p className="mb-6 text-sm text-stone-500">Staff sign-in — not a business account.</p>
 
         <form onSubmit={onSubmit} className="space-y-4" noValidate>
           {formError && (

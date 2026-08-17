@@ -41,8 +41,8 @@ export function LoginPage() {
 
   return (
     <Card className="p-8">
-      <h1 className="text-2xl font-bold text-slate-900">{t("auth.login.title")}</h1>
-      <p className="mt-1.5 text-sm text-slate-500">{t("auth.login.subtitle")}</p>
+      <h1 className="text-2xl font-bold text-stone-900">{t("auth.login.title")}</h1>
+      <p className="mt-1.5 text-sm text-stone-500">{t("auth.login.subtitle")}</p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
         {formError && (
@@ -87,7 +87,7 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500">{t("auth.login.noAccount")}</p>
+      <p className="mt-6 text-center text-sm text-stone-500">{t("auth.login.noAccount")}</p>
     </Card>
   );
 }

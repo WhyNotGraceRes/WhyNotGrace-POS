@@ -91,7 +91,7 @@ export function MenuAdminPage() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[16rem_1fr]">
           <Card className="p-3">
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("menuAdmin.categories")}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">{t("menuAdmin.categories")}</p>
               <button
                 type="button"
                 onClick={() => {
@@ -109,7 +109,7 @@ export function MenuAdminPage() {
               onClick={() => setSelectedCategoryId(null)}
               className={cn(
                 "mb-1 flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm font-medium",
-                selectedCategoryId === null ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-50"
+                selectedCategoryId === null ? "bg-brand-50 text-brand-700" : "text-stone-600 hover:bg-stone-50"
               )}
             >
               {t("pos.allCategories")}
@@ -119,12 +119,12 @@ export function MenuAdminPage() {
                 key={category.id}
                 className={cn(
                   "group mb-1 flex items-center justify-between rounded-lg px-2.5 py-2 text-sm font-medium",
-                  selectedCategoryId === category.id ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-50"
+                  selectedCategoryId === category.id ? "bg-brand-50 text-brand-700" : "text-stone-600 hover:bg-stone-50"
                 )}
               >
                 <button type="button" onClick={() => setSelectedCategoryId(category.id)} className="flex-1 text-left">
                   {category.name}
-                  {!category.is_active && <span className="ml-1.5 text-[10px] text-slate-400">({t("menuAdmin.inactive")})</span>}
+                  {!category.is_active && <span className="ml-1.5 text-[10px] text-stone-400">({t("menuAdmin.inactive")})</span>}
                 </button>
                 <span className="hidden items-center gap-0.5 group-hover:flex">
                   <button
@@ -133,7 +133,7 @@ export function MenuAdminPage() {
                       setEditingCategoryId(category.id);
                       setCategoryDialogOpen(true);
                     }}
-                    className="rounded p-1 text-slate-400 hover:bg-white hover:text-slate-700"
+                    className="rounded p-1 text-stone-400 hover:bg-white hover:text-stone-700"
                     aria-label={t("common.save")}
                   >
                     <Pencil size={12} />
@@ -141,7 +141,7 @@ export function MenuAdminPage() {
                   <button
                     type="button"
                     onClick={() => void handleDeleteCategory(category)}
-                    className="rounded p-1 text-slate-400 hover:bg-white hover:text-danger-600"
+                    className="rounded p-1 text-stone-400 hover:bg-white hover:text-danger-600"
                     aria-label={t("menuAdmin.deleteCategory")}
                   >
                     <Trash2 size={12} />
@@ -149,12 +149,12 @@ export function MenuAdminPage() {
                 </span>
               </div>
             ))}
-            {(categories ?? []).length === 0 && <p className="px-2.5 py-2 text-xs text-slate-400">{t("menuAdmin.noCategories")}</p>}
+            {(categories ?? []).length === 0 && <p className="px-2.5 py-2 text-xs text-stone-400">{t("menuAdmin.noCategories")}</p>}
           </Card>
 
           <div>
             {visibleItems.length === 0 ? (
-              <Card className="flex flex-col items-center justify-center gap-2 p-16 text-center text-slate-400">
+              <Card className="flex flex-col items-center justify-center gap-2 p-16 text-center text-stone-400">
                 <p className="text-sm">{t("menuAdmin.noItems")}</p>
               </Card>
             ) : (
@@ -171,17 +171,17 @@ export function MenuAdminPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <VegIndicator isVeg={item.is_veg} />
-                        <span className="text-sm font-semibold text-slate-800">{item.name}</span>
+                        <span className="text-sm font-semibold text-stone-800">{item.name}</span>
                       </div>
-                      <Pencil size={13} className="mt-0.5 shrink-0 text-slate-300" />
+                      <Pencil size={13} className="mt-0.5 shrink-0 text-stone-300" />
                     </div>
-                    <p className="mt-1.5 text-sm font-bold text-slate-900">{formatCurrency(item.base_price)}</p>
+                    <p className="mt-1.5 text-sm font-bold text-stone-900">{formatCurrency(item.base_price)}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
-                      {!item.is_active && <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{t("menuAdmin.inactive")}</span>}
+                      {!item.is_active && <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] text-stone-500">{t("menuAdmin.inactive")}</span>}
                       {item.is_sold_out && <span className="rounded-full bg-danger-50 px-1.5 py-0.5 text-[10px] text-danger-600">{t("pos.soldOut")}</span>}
                       {item.is_todays_special && <span className="rounded-full bg-accent-50 px-1.5 py-0.5 text-[10px] text-accent-600">{t("pos.special")}</span>}
                       {item.variants.length > 0 && (
-                        <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+                        <span className="rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] text-stone-500">
                           {t("menuAdmin.variantCount", { count: item.variants.length })}
                         </span>
                       )}

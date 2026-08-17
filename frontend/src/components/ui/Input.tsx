@@ -11,10 +11,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={cn(
-          "h-10 w-full rounded-lg border bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400",
+          "h-10 w-full rounded-lg border bg-white px-3 text-sm text-stone-900 placeholder:text-stone-400",
           "transition-colors focus-ring",
-          invalid ? "border-danger-500" : "border-slate-300 hover:border-slate-400",
-          "disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400",
+          invalid ? "border-danger-500" : "border-stone-300 hover:border-stone-400",
+          "disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400",
           className
         )}
         {...props}

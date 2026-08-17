@@ -63,7 +63,7 @@ export function CustomerPickerDialog({
       {!showCreate ? (
         <>
           <div className="relative mb-3">
-            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -transtone-y-1/2 text-stone-400" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -88,14 +88,14 @@ export function CustomerPickerDialog({
                       onSelect(customer.id, `${customer.first_name} (${customer.mobile})`);
                       onClose();
                     }}
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50"
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-50"
                   >
-                    <span className="font-medium text-slate-800">{customer.first_name}</span>
-                    <span className="text-slate-500">{customer.mobile}</span>
+                    <span className="font-medium text-stone-800">{customer.first_name}</span>
+                    <span className="text-stone-500">{customer.mobile}</span>
                   </button>
                 </li>
               ))}
-              {filtered.length === 0 && <p className="py-4 text-center text-sm text-slate-400">{t("customers.empty")}</p>}
+              {filtered.length === 0 && <p className="py-4 text-center text-sm text-stone-400">{t("customers.empty")}</p>}
             </ul>
           )}
 

@@ -89,8 +89,8 @@ export function ShiftPage() {
       {!shift && !closed && (
         <Card className="max-w-md space-y-4 p-5">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">{t("shift.openTitle")}</h2>
-            <p className="mt-0.5 text-xs text-slate-500">{t("shift.openHint")}</p>
+            <h2 className="text-sm font-semibold text-stone-900">{t("shift.openTitle")}</h2>
+            <p className="mt-0.5 text-xs text-stone-500">{t("shift.openHint")}</p>
           </div>
           <div>
             <Label htmlFor="shift-float">{t("shift.openingFloat")}</Label>
@@ -115,10 +115,10 @@ export function ShiftPage() {
 
           <Card className="space-y-4 p-5">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">{t("shift.closeTitle")}</h2>
+              <h2 className="text-sm font-semibold text-stone-900">{t("shift.closeTitle")}</h2>
               {/* The instruction is the control. A cashier who reads the
                   expected figure first will type it back. */}
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-stone-500">
                 {report?.blind_count ? t("shift.closeHintBlind") : t("shift.closeHint")}
               </p>
             </div>
@@ -159,7 +159,7 @@ function RunningTotals({ report }: { report: ShiftReportOut }) {
   const { t } = useTranslation();
   return (
     <Card className="space-y-3 p-5">
-      <h2 className="text-sm font-semibold text-slate-900">{t("shift.currentTitle")}</h2>
+      <h2 className="text-sm font-semibold text-stone-900">{t("shift.currentTitle")}</h2>
 
       <dl className="space-y-1 text-sm">
         <Row label={t("shift.openingFloat")} value={formatCurrencyExact(report.opening_float)} />
@@ -183,7 +183,7 @@ function RunningTotals({ report }: { report: ShiftReportOut }) {
       {/* Withheld deliberately, and said so — an empty space would read as a
           bug rather than as a control. */}
       {report.blind_count && report.expected_cash === null && (
-        <p className="flex items-start gap-1.5 rounded bg-slate-50 px-2 py-1.5 text-xs text-slate-600">
+        <p className="flex items-start gap-1.5 rounded bg-stone-50 px-2 py-1.5 text-xs text-stone-600">
           <Lock size={12} className="mt-0.5 shrink-0" />
           {t("shift.expectedHidden")}
         </p>
@@ -210,7 +210,7 @@ function ClosedSummary({
 
   return (
     <Card className="mb-4 max-w-md space-y-4 p-5">
-      <h2 className="text-sm font-semibold text-slate-900">{t("shift.closedTitle")}</h2>
+      <h2 className="text-sm font-semibold text-stone-900">{t("shift.closedTitle")}</h2>
 
       <dl className="space-y-1 text-sm">
         <Row label={t("shift.expectedCash")} value={formatCurrencyExact(report.expected_cash ?? 0)} />
@@ -262,8 +262,8 @@ function Row({
 }) {
   return (
     <div className="flex justify-between">
-      <dt className={tone === "warn" ? "text-amber-700" : "text-slate-600"}>{label}</dt>
-      <dd className={bold ? "font-semibold text-slate-900" : "text-slate-800"}>{value}</dd>
+      <dt className={tone === "warn" ? "text-amber-700" : "text-stone-600"}>{label}</dt>
+      <dd className={bold ? "font-semibold text-stone-900" : "text-stone-800"}>{value}</dd>
     </div>
   );
 }

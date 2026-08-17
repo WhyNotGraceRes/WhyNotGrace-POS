@@ -42,7 +42,7 @@ export function FreshnessIndicator({
           : t("dashboard.updatedHoursAgo", { count: elapsed.count });
 
   return (
-    <div className="flex items-center gap-2 text-xs text-slate-400">
+    <div className="flex items-center gap-2 text-xs text-stone-400">
       <span>{updatedLabel}</span>
       <button
         type="button"
@@ -50,7 +50,7 @@ export function FreshnessIndicator({
         disabled={isFetching}
         aria-label={t("dashboard.refresh")}
         title={t("dashboard.refresh")}
-        className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50"
+        className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600 disabled:opacity-50"
       >
         <RotateCcw size={14} className={isFetching ? "animate-spin" : ""} />
       </button>

@@ -327,25 +327,25 @@ export function MenuItemDialog({
         </div>
 
         <div className="flex flex-wrap gap-4">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-stone-700">
             <Switch checked={isVeg} onChange={setIsVeg} label={t("menuAdmin.isVeg")} />
             {t("menuAdmin.isVeg")}
           </label>
           {isEdit && (
             <>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-stone-700">
                 <Switch checked={isActive} onChange={setIsActive} label={t("menuAdmin.isActive")} />
                 {t("menuAdmin.isActive")}
               </label>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-stone-700">
                 <Switch checked={isSoldOut} onChange={setIsSoldOut} label={t("pos.soldOut")} />
                 {t("pos.soldOut")}
               </label>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-stone-700">
                 <Switch checked={isTodaysSpecial} onChange={setIsTodaysSpecial} label={t("pos.special")} />
                 {t("pos.special")}
               </label>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-stone-700">
                 <Switch checked={isSpecialty} onChange={setIsSpecialty} label={t("menuAdmin.isSpecialty")} />
                 {t("menuAdmin.isSpecialty")}
               </label>
@@ -354,8 +354,8 @@ export function MenuItemDialog({
         </div>
 
         {/* Variants */}
-        <div className="rounded-lg border border-slate-200 p-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("menuAdmin.variants")}</p>
+        <div className="rounded-lg border border-stone-200 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">{t("menuAdmin.variants")}</p>
           <div className="mb-2 flex flex-wrap gap-1.5">
             {(isEdit ? item?.variants ?? [] : draftVariants).map((v) => {
               const delta = v.price_delta ?? 0;
@@ -364,7 +364,7 @@ export function MenuItemDialog({
                 <span
                   key={isSaved ? v.id : v.key}
                   className={cn(
-                    "flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700",
+                    "flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-700",
                     isSaved && "is_active" in v && !v.is_active && "opacity-50"
                   )}
                 >
@@ -374,7 +374,7 @@ export function MenuItemDialog({
                     <button
                       type="button"
                       onClick={() => handleDeleteVariant(v.id, v.name)}
-                      className="ml-0.5 rounded-full p-0.5 text-slate-400 hover:bg-danger-50 hover:text-danger-600"
+                      className="ml-0.5 rounded-full p-0.5 text-stone-400 hover:bg-danger-50 hover:text-danger-600"
                       aria-label={t("menuAdmin.deleteVariant")}
                     >
                       <X size={11} />
@@ -384,7 +384,7 @@ export function MenuItemDialog({
               );
             })}
             {(isEdit ? item?.variants.length === 0 : draftVariants.length === 0) && (
-              <span className="text-xs text-slate-400">{t("menuAdmin.none")}</span>
+              <span className="text-xs text-stone-400">{t("menuAdmin.none")}</span>
             )}
           </div>
           <div className="flex flex-wrap items-end gap-2">
@@ -410,8 +410,8 @@ export function MenuItemDialog({
         </div>
 
         {/* Option groups */}
-        <div className="rounded-lg border border-slate-200 p-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("menuAdmin.optionGroups")}</p>
+        <div className="rounded-lg border border-stone-200 p-3">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">{t("menuAdmin.optionGroups")}</p>
           <div className="space-y-3">
             {(isEdit ? item?.option_groups ?? [] : draftGroups).map((g) => {
               const groupIsSaved = "id" in g;
@@ -419,19 +419,19 @@ export function MenuItemDialog({
               return (
               <div
                 key={groupKey}
-                className={cn("rounded-lg bg-slate-50 p-2.5", groupIsSaved && "is_active" in g && !g.is_active && "opacity-50")}
+                className={cn("rounded-lg bg-stone-50 p-2.5", groupIsSaved && "is_active" in g && !g.is_active && "opacity-50")}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-sm font-semibold text-stone-800">
                     {g.name}
                     {g.is_required && <span className="ml-1.5 text-[10px] font-bold uppercase text-danger-500">{t("menuAdmin.required")}</span>}
-                    {g.allow_multiple && <span className="ml-1.5 text-[10px] font-bold uppercase text-slate-400">{t("menuAdmin.multiple")}</span>}
+                    {g.allow_multiple && <span className="ml-1.5 text-[10px] font-bold uppercase text-stone-400">{t("menuAdmin.multiple")}</span>}
                   </p>
                   {groupIsSaved && (
                     <button
                       type="button"
                       onClick={() => handleDeleteOptionGroup(g.id, g.name)}
-                      className="shrink-0 rounded p-0.5 text-slate-400 hover:bg-danger-50 hover:text-danger-600"
+                      className="shrink-0 rounded p-0.5 text-stone-400 hover:bg-danger-50 hover:text-danger-600"
                       aria-label={t("menuAdmin.deleteOptionGroup")}
                     >
                       <Trash2 size={12} />
@@ -446,7 +446,7 @@ export function MenuItemDialog({
                       <span
                         key={optionIsSaved ? o.id : o.key}
                         className={cn(
-                          "flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-slate-600",
+                          "flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs text-stone-600",
                           optionIsSaved && "is_active" in o && !o.is_active && "opacity-50"
                         )}
                       >
@@ -455,7 +455,7 @@ export function MenuItemDialog({
                           <button
                             type="button"
                             onClick={() => handleDeleteOption(o.id, o.name)}
-                            className="ml-0.5 rounded-full p-0.5 text-slate-400 hover:bg-danger-50 hover:text-danger-600"
+                            className="ml-0.5 rounded-full p-0.5 text-stone-400 hover:bg-danger-50 hover:text-danger-600"
                             aria-label={t("menuAdmin.deleteOption")}
                           >
                             <X size={10} />
@@ -464,7 +464,7 @@ export function MenuItemDialog({
                       </span>
                     );
                   })}
-                  {g.options.length === 0 && <span className="text-xs text-slate-400">{t("menuAdmin.none")}</span>}
+                  {g.options.length === 0 && <span className="text-xs text-stone-400">{t("menuAdmin.none")}</span>}
                 </div>
                 <div className="mt-2 flex flex-wrap items-end gap-2">
                   <div className="min-w-[8rem] flex-1">
@@ -499,20 +499,20 @@ export function MenuItemDialog({
               );
             })}
             {(isEdit ? item?.option_groups.length === 0 : draftGroups.length === 0) && (
-              <p className="text-xs text-slate-400">{t("menuAdmin.none")}</p>
+              <p className="text-xs text-stone-400">{t("menuAdmin.none")}</p>
             )}
           </div>
 
-          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
+          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-stone-100 pt-3">
             <div className="min-w-[8rem] flex-1">
               <Label htmlFor="new-group-name">{t("menuAdmin.groupName")}</Label>
               <Input id="new-group-name" value={newGroupName} onChange={(e) => setNewGroupName(e.target.value)} />
             </div>
-            <label className="flex items-center gap-1.5 pb-2 text-xs text-slate-600">
+            <label className="flex items-center gap-1.5 pb-2 text-xs text-stone-600">
               <Switch checked={newGroupRequired} onChange={setNewGroupRequired} label={t("menuAdmin.required")} />
               {t("menuAdmin.required")}
             </label>
-            <label className="flex items-center gap-1.5 pb-2 text-xs text-slate-600">
+            <label className="flex items-center gap-1.5 pb-2 text-xs text-stone-600">
               <Switch checked={newGroupMultiple} onChange={setNewGroupMultiple} label={t("menuAdmin.multiple")} />
               {t("menuAdmin.multiple")}
             </label>

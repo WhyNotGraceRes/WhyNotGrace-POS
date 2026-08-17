@@ -88,7 +88,7 @@ export function CustomersPage() {
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
-        <p className="py-16 text-center text-sm text-slate-400">
+        <p className="py-16 text-center text-sm text-stone-400">
           {search ? t("customers.noSearchResults", { query: search }) : t("customers.empty")}
         </p>
       )}
@@ -101,9 +101,9 @@ export function CustomersPage() {
               className="cursor-pointer p-4 transition-shadow hover:shadow-popover"
               onClick={() => setSelected(customer)}
             >
-              <p className="font-semibold text-slate-800">{customer.first_name}</p>
-              <p className="text-sm text-slate-500">{customer.mobile}</p>
-              {customer.email && <p className="truncate text-xs text-slate-400">{customer.email}</p>}
+              <p className="font-semibold text-stone-800">{customer.first_name}</p>
+              <p className="text-sm text-stone-500">{customer.mobile}</p>
+              {customer.email && <p className="truncate text-xs text-stone-400">{customer.email}</p>}
             </Card>
           ))}
         </div>

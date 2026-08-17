@@ -23,9 +23,9 @@ export function HeroStatCard({ label, value, icon: Icon, hint }: HeroStatCardPro
             than "Sales today"/"Orders today" and there's vertical room in
             this card; an ellipsis here would hide the label entirely
             rather than just clipping a character or two. */}
-        <p className="text-sm font-medium leading-snug text-slate-500">{label}</p>
-        <p className="mt-0.5 truncate text-2xl font-bold tabular-nums text-slate-900">{value}</p>
-        {hint && <p className="mt-0.5 truncate text-xs text-slate-400">{hint}</p>}
+        <p className="text-sm font-medium leading-snug text-stone-500">{label}</p>
+        <p className="mt-0.5 truncate text-3xl font-bold tracking-tight tabular-nums text-stone-900">{value}</p>
+        {hint && <p className="mt-0.5 truncate text-xs text-stone-400">{hint}</p>}
       </div>
     </Card>
   );
@@ -34,10 +34,10 @@ export function HeroStatCard({ label, value, icon: Icon, hint }: HeroStatCardPro
 export function HeroStatCardSkeleton() {
   return (
     <Card className="flex items-center gap-4 p-5">
-      <div className="h-12 w-12 shrink-0 animate-pulse rounded-xl bg-slate-200" />
+      <div className="h-12 w-12 shrink-0 animate-pulse rounded-xl bg-stone-200" />
       <div className="min-w-0 flex-1 space-y-2">
-        <div className="h-3.5 w-24 animate-pulse rounded bg-slate-200" />
-        <div className="h-7 w-20 animate-pulse rounded bg-slate-200" />
+        <div className="h-3.5 w-24 animate-pulse rounded bg-stone-200" />
+        <div className="h-7 w-20 animate-pulse rounded bg-stone-200" />
       </div>
     </Card>
   );

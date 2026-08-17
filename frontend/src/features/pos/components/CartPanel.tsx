@@ -102,8 +102,8 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-slate-100 p-4">
-        <h2 className="mb-2 text-sm font-bold text-slate-900">{t("pos.currentOrder")}</h2>
+      <div className="border-b border-stone-100 p-4">
+        <h2 className="mb-2 text-sm font-bold text-stone-900">{t("pos.currentOrder")}</h2>
 
         <div className={cn("grid gap-1", GRID_COLS_CLASS[visibleTabs.length] ?? "grid-cols-4")}>
           {visibleTabs.map(({ context, icon: Icon, labelKey }) => (
@@ -113,7 +113,7 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
               onClick={() => setOrderContext(context)}
               className={cn(
                 "flex flex-col items-center gap-1 rounded-lg border px-1 py-1.5 text-[10px] font-semibold transition-colors focus-ring",
-                orderContext === context ? "border-brand-500 bg-brand-50 text-brand-700" : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                orderContext === context ? "border-brand-500 bg-brand-50 text-brand-700" : "border-stone-200 text-stone-500 hover:bg-stone-50"
               )}
             >
               <Icon size={14} />
@@ -126,10 +126,10 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
           <button
             type="button"
             onClick={() => setLocationDialogOpen(true)}
-            className="mt-2 flex w-full items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-ring"
+            className="mt-2 flex w-full items-center justify-between rounded-lg border border-stone-200 px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50 focus-ring"
           >
             <span>{tableName ?? (orderContext === "ROOM_SERVICE" ? t("pos.selectRoom") : t("pos.selectTable"))}</span>
-            <ChevronRight size={16} className="text-slate-400" />
+            <ChevronRight size={16} className="text-stone-400" />
           </button>
         )}
 
@@ -140,12 +140,12 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
             placeholder={t("pos.deliveryAddressPlaceholder")}
             rows={2}
             maxLength={1000}
-            className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus-ring"
+            className="mt-2 w-full rounded-lg border border-stone-300 px-3 py-1.5 text-sm focus-ring"
           />
         )}
 
         {orderContext === "PICKUP" && (
-          <p className="mt-2 rounded-lg border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-500">
+          <p className="mt-2 rounded-lg border border-dashed border-stone-200 px-3 py-2 text-xs text-stone-500">
             {t("pos.pickupHint")}
           </p>
         )}
@@ -169,42 +169,42 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
           <button
             type="button"
             onClick={() => setCustomerDialogOpen(true)}
-            className="mt-2 flex w-full items-center justify-between rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 focus-ring"
+            className="mt-2 flex w-full items-center justify-between rounded-lg border border-dashed border-stone-200 px-3 py-2 text-sm font-medium text-stone-500 hover:bg-stone-50 focus-ring"
           >
             <span className="flex items-center gap-1.5">
               <UserRound size={14} />
               {t("customers.selectCustomer")}
             </span>
-            <ChevronRight size={16} className="text-slate-400" />
+            <ChevronRight size={16} className="text-stone-400" />
           </button>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
         {lines.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-slate-400">
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-stone-400">
             <ShoppingCart size={28} />
             <p className="text-sm">{t("pos.cartEmpty")}</p>
           </div>
         ) : (
           <ul className="space-y-3">
             {lines.map((line) => (
-              <li key={line.id} className="rounded-lg border border-slate-100 p-3">
+              <li key={line.id} className="rounded-lg border border-stone-100 p-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800">{line.itemName}</p>
-                    {line.variantName && <p className="text-xs text-slate-500">{line.variantName}</p>}
+                    <p className="truncate text-sm font-semibold text-stone-800">{line.itemName}</p>
+                    {line.variantName && <p className="text-xs text-stone-500">{line.variantName}</p>}
                     {line.options.length > 0 && (
-                      <p className="text-xs text-slate-500">{line.options.map((o) => o.name).join(", ")}</p>
+                      <p className="text-xs text-stone-500">{line.options.map((o) => o.name).join(", ")}</p>
                     )}
                     {line.specialInstructions && (
-                      <p className="mt-0.5 text-xs italic text-slate-400">"{line.specialInstructions}"</p>
+                      <p className="mt-0.5 text-xs italic text-stone-400">"{line.specialInstructions}"</p>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => removeLine(line.id)}
-                    className="shrink-0 rounded-md p-1 text-slate-300 hover:bg-danger-50 hover:text-danger-500 focus-ring"
+                    className="shrink-0 rounded-md p-1 text-stone-300 hover:bg-danger-50 hover:text-danger-500 focus-ring"
                     aria-label={t("pos.removeItem")}
                   >
                     <Trash2 size={14} />
@@ -217,7 +217,7 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
                     onChange={(q) => setQuantity(line.id, q)}
                     min={0}
                   />
-                  <span className="text-sm font-bold text-slate-800">
+                  <span className="text-sm font-bold text-stone-800">
                     {formatCurrency((line.unitEstimate + line.options.reduce((s, o) => s + o.priceDelta, 0)) * line.quantity)}
                   </span>
                 </div>
@@ -227,7 +227,7 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
         )}
       </div>
 
-      <div className="shrink-0 border-t border-slate-100 p-4">
+      <div className="shrink-0 border-t border-stone-100 p-4">
         {lines.length > 0 && (
           <textarea
             value={notes}
@@ -235,7 +235,7 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
             placeholder={t("pos.orderNotesPlaceholder")}
             rows={1}
             maxLength={1000}
-            className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus-ring"
+            className="mb-3 w-full rounded-lg border border-stone-300 px-3 py-1.5 text-sm focus-ring"
           />
         )}
 
@@ -246,8 +246,8 @@ export function CartPanel({ onOrderPlaced }: { onOrderPlaced: (order: OrderOut) 
         )}
 
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm text-slate-500">{t("pos.estimatedSubtotal")}</span>
-          <span className="text-lg font-bold text-slate-900">{formatCurrency(subtotal)}</span>
+          <span className="text-sm text-stone-500">{t("pos.estimatedSubtotal")}</span>
+          <span className="text-lg font-bold text-stone-900">{formatCurrency(subtotal)}</span>
         </div>
 
         <Button

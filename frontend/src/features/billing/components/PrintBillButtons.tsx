@@ -67,7 +67,7 @@ export function PrintBillButtons({ bill }: { bill: BillOut }) {
           title={t("billing.previewTitle")}
           srcDoc={previewHtml ?? ""}
           sandbox=""
-          className="h-[60vh] w-full rounded border border-slate-200 bg-white"
+          className="h-[60vh] w-full rounded border border-stone-200 bg-white"
         />
       </Dialog>
     </>

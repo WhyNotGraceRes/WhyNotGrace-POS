@@ -40,10 +40,15 @@
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
-  --shadow-popover: 0 8px 24px -4px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.08);
+  /* Warm-tinted shadows (stone-900's rgb, not the cooler slate) — a card's
+     shadow should read as a soft cast on a warm surface, not a cold one. */
+  --shadow-card: 0 1px 2px 0 rgb(28 25 23 / 0.04), 0 1px 3px 0 rgb(28 25 23 / 0.06);
+  --shadow-card-hover: 0 4px 12px -2px rgb(28 25 23 / 0.08), 0 2px 4px -2px rgb(28 25 23 / 0.05);
+  --shadow-popover: 0 12px 32px -6px rgb(28 25 23 / 0.14), 0 4px 10px -4px rgb(28 25 23 / 0.08);
 
-  --radius-card: 0.625rem;
+  /* Softer, more generous rounding than the old 0.625rem — reads calmer
+     and closer to the premium software this is meant to feel like. */
+  --radius-card: 0.875rem;
 }
 
 @layer base {
@@ -52,7 +57,7 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-stone-50 text-stone-900 font-sans antialiased;
   }
 
   ::selection {
@@ -63,6 +68,19 @@
 @layer utilities {
   .focus-ring {
     @apply outline-none ring-2 ring-brand-500/40 ring-offset-2 ring-offset-white;
+  }
+
+  /* The tactile "lift" on hover that premium software uses to make a card
+     feel like a physical, pressable surface rather than a flat rectangle.
+     Applied to every card that's actually a link/button, never to a
+     read-only stat card — lifting something you can't act on is a lie. */
+  .interactive-card {
+    @apply transition-all duration-200 ease-out;
+    will-change: transform;
+  }
+  .interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
   }
 }
 

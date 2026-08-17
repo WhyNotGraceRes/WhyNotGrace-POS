@@ -68,7 +68,7 @@ export function DeliveryPage() {
       )}
 
       {!isLoading && !isError && (orders ?? []).length === 0 && (
-        <div className="flex flex-col items-center gap-2 py-16 text-center text-slate-400">
+        <div className="flex flex-col items-center gap-2 py-16 text-center text-stone-400">
           <Truck size={24} />
           <p className="text-sm">{t("deliveryStaff.empty")}</p>
         </div>
@@ -82,38 +82,38 @@ export function DeliveryPage() {
             return (
               <Card key={order.id} className="p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="font-bold text-slate-900">{order.order_number}</p>
+                  <p className="font-bold text-stone-900">{order.order_number}</p>
                   <OrderStatusBadge status={order.status} />
                 </div>
 
                 {order.customer && (
-                  <p className="mt-1.5 text-sm text-slate-700">{order.customer.first_name}</p>
+                  <p className="mt-1.5 text-sm text-stone-700">{order.customer.first_name}</p>
                 )}
                 {order.customer && (
-                  <p className="flex items-center gap-1 text-xs text-slate-500">
+                  <p className="flex items-center gap-1 text-xs text-stone-500">
                     <Phone size={11} /> {order.customer.mobile}
                   </p>
                 )}
                 {order.delivery_address && (
-                  <p className="mt-1.5 flex items-start gap-1 text-xs text-slate-600">
+                  <p className="mt-1.5 flex items-start gap-1 text-xs text-stone-600">
                     <MapPin size={12} className="mt-0.5 shrink-0" /> {order.delivery_address}
                   </p>
                 )}
                 {order.delivery_instructions && (
-                  <p className="mt-1 flex items-start gap-1 text-xs italic text-slate-400">
+                  <p className="mt-1 flex items-start gap-1 text-xs italic text-stone-400">
                     <StickyNote size={12} className="mt-0.5 shrink-0" /> {order.delivery_instructions}
                   </p>
                 )}
 
                 <ul className="mt-2 space-y-1">
                   {order.items.map((item) => (
-                    <li key={item.id} className="text-xs text-slate-600">
+                    <li key={item.id} className="text-xs text-stone-600">
                       {item.quantity} × {item.item_name_snapshot}
                     </li>
                   ))}
                 </ul>
-                {order.notes && <p className="mt-1.5 text-xs italic text-slate-400">"{order.notes}"</p>}
-                <p className="mt-2 text-sm font-semibold text-slate-800">{formatCurrency(order.subtotal)}</p>
+                {order.notes && <p className="mt-1.5 text-xs italic text-stone-400">"{order.notes}"</p>}
+                <p className="mt-2 text-sm font-semibold text-stone-800">{formatCurrency(order.subtotal)}</p>
 
                 <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-brand-700">
                   {t("deliveryStaff.currentStatus")}: {t(`deliveryStaff.status.${currentStatus}`)}

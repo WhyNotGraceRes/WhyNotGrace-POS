@@ -10,9 +10,9 @@ import { useLogout } from "@/features/auth/hooks";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-slate-100 py-3 last:border-0">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="text-sm font-medium text-slate-800">{children}</span>
+    <div className="flex items-center justify-between gap-4 border-b border-stone-100 py-3 last:border-0">
+      <span className="text-sm text-stone-500">{label}</span>
+      <span className="text-sm font-medium text-stone-800">{children}</span>
     </div>
   );
 }
@@ -30,16 +30,16 @@ export function ProfilePage() {
       <PageHeader title={t("shell.profile")} />
 
       <Card className="max-w-lg p-5">
-        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+        <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-lg font-bold text-brand-700">
             {user.first_name[0]}
             {user.last_name[0]}
           </div>
           <div>
-            <p className="font-bold text-slate-900">
+            <p className="font-bold text-stone-900">
               {user.first_name} {user.last_name}
             </p>
-            <p className="text-sm text-slate-500">{t(`roles.${user.role}`)}</p>
+            <p className="text-sm text-stone-500">{t(`roles.${user.role}`)}</p>
           </div>
         </div>
 

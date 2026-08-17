@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 import type { OrderStatus } from "@/types/models";
 
 const STATUS_CLASSES: Record<OrderStatus, string> = {
-  PLACED: "bg-slate-100 text-slate-600",
+  PLACED: "bg-stone-100 text-stone-600",
   CONFIRMED: "bg-brand-50 text-brand-700",
   PREPARING: "bg-warning-50 text-warning-600",
   READY: "bg-success-50 text-success-600",

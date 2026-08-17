@@ -130,7 +130,7 @@ export function RoleHomePage() {
 
       {hasLiveStrip && (
         <div className="mt-6">
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-stone-400">
             {t("dashboard.needsAttention")}
           </h2>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -168,13 +168,13 @@ export function RoleHomePage() {
                 <Link to="/tables" className="block">
                   <Card
                     className={cn(
-                      "flex items-center gap-3 p-4 transition-shadow hover:shadow-md",
+                      "interactive-card flex items-center gap-3 p-4",
                       occupancyTone(tablesOccupied, tablesTotal) === "success" && "ring-1 ring-success-200"
                     )}
                   >
                     <div
                       className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
                         occupancyTone(tablesOccupied, tablesTotal) === "success"
                           ? "bg-success-50 text-success-600"
                           : "bg-brand-50 text-brand-700"
@@ -183,8 +183,8 @@ export function RoleHomePage() {
                       <UtensilsCrossed size={19} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-medium text-slate-500">{t("dashboard.tables")}</p>
-                      <p className="mt-0.5 text-xl font-bold tabular-nums text-slate-900">
+                      <p className="truncate text-xs font-medium text-stone-500">{t("dashboard.tables")}</p>
+                      <p className="mt-0.5 text-2xl font-bold tracking-tight tabular-nums text-stone-900">
                         {tablesOccupied}/{tablesTotal}
                       </p>
                     </div>
@@ -230,17 +230,17 @@ export function RoleHomePage() {
 
       {items.length > 0 && (
         <div className="mt-6">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-400">
             {t("roleHome.quickLinks")}
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {items.map((item) => (
               <Link key={item.path} to={item.path}>
-                <Card className="flex flex-col items-start gap-3 p-4 transition-shadow hover:shadow-md">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+                <Card className="interactive-card flex flex-col items-start gap-3 p-4">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
                     <item.icon size={18} />
                   </div>
-                  <span className="text-sm font-semibold text-slate-800">{t(item.labelKey)}</span>
+                  <span className="text-sm font-semibold text-stone-800">{t(item.labelKey)}</span>
                 </Card>
               </Link>
             ))}

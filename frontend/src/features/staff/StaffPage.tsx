@@ -65,7 +65,7 @@ export function StaffPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <tr className="border-b border-stone-100 text-left text-xs font-semibold uppercase tracking-wide text-stone-400">
                   <th className="px-4 py-3">{t("common.firstName")}</th>
                   <th className="px-4 py-3">{t("common.email")}</th>
                   <th className="px-4 py-3">{t("common.mobile")}</th>
@@ -76,20 +76,20 @@ export function StaffPage() {
               </thead>
               <tbody>
                 {(staff ?? []).map((member) => (
-                  <tr key={member.id} className="border-b border-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-800">
+                  <tr key={member.id} className="border-b border-stone-50">
+                    <td className="px-4 py-3 font-medium text-stone-800">
                       {member.first_name} {member.last_name}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{member.email}</td>
-                    <td className="px-4 py-3 text-slate-600">{member.mobile}</td>
-                    <td className="px-4 py-3 text-slate-600">{t(`roles.${member.role}`)}</td>
+                    <td className="px-4 py-3 text-stone-600">{member.email}</td>
+                    <td className="px-4 py-3 text-stone-600">{member.mobile}</td>
+                    <td className="px-4 py-3 text-stone-600">{t(`roles.${member.role}`)}</td>
                     <td className="px-4 py-3">
                       {member.is_active ? (
                         <span className="rounded-full bg-success-50 px-2 py-0.5 text-xs font-semibold text-success-700">
                           {t("staffAdmin.active")}
                         </span>
                       ) : (
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
+                        <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-500">
                           {t("staffAdmin.inactive")}
                         </span>
                       )}
@@ -104,7 +104,7 @@ export function StaffPage() {
                                 setEditingStaff(member);
                                 setFormOpen(true);
                               }}
-                              className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-ring"
+                              className="rounded-md p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 focus-ring"
                               aria-label={t("staffAdmin.editStaff")}
                             >
                               <Pencil size={14} />
@@ -112,7 +112,7 @@ export function StaffPage() {
                             <button
                               type="button"
                               onClick={() => void handleResetAccess(member)}
-                              className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-ring"
+                              className="rounded-md p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700 focus-ring"
                               aria-label={t("staffAdmin.resetAccess")}
                             >
                               <KeyRound size={14} />

@@ -14,8 +14,8 @@ const STATUS_CLASSES: Record<LocationStatus, string> = {
   READY: "border-brand-500/40 bg-brand-50 text-brand-700",
   SERVED: "border-brand-500/40 bg-brand-50 text-brand-700",
   BILL_PENDING: "border-danger-500/40 bg-danger-50 text-danger-700",
-  PAID: "border-slate-300 bg-slate-100 text-slate-500",
-  CLOSED: "border-slate-300 bg-slate-100 text-slate-500",
+  PAID: "border-stone-300 bg-stone-100 text-stone-500",
+  CLOSED: "border-stone-300 bg-stone-100 text-stone-500",
 };
 
 /** Shared by dine-in table selection and hotel room-service room
@@ -51,7 +51,7 @@ export function LocationSelectDialog({
 
       {isError && <p className="py-6 text-center text-sm text-danger-600">{t(errorKey)}</p>}
 
-      {locations && locations.length === 0 && <p className="py-6 text-center text-sm text-slate-400">{t(emptyKey)}</p>}
+      {locations && locations.length === 0 && <p className="py-6 text-center text-sm text-stone-400">{t(emptyKey)}</p>}
 
       {locations && locations.length > 0 && (
         <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">

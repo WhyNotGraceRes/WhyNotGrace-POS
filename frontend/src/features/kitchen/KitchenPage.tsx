@@ -64,7 +64,7 @@ export function KitchenPage() {
       )}
 
       {!isLoading && !isError && kots && kots.length === 0 && (
-        <div className="flex flex-col items-center gap-2 py-16 text-slate-400">
+        <div className="flex flex-col items-center gap-2 py-16 text-stone-400">
           <ChefHat size={28} />
           <p className="text-sm">{t("kitchen.empty")}</p>
         </div>

@@ -72,7 +72,7 @@ export function PosPage() {
           <CategoryTabs categories={categories} selectedId={selectedCategoryId} onSelect={setSelectedCategoryId} />
         )}
 
-        <div className="flex-1 overflow-y-auto rounded-card border border-slate-200 bg-white p-3">
+        <div className="flex-1 overflow-y-auto rounded-card border border-stone-200 bg-white p-3">
           {isLoading && (
             <div className="flex h-full items-center justify-center">
               <Spinner className="text-brand-600" />
@@ -87,7 +87,7 @@ export function PosPage() {
           )}
 
           {!isLoading && !isError && visibleItems.length === 0 && (
-            <div className="flex h-full items-center justify-center text-center text-sm text-slate-400">
+            <div className="flex h-full items-center justify-center text-center text-sm text-stone-400">
               {search ? t("pos.noSearchResults", { query: search }) : t("pos.noItems")}
             </div>
           )}
@@ -102,7 +102,7 @@ export function PosPage() {
         </div>
       </div>
 
-      <div className="hidden w-80 shrink-0 rounded-card border border-slate-200 bg-white sm:block xl:w-96">
+      <div className="hidden w-80 shrink-0 rounded-card border border-stone-200 bg-white sm:block xl:w-96">
         <CartPanel onOrderPlaced={setConfirmedOrder} />
       </div>
 

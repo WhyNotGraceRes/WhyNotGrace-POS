@@ -109,22 +109,22 @@ export function BusinessDetailPage() {
       />
 
       <Card className="p-5">
-        <h2 className="mb-1 text-sm font-bold text-slate-800">Subscription</h2>
-        <p className="mb-4 text-xs text-slate-500">
+        <h2 className="mb-1 text-sm font-bold text-stone-800">Subscription</h2>
+        <p className="mb-4 text-xs text-stone-500">
           What this business is being charged and whether its plan is current.
         </p>
         <SubscriptionPanel businessId={id} subscription={subscription} />
       </Card>
 
       <Card className="p-5">
-        <h2 className="mb-1 text-sm font-bold text-slate-800">Modules</h2>
-        <p className="mb-4 text-xs text-slate-500">
+        <h2 className="mb-1 text-sm font-bold text-stone-800">Modules</h2>
+        <p className="mb-4 text-xs text-stone-500">
           What this business can use. CORE_POS can never be turned off.
         </p>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-stone-100">
           {(features ?? []).map((flag) => (
             <div key={flag.module} className="flex items-center justify-between gap-4 py-2.5">
-              <span className="text-sm text-slate-700">{flag.module.replace(/_/g, " ")}</span>
+              <span className="text-sm text-stone-700">{flag.module.replace(/_/g, " ")}</span>
               <Switch
                 checked={flag.enabled}
                 disabled={flag.module === "CORE_POS" || pendingModule === flag.module}
@@ -137,18 +137,18 @@ export function BusinessDetailPage() {
       </Card>
 
       <Card className="p-5">
-        <h2 className="mb-1 text-sm font-bold text-slate-800">Entitlement toggles</h2>
-        <p className="mb-4 text-xs text-slate-500">
+        <h2 className="mb-1 text-sm font-bold text-stone-800">Entitlement toggles</h2>
+        <p className="mb-4 text-xs text-stone-500">
           Fine-grained switches this business cannot change itself — see each one's description.
         </p>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-stone-100">
           {(toggleRows ?? [])
             .filter((row) => !row.owner_editable)
             .map((row) => (
               <div key={row.key} className="flex items-center justify-between gap-4 py-2.5">
                 <div>
-                  <p className="text-sm text-slate-700">{row.label}</p>
-                  <p className="text-xs text-slate-500">{row.description}</p>
+                  <p className="text-sm text-stone-700">{row.label}</p>
+                  <p className="text-xs text-stone-500">{row.description}</p>
                 </div>
                 <Switch
                   checked={row.enabled}
@@ -159,7 +159,7 @@ export function BusinessDetailPage() {
               </div>
             ))}
           {(toggleRows ?? []).every((row) => row.owner_editable) && (
-            <p className="py-2.5 text-xs text-slate-500">
+            <p className="py-2.5 text-xs text-stone-500">
               No entitlement-class toggles registered yet — every switch shipped so far is owner-editable.
             </p>
           )}

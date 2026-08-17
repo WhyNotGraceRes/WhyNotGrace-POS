@@ -58,24 +58,24 @@ export function PriceRulesSection({ item }: { item: MenuItemOut }) {
   };
 
   return (
-    <div className="rounded-lg border border-slate-200 p-3">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{t("menuAdmin.pricingRules")}</p>
+    <div className="rounded-lg border border-stone-200 p-3">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">{t("menuAdmin.pricingRules")}</p>
       {error && <p className="mb-2 text-xs text-danger-600">{error}</p>}
 
       {isLoading ? (
-        <p className="text-xs text-slate-400">{t("common.loading")}</p>
+        <p className="text-xs text-stone-400">{t("common.loading")}</p>
       ) : (rules ?? []).length === 0 ? (
-        <p className="mb-2 text-xs text-slate-400">{t("menuAdmin.none")}</p>
+        <p className="mb-2 text-xs text-stone-400">{t("menuAdmin.none")}</p>
       ) : (
         <ul className="mb-3 space-y-1.5">
           {(rules ?? []).map((rule) => (
-            <li key={rule.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs">
-              <span className="text-slate-700">
+            <li key={rule.id} className="flex items-center justify-between gap-2 rounded-lg bg-stone-50 px-2.5 py-1.5 text-xs">
+              <span className="text-stone-700">
                 {t(`pricingContext.${rule.context}`)}
                 {variantName(rule.variant_id) && ` · ${variantName(rule.variant_id)}`}
               </span>
               <span className="flex items-center gap-2">
-                <span className="font-semibold text-slate-800">{formatCurrency(rule.price)}</span>
+                <span className="font-semibold text-stone-800">{formatCurrency(rule.price)}</span>
                 <Switch
                   checked={rule.is_active}
                   onChange={(checked) => updateRule.mutate({ ruleId: rule.id, payload: { is_active: checked } })}
@@ -84,7 +84,7 @@ export function PriceRulesSection({ item }: { item: MenuItemOut }) {
                 <button
                   type="button"
                   onClick={() => deleteRule.mutate(rule.id)}
-                  className="text-slate-400 hover:text-danger-600"
+                  className="text-stone-400 hover:text-danger-600"
                   aria-label={t("menuAdmin.deletePriceRule")}
                 >
                   <Trash2 size={13} />
@@ -95,7 +95,7 @@ export function PriceRulesSection({ item }: { item: MenuItemOut }) {
         </ul>
       )}
 
-      <div className="flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
+      <div className="flex flex-wrap items-end gap-2 border-t border-stone-100 pt-3">
         <div className="min-w-[8rem]">
           <Select value={context} onChange={(e) => setContext(e.target.value as PricingContext)}>
             {CONTEXTS.map((c) => (

@@ -15,11 +15,11 @@ export function ComingSoonPage({ titleKey }: { titleKey: string }) {
     <div>
       <PageHeader title={title} />
       <Card className="flex flex-col items-center gap-3 p-12 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-stone-400">
           <Construction size={22} />
         </div>
-        <p className="font-semibold text-slate-700">{t("comingSoon.title")}</p>
-        <p className="max-w-sm text-sm text-slate-500">{t("comingSoon.body", { section: title })}</p>
+        <p className="font-semibold text-stone-700">{t("comingSoon.title")}</p>
+        <p className="max-w-sm text-sm text-stone-500">{t("comingSoon.body", { section: title })}</p>
       </Card>
     </div>
   );

@@ -8,11 +8,11 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { t } = useTranslation();
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 sm:px-6">
       <button
         type="button"
         onClick={onMenuClick}
-        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-ring lg:hidden"
+        className="rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-700 focus-ring lg:hidden"
         aria-label={t("shell.openMenu")}
       >
         <Menu size={20} />
@@ -23,7 +23,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="flex items-center gap-1.5 sm:gap-2">
         <LanguageSwitcher />
         <NotificationsButton />
-        <div className="mx-1 h-6 w-px bg-slate-200" />
+        <div className="mx-1 h-6 w-px bg-stone-200" />
         <ProfileMenu />
       </div>
     </header>

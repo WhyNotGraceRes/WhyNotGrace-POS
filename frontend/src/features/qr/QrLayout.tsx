@@ -14,12 +14,12 @@ export function QrLayout() {
   const locationName = useQrSessionStore((s) => s.locationName);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-stone-50">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-white shadow-sm">
-        <header className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur">
+        <header className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b border-stone-100 bg-white/95 px-4 py-3 backdrop-blur">
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-900">{businessName ?? "WhyNotGrace"}</p>
-            {locationName && <p className="truncate text-xs text-slate-500">{locationName}</p>}
+            <p className="truncate text-sm font-bold text-stone-900">{businessName ?? "WhyNotGrace"}</p>
+            {locationName && <p className="truncate text-xs text-stone-500">{locationName}</p>}
           </div>
           <LanguageSwitcher className="shrink-0" />
         </header>

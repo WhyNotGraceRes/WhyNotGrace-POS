@@ -53,21 +53,21 @@ export function ChannelBreakdown({
 
   return (
     <Card className="p-5">
-      <h2 className="text-sm font-bold text-slate-900">{t("dashboard.channelBreakdown")}</h2>
-      <p className="text-xs text-slate-500">{t("dashboard.channelBreakdownSubtitle")}</p>
+      <h2 className="text-sm font-bold text-stone-900">{t("dashboard.channelBreakdown")}</h2>
+      <p className="text-xs text-stone-500">{t("dashboard.channelBreakdownSubtitle")}</p>
 
       <ul className="mt-4 space-y-3">
         {channels.map((channel) => (
           <li key={channel.key} className="flex items-center gap-3">
-            <channel.icon size={16} className="shrink-0 text-slate-400" />
-            <span className="w-16 shrink-0 text-xs font-medium text-slate-600">{t(channel.labelKey)}</span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+            <channel.icon size={16} className="shrink-0 text-stone-400" />
+            <span className="w-16 shrink-0 text-xs font-medium text-stone-600">{t(channel.labelKey)}</span>
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-100">
               <div
                 className="h-full rounded-full bg-brand-500"
                 style={{ width: `${(channel.count / max) * 100}%` }}
               />
             </div>
-            <span className="w-8 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-800">
+            <span className="w-8 shrink-0 text-right text-sm font-semibold tabular-nums text-stone-800">
               {formatNumber(channel.count)}
             </span>
           </li>

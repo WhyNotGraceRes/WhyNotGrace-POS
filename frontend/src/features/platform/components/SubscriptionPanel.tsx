@@ -20,14 +20,14 @@ function formatDate(iso: string | null | undefined): string {
 }
 
 const STATUS_CLASSES: Record<string, string> = {
-  NOT_CONFIGURED: "bg-slate-100 text-slate-600",
+  NOT_CONFIGURED: "bg-stone-100 text-stone-600",
   ACTIVE: "bg-success-50 text-success-700",
   GRACE: "bg-warning-50 text-warning-700",
   SUSPENDED: "bg-danger-50 text-danger-600",
-  CANCELLED: "bg-slate-100 text-slate-600",
+  CANCELLED: "bg-stone-100 text-stone-600",
   PAYMENT_FAILED: "bg-danger-50 text-danger-600",
   EXPIRED: "bg-danger-50 text-danger-600",
-  PENDING: "bg-slate-100 text-slate-600",
+  PENDING: "bg-stone-100 text-stone-600",
 };
 
 export function SubscriptionPanel({
@@ -113,31 +113,31 @@ export function SubscriptionPanel({
 
       <div className="flex items-center justify-between">
         <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_CLASSES[subscription.status] ?? "bg-slate-100 text-slate-600"}`}
+          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_CLASSES[subscription.status] ?? "bg-stone-100 text-stone-600"}`}
         >
           {subscription.status.replace(/_/g, " ")}
         </span>
         {subscription.amount != null && (
-          <span className="text-sm font-semibold text-slate-800">
+          <span className="text-sm font-semibold text-stone-800">
             {formatCurrency(subscription.amount)}
-            <span className="font-normal text-slate-500">/{subscription.billing_interval}</span>
+            <span className="font-normal text-stone-500">/{subscription.billing_interval}</span>
           </span>
         )}
       </div>
 
       {subscription.plan_name && (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-stone-600">
           <span>Plan</span>
-          <span className="text-right font-medium text-slate-800">{subscription.plan_name}</span>
+          <span className="text-right font-medium text-stone-800">{subscription.plan_name}</span>
           <span>Period start</span>
-          <span className="text-right font-medium text-slate-800">{formatDate(subscription.current_period_start)}</span>
+          <span className="text-right font-medium text-stone-800">{formatDate(subscription.current_period_start)}</span>
           <span>Period end</span>
-          <span className="text-right font-medium text-slate-800">{formatDate(subscription.current_period_end)}</span>
+          <span className="text-right font-medium text-stone-800">{formatDate(subscription.current_period_end)}</span>
         </div>
       )}
 
       {subscription.status === "NOT_CONFIGURED" || subscription.status === "CANCELLED" ? (
-        <div className="space-y-3 border-t border-slate-100 pt-4">
+        <div className="space-y-3 border-t border-stone-100 pt-4">
           <div className="grid grid-cols-3 gap-3">
             <div>
               <Label htmlFor="plan-name">Plan name</Label>
@@ -157,7 +157,7 @@ export function SubscriptionPanel({
           </Button>
         </div>
       ) : (
-        <div className="flex flex-wrap items-end gap-3 border-t border-slate-100 pt-4">
+        <div className="flex flex-wrap items-end gap-3 border-t border-stone-100 pt-4">
           <div>
             <Label htmlFor="renew-months">Renew (months)</Label>
             <Input
