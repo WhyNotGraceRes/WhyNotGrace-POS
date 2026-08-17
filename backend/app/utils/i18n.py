@@ -11,6 +11,12 @@ from sqlalchemy.orm import Session
 
 from app.models.translation import Translation
 
+# "en" is never stored — it's always the field's own value, not a
+# translation row (see translate()'s early return). These are the only
+# languages a translation can actually be written in; keep in sync with
+# frontend SUPPORTED_LANGUAGES (src/i18n/index.ts) minus "en".
+SUPPORTED_TRANSLATION_LANGUAGES = ("hi", "mr")
+
 
 def translate(
     db: Session, business_id: uuid.UUID, entity_type: str, entity_id: uuid.UUID, field_name: str,
@@ -57,3 +63,25 @@ def upsert_translation(
         row.value = value
     db.flush()
     return row
+
+
+def clear_translation(
+    db: Session, business_id: uuid.UUID, entity_type: str, entity_id: uuid.UUID, field_name: str, language: str,
+) -> None:
+    """Removes a translation row so the field falls back to the default
+    language again — used when a translator blanks out a field rather than
+    leaving it in an intentionally-different language."""
+    row = (
+        db.query(Translation)
+        .filter(
+            Translation.business_id == business_id,
+            Translation.entity_type == entity_type,
+            Translation.entity_id == entity_id,
+            Translation.field_name == field_name,
+            Translation.language == language,
+        )
+        .first()
+    )
+    if row is not None:
+        db.delete(row)
+        db.flush()

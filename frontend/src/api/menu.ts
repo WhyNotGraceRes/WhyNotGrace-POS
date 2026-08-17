@@ -1,6 +1,8 @@
 import { apiClient } from "@/api/client";
 import { normalizeMenuItem } from "@/api/normalize";
 import type {
+  CategoryTranslationUpdateRequest,
+  ItemTranslationUpdateRequest,
   MenuCategoryCreate,
   MenuCategoryOut,
   MenuCategoryUpdate,
@@ -16,6 +18,7 @@ import type {
   MenuVariantCreate,
   MenuVariantOut,
   MenuVariantUpdate,
+  TranslationOut,
 } from "@/types/models";
 
 export const categoriesApi = {
@@ -29,6 +32,14 @@ export const categoriesApi = {
     apiClient.put<MenuCategoryOut>(`/categories/${categoryId}`, payload).then((r) => r.data),
 
   delete: (categoryId: string) => apiClient.delete(`/categories/${categoryId}`),
+
+  listTranslations: (categoryId: string, signal?: AbortSignal) =>
+    apiClient.get<TranslationOut[]>(`/categories/${categoryId}/translations`, { signal }).then((r) => r.data),
+
+  setTranslation: (categoryId: string, language: string, payload: CategoryTranslationUpdateRequest) =>
+    apiClient
+      .put<TranslationOut>(`/categories/${categoryId}/translations/${language}`, payload)
+      .then((r) => r.data),
 };
 
 export const menuApi = {
@@ -68,4 +79,10 @@ export const menuApi = {
     apiClient.put<MenuOptionOut>(`/menu/options/${optionId}`, payload).then((r) => r.data),
 
   deleteOption: (optionId: string) => apiClient.delete(`/menu/options/${optionId}`),
+
+  listItemTranslations: (itemId: string, signal?: AbortSignal) =>
+    apiClient.get<TranslationOut[]>(`/menu/items/${itemId}/translations`, { signal }).then((r) => r.data),
+
+  setItemTranslation: (itemId: string, language: string, payload: ItemTranslationUpdateRequest) =>
+    apiClient.put<TranslationOut>(`/menu/items/${itemId}/translations/${language}`, payload).then((r) => r.data),
 };

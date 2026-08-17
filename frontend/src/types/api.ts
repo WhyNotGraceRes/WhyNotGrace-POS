@@ -320,6 +320,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/menu/items/{item_id}/translations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Item Translations */
+        get: operations["get_item_translations_api_v1_menu_items__item_id__translations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/menu/items/{item_id}/translations/{language}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Item Translation */
+        put: operations["set_item_translation_api_v1_menu_items__item_id__translations__language__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/menu/items/{item_id}/variants": {
         parameters: {
             query?: never;
@@ -456,6 +490,40 @@ export interface paths {
         post?: never;
         /** Delete Category */
         delete: operations["delete_category_api_v1_categories__category_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/categories/{category_id}/translations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Category Translations */
+        get: operations["get_category_translations_api_v1_categories__category_id__translations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/categories/{category_id}/translations/{language}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set Category Translation */
+        put: operations["set_category_translation_api_v1_categories__category_id__translations__language__put"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2907,6 +2975,11 @@ export interface components {
             /** Notes */
             notes?: string | null;
         };
+        /** CategoryTranslationUpdateRequest */
+        CategoryTranslationUpdateRequest: {
+            /** Name */
+            name?: string | null;
+        };
         /** ChargeBandCreate */
         ChargeBandCreate: {
             /** Name */
@@ -3337,6 +3410,13 @@ export interface components {
             next_number: string;
             /** Last Issued */
             last_issued: number;
+        };
+        /** ItemTranslationUpdateRequest */
+        ItemTranslationUpdateRequest: {
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
         };
         /** KOTItemOut */
         KOTItemOut: {
@@ -4981,6 +5061,15 @@ export interface components {
              */
             location_id: string;
         };
+        /** TranslationOut */
+        TranslationOut: {
+            /** Language */
+            language: string;
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+        };
         /** UserOut */
         UserOut: {
             /**
@@ -5754,6 +5843,73 @@ export interface operations {
             };
         };
     };
+    get_item_translations_api_v1_menu_items__item_id__translations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranslationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_item_translation_api_v1_menu_items__item_id__translations__language__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+                language: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemTranslationUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranslationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     add_variant_api_v1_menu_items__item_id__variants_post: {
         parameters: {
             query?: never;
@@ -6156,6 +6312,73 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_category_translations_api_v1_categories__category_id__translations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranslationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_category_translation_api_v1_categories__category_id__translations__language__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: string;
+                language: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryTranslationUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranslationOut"];
+                };
             };
             /** @description Validation Error */
             422: {

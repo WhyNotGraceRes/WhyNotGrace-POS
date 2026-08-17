@@ -5,6 +5,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.menu import MenuCategory, MenuItem, MenuOption, MenuOptionGroup, MenuVariant
+from app.models.translation import Translation
+from app.utils.i18n import SUPPORTED_TRANSLATION_LANGUAGES, clear_translation, upsert_translation
 
 
 def _delete_or_409(db: Session, entity, *, in_use_detail: str) -> None:
@@ -233,3 +235,68 @@ def delete_option(db: Session, business_id: uuid.UUID, option_id: uuid.UUID) -> 
         db, option,
         in_use_detail="Cannot delete this option: it is used by existing orders. Deactivate it instead.",
     )
+
+
+def _translations_by_language(db: Session, business_id: uuid.UUID, entity_type: str, entity_id: uuid.UUID) -> dict:
+    rows = (
+        db.query(Translation)
+        .filter(
+            Translation.business_id == business_id,
+            Translation.entity_type == entity_type,
+            Translation.entity_id == entity_id,
+        )
+        .all()
+    )
+    by_language = {language: {} for language in SUPPORTED_TRANSLATION_LANGUAGES}
+    for row in rows:
+        if row.language in by_language:
+            by_language[row.language][row.field_name] = row.value
+    return by_language
+
+
+def _set_translation_field(
+    db: Session, business_id: uuid.UUID, entity_type: str, entity_id: uuid.UUID, field_name: str,
+    language: str, value: str | None,
+) -> None:
+    value = (value or "").strip()
+    if value:
+        upsert_translation(db, business_id, entity_type, entity_id, field_name, language, value)
+    else:
+        clear_translation(db, business_id, entity_type, entity_id, field_name, language)
+
+
+def _require_supported_language(language: str) -> None:
+    if language not in SUPPORTED_TRANSLATION_LANGUAGES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported language")
+
+
+def list_item_translations(db: Session, business_id: uuid.UUID, item_id: uuid.UUID) -> list[dict]:
+    get_item_or_404(db, business_id, item_id)
+    by_language = _translations_by_language(db, business_id, "menu_item", item_id)
+    return [
+        {"language": language, "name": fields.get("name"), "description": fields.get("description")}
+        for language, fields in by_language.items()
+    ]
+
+
+def set_item_translation(db: Session, business_id: uuid.UUID, item_id: uuid.UUID, language: str, payload) -> dict:
+    get_item_or_404(db, business_id, item_id)
+    _require_supported_language(language)
+    _set_translation_field(db, business_id, "menu_item", item_id, "name", language, payload.name)
+    _set_translation_field(db, business_id, "menu_item", item_id, "description", language, payload.description)
+    fields = _translations_by_language(db, business_id, "menu_item", item_id)[language]
+    return {"language": language, "name": fields.get("name"), "description": fields.get("description")}
+
+
+def list_category_translations(db: Session, business_id: uuid.UUID, category_id: uuid.UUID) -> list[dict]:
+    _get_category_or_404(db, business_id, category_id)
+    by_language = _translations_by_language(db, business_id, "menu_category", category_id)
+    return [{"language": language, "name": fields.get("name")} for language, fields in by_language.items()]
+
+
+def set_category_translation(db: Session, business_id: uuid.UUID, category_id: uuid.UUID, language: str, payload) -> dict:
+    _get_category_or_404(db, business_id, category_id)
+    _require_supported_language(language)
+    _set_translation_field(db, business_id, "menu_category", category_id, "name", language, payload.name)
+    fields = _translations_by_language(db, business_id, "menu_category", category_id)[language]
+    return {"language": language, "name": fields.get("name")}

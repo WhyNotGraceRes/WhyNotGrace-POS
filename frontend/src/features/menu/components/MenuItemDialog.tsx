@@ -24,6 +24,7 @@ import {
   useUpdateMenuItem,
 } from "@/features/menu/hooks";
 import { PriceRulesSection } from "@/features/menu/components/PriceRulesSection";
+import { ItemTranslationsSection } from "@/features/menu/components/ItemTranslationsSection";
 import type { MenuCategoryOut, MenuItemOut, MenuOptionCreate, MenuVariantCreate } from "@/types/models";
 
 interface DraftVariant extends MenuVariantCreate {
@@ -550,6 +551,7 @@ export function MenuItemDialog({
         </div>
 
         {isEdit && item && <PriceRulesSection item={item} />}
+        {isEdit && item && <ItemTranslationsSection item={item} />}
 
         <div className="flex items-center gap-2 pt-2">
           <Button className="flex-1" size="lg" isLoading={isPending} onClick={() => void handleSubmit()}>

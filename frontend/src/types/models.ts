@@ -97,6 +97,11 @@ export type MenuVariantUpdate = Schemas["MenuVariantUpdate"];
 export type MenuOptionGroupUpdate = Schemas["MenuOptionGroupUpdate"];
 export type MenuOptionUpdate = Schemas["MenuOptionUpdate"];
 
+// --- Menu content translations (hi/mr — see backend app/utils/i18n.py) ---
+export type TranslationOut = Schemas["TranslationOut"];
+export type ItemTranslationUpdateRequest = Schemas["ItemTranslationUpdateRequest"];
+export type CategoryTranslationUpdateRequest = Schemas["CategoryTranslationUpdateRequest"];
+
 // --- Pricing contexts ---
 export type PriceRuleOut = Schemas["PriceRuleOut"];
 export type PriceRuleCreate = Schemas["PriceRuleCreate"];

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { parseApiError } from "@/api/errors";
 import { useCreateCategory, useUpdateCategory } from "@/features/menu/hooks";
+import { CategoryTranslationsSection } from "@/features/menu/components/CategoryTranslationsSection";
 import type { MenuCategoryOut } from "@/types/models";
 
 export function CategoryFormDialog({
@@ -86,6 +87,7 @@ export function CategoryFormDialog({
         <Button className="w-full" isLoading={isPending} onClick={() => void handleSubmit()}>
           {isEdit ? t("common.save") : t("menuAdmin.addCategory")}
         </Button>
+        {isEdit && category && <CategoryTranslationsSection category={category} />}
       </div>
     </Dialog>
   );

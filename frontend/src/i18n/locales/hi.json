@@ -612,7 +612,11 @@
     "priceRuleAdded": "मूल्य नियम जोड़ा गया।",
     "priceRuleInvalid": "0 से अधिक कीमत दर्ज करें।",
     "deletePriceRule": "मूल्य नियम हटाएं",
-    "allVariants": "सभी वेरिएंट"
+    "allVariants": "सभी वेरिएंट",
+    "translations": "अनुवाद",
+    "saveTranslation": "अनुवाद सहेजें",
+    "translationSaved": "अनुवाद सहेजा गया।",
+    "translationEnglishReference": "अंग्रेज़ी: {{value}}"
   },
   "pricingContext": {
     "DINE_IN": "डाइन-इन",

@@ -612,7 +612,11 @@
     "priceRuleAdded": "Pricing rule added.",
     "priceRuleInvalid": "Enter a price greater than 0.",
     "deletePriceRule": "Delete pricing rule",
-    "allVariants": "All variants"
+    "allVariants": "All variants",
+    "translations": "Translations",
+    "saveTranslation": "Save translation",
+    "translationSaved": "Translation saved.",
+    "translationEnglishReference": "English: {{value}}"
   },
   "pricingContext": {
     "DINE_IN": "Dine-in",

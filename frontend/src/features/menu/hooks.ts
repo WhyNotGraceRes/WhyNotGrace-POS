@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { categoriesApi, menuApi } from "@/api/menu";
 import type {
+  CategoryTranslationUpdateRequest,
+  ItemTranslationUpdateRequest,
   MenuCategoryCreate,
   MenuCategoryUpdate,
   MenuItemCreate,
@@ -162,5 +164,41 @@ export function useDeleteOption() {
   return useMutation({
     mutationFn: (optionId: string) => menuApi.deleteOption(optionId),
     onSuccess: invalidate,
+  });
+}
+
+export function useItemTranslations(itemId: string | null) {
+  return useQuery({
+    queryKey: ["menu-item-translations", itemId],
+    queryFn: ({ signal }) => menuApi.listItemTranslations(itemId as string, signal),
+    enabled: Boolean(itemId),
+    staleTime: 30_000,
+  });
+}
+
+export function useSetItemTranslation(itemId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ language, payload }: { language: string; payload: ItemTranslationUpdateRequest }) =>
+      menuApi.setItemTranslation(itemId, language, payload),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["menu-item-translations", itemId] }),
+  });
+}
+
+export function useCategoryTranslations(categoryId: string | null) {
+  return useQuery({
+    queryKey: ["menu-category-translations", categoryId],
+    queryFn: ({ signal }) => categoriesApi.listTranslations(categoryId as string, signal),
+    enabled: Boolean(categoryId),
+    staleTime: 30_000,
+  });
+}
+
+export function useSetCategoryTranslation(categoryId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ language, payload }: { language: string; payload: CategoryTranslationUpdateRequest }) =>
+      categoriesApi.setTranslation(categoryId, language, payload),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["menu-category-translations", categoryId] }),
   });
 }

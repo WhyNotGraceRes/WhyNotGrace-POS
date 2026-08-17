@@ -21,6 +21,7 @@ from app.schemas.menu import (
     MenuVariantOut,
     MenuVariantUpdate,
 )
+from app.schemas.translation import ItemTranslationUpdateRequest, TranslationOut
 from app.services import audit_service, menu_service
 
 router = APIRouter(prefix="/menu", tags=["menu"])
@@ -86,6 +87,31 @@ def delete_item(
             db, action="menu_item.delete", business_id=business_id, user_id=user.id,
             resource_type="menu_item", resource_id=str(item_id),
         )
+
+
+@router.get("/items/{item_id}/translations", response_model=list[TranslationOut])
+def get_item_translations(
+    item_id: uuid.UUID, business_id=Depends(get_current_business_id), db: Session = Depends(get_db)
+):
+    return menu_service.list_item_translations(db, business_id, item_id)
+
+
+@router.put("/items/{item_id}/translations/{language}", response_model=TranslationOut)
+def set_item_translation(
+    item_id: uuid.UUID,
+    language: str,
+    payload: ItemTranslationUpdateRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_OPERATIONAL)),
+):
+    with transaction(db):
+        result = menu_service.set_item_translation(db, business_id, item_id, language, payload)
+        audit_service.record(
+            db, action="menu_item.translation_update", business_id=business_id, user_id=user.id,
+            resource_type="menu_item", resource_id=str(item_id), metadata={"language": language},
+        )
+    return result
 
 
 @router.post("/items/{item_id}/variants", response_model=MenuItemOut, status_code=status.HTTP_201_CREATED)

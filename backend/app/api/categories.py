@@ -8,6 +8,7 @@ from app.core.permissions import ROLE_OPERATIONAL
 from app.database.session import get_db
 from app.database.transaction import transaction
 from app.schemas.menu import MenuCategoryCreate, MenuCategoryOut, MenuCategoryUpdate
+from app.schemas.translation import CategoryTranslationUpdateRequest, TranslationOut
 from app.services import audit_service, menu_service
 
 router = APIRouter(prefix="/categories", tags=["categories"])
@@ -64,3 +65,28 @@ def delete_category(
             db, action="menu_category.delete", business_id=business_id, user_id=user.id,
             resource_type="menu_category", resource_id=str(category_id),
         )
+
+
+@router.get("/{category_id}/translations", response_model=list[TranslationOut])
+def get_category_translations(
+    category_id: uuid.UUID, business_id=Depends(get_current_business_id), db: Session = Depends(get_db)
+):
+    return menu_service.list_category_translations(db, business_id, category_id)
+
+
+@router.put("/{category_id}/translations/{language}", response_model=TranslationOut)
+def set_category_translation(
+    category_id: uuid.UUID,
+    language: str,
+    payload: CategoryTranslationUpdateRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_OPERATIONAL)),
+):
+    with transaction(db):
+        result = menu_service.set_category_translation(db, business_id, category_id, language, payload)
+        audit_service.record(
+            db, action="menu_category.translation_update", business_id=business_id, user_id=user.id,
+            resource_type="menu_category", resource_id=str(category_id), metadata={"language": language},
+        )
+    return result
