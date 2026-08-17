@@ -45,4 +45,10 @@ export const billingApi = {
 
   markNoCharge: (billId: string, reason?: string) =>
     apiClient.post<BillOut>(`/billing/${billId}/no-charge`, { reason }).then((r) => normalizeBill(r.data)),
+
+  /** Cancels the whole bill — paid or not. The server frees the table and
+   * (for a paid bill) leaves the payment rows in place as a record; this
+   * does not refund money, it only marks the invoice cancelled. */
+  voidBill: (billId: string, reason?: string) =>
+    apiClient.post<BillOut>(`/billing/${billId}/void`, { reason }).then((r) => normalizeBill(r.data)),
 };

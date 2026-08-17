@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core import toggles
 from app.core.permissions import ROLE_OPERATIONAL
+from app.core.ws_manager import manager as ws_manager
 from app.models.billing import Bill, BillDiscount, BillItem, BillServiceCharge, BillTax
 from app.models.business import BusinessSettings
 from app.models.enums import BillStatus, ChargeBasis, LocationStatus, OrderStatus, PricingContext
@@ -20,7 +21,8 @@ def _bill_query(db: Session, business_id: uuid.UUID):
         db.query(Bill)
         .populate_existing()
         .options(
-            joinedload(Bill.items), joinedload(Bill.taxes), joinedload(Bill.discounts), joinedload(Bill.service_charges)
+            joinedload(Bill.items), joinedload(Bill.taxes), joinedload(Bill.discounts),
+            joinedload(Bill.service_charges), joinedload(Bill.payments),
         )
         .filter(Bill.business_id == business_id)
     )
@@ -431,6 +433,7 @@ def void_bill(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, *, reason
             location.status = LocationStatus.AVAILABLE
             db.flush()
 
+    ws_manager.notify(business_id, "billing", "tables", "orders")
     return bill
 
 
@@ -651,6 +654,7 @@ def mark_bill_nc(db: Session, business_id: uuid.UUID, bill_id: uuid.UUID, *, rea
     # are earned on money spent, and nothing was.
     kot_service.release_held_kots_for_session(db, business_id, bill.session_id)
 
+    ws_manager.notify(business_id, "billing", "tables", "orders")
     return bill
 
 

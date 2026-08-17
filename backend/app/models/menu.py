@@ -36,6 +36,12 @@ class MenuItem(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     is_veg: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_sold_out: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # NULL means untracked/unlimited — the default, and the only option
+    # before this column existed. A business that never sets it keeps
+    # behaving exactly as before; one that does gets orders decremented
+    # against it (see pricing_service.compute_line_item) and an automatic
+    # sold-out at zero, instead of a manual toggle they have to remember.
+    stock_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_todays_special: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_specialty: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # Which kitchen prints this item's ticket — "TANDOOR", "CHINESE",

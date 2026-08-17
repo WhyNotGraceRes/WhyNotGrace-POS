@@ -113,6 +113,14 @@ def update_item(db: Session, business_id: uuid.UUID, item_id: uuid.UUID, payload
     data = payload.model_dump(exclude_unset=True)
     if "category_id" in data and data["category_id"] is not None:
         _get_category_or_404(db, business_id, data["category_id"])
+    # Restocking un-86's the item automatically — an owner who just typed
+    # in a fresh count clearly means for it to be orderable again, and
+    # making them separately remember to flip is_sold_out back is exactly
+    # the kind of two-step chore this field exists to remove. Only when
+    # the same request doesn't also set is_sold_out explicitly, so a
+    # deliberate "restock but keep it hidden" call is still respected.
+    if data.get("stock_quantity") is not None and data["stock_quantity"] > 0 and "is_sold_out" not in data:
+        data["is_sold_out"] = False
     for field, value in data.items():
         setattr(item, field, value)
     db.flush()

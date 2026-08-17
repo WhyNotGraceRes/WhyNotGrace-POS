@@ -40,6 +40,20 @@ export function minutesSince(isoTimestamp: string): number {
   return Math.max(0, Math.floor(elapsedMs / 60_000));
 }
 
+/** "vs yesterday, same time" comparison. `percent` is null when there's
+ * nothing to divide by (yesterday was 0) — the caller shows "new" instead
+ * of a nonsensical "+infinity%". A same-value comparison is "flat", not
+ * "up" or "down" — 0% shouldn't render with an arrow either way. */
+export function computeTrend(
+  current: number,
+  previous: number
+): { direction: "up" | "down" | "flat"; percent: number | null } {
+  if (current === previous) return { direction: "flat", percent: previous === 0 ? null : 0 };
+  if (previous === 0) return { direction: "up", percent: null };
+  const percent = ((current - previous) / previous) * 100;
+  return { direction: percent > 0 ? "up" : "down", percent: Math.abs(Math.round(percent)) };
+}
+
 /** Pure arithmetic only — no English text baked in here, since this is
  * used for a translated "updated Xs/Xm ago" label and every caller must
  * go through i18next's own pluralization (see dashboard.updatedJustNow /

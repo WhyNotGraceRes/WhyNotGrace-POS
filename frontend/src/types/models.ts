@@ -141,6 +141,7 @@ export type KOTOut = Omit<Schemas["KOTOut"], "items"> & {
 // --- Billing ---
 export type BillItemOut = Schemas["BillItemOut"];
 export type BillLineOut = Schemas["BillLineOut"];
+export type BillPaymentOut = Schemas["BillPaymentOut"];
 export type BillStatus = Schemas["BillStatus"];
 export type BillTaxCreate = Schemas["BillTaxCreate"];
 export type BillServiceChargeCreate = Schemas["BillServiceChargeCreate"];
@@ -159,11 +160,12 @@ export type GenerateBillRequest = Omit<Schemas["GenerateBillRequest"], "use_defa
 };
 
 /** See MenuItemOut above — same default-array optionality quirk. */
-export type BillOut = Omit<Schemas["BillOut"], "items" | "taxes" | "discounts" | "service_charges"> & {
+export type BillOut = Omit<Schemas["BillOut"], "items" | "taxes" | "discounts" | "service_charges" | "payments"> & {
   items: BillItemOut[];
   taxes: BillLineOut[];
   discounts: BillLineOut[];
   service_charges: BillLineOut[];
+  payments: BillPaymentOut[];
 };
 
 // --- Payments ---
@@ -295,6 +297,10 @@ export type ShiftOut = Schemas["ShiftOut"];
 export type ShiftReportOut = Schemas["ShiftReportOut"];
 export type OpenShiftRequest = Schemas["OpenShiftRequest"];
 export type CloseShiftRequest = Schemas["CloseShiftRequest"];
+
+// --- Notifications ---
+export type NotificationOut = Schemas["NotificationOut"];
+export type NotificationListOut = Schemas["NotificationListOut"];
 
 // --- Platform (WhyNotGrace's own staff — see backend/app/api/platform/) ---
 export type PlatformRole = Schemas["PlatformRole"];

@@ -17,7 +17,9 @@ class PaymentMethodBreakdownOut(BaseModel):
 
 class DashboardResponse(BaseModel):
     sales_today: float
+    sales_yesterday_same_time: float
     orders_today: int
+    orders_yesterday_same_time: int
     pending_orders: int
     kot_queue: int
     ready_orders: int

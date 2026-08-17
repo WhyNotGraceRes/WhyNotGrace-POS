@@ -76,6 +76,20 @@ export function useUncompBillItem() {
   });
 }
 
+export function useVoidBill() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ billId, reason }: { billId: string; reason?: string }) => billingApi.voidBill(billId, reason),
+    onSuccess: (bill) => {
+      queryClient.setQueryData(["billing", bill.id], bill);
+      // The table is freed on void, same as a settled bill.
+      void queryClient.invalidateQueries({ queryKey: ["orders"] });
+      void queryClient.invalidateQueries({ queryKey: ["tables"] });
+      void queryClient.invalidateQueries({ queryKey: ["billing", "unbilled-orders"] });
+    },
+  });
+}
+
 export function useMarkBillNoCharge() {
   const queryClient = useQueryClient();
   return useMutation({

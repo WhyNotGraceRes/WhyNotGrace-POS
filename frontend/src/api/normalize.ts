@@ -34,5 +34,6 @@ export function normalizeBill(bill: BillOut): BillOut {
     taxes: bill.taxes ?? [],
     discounts: bill.discounts ?? [],
     service_charges: bill.service_charges ?? [],
+    payments: bill.payments ?? [],
   };
 }

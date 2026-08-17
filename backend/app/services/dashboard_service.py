@@ -2,7 +2,7 @@
 PostgreSQL query scoped to business_id — never hardcoded or cached client-side.
 """
 import uuid
-from datetime import datetime, time, timezone
+from datetime import datetime, time, timedelta, timezone
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -33,9 +33,22 @@ def _today_start_utc() -> datetime:
 
 def build_dashboard(db: Session, business_id: uuid.UUID):
     today_start = _today_start_utc()
+    now = datetime.now(timezone.utc)
+
+    # The comparable window: not "all of yesterday" (which always looks
+    # bigger just because it has more elapsed hours in it) but yesterday
+    # up to the same elapsed time since midnight — so "vs yesterday" at
+    # 11am compares 11am-to-11am, not 11am against a full closed day.
+    yesterday_start = today_start - timedelta(days=1)
+    yesterday_same_time = yesterday_start + (now - today_start)
 
     orders_today = db.query(func.count(Order.id)).filter(
         Order.business_id == business_id, Order.created_at >= today_start
+    ).scalar() or 0
+
+    orders_yesterday_same_time = db.query(func.count(Order.id)).filter(
+        Order.business_id == business_id,
+        Order.created_at >= yesterday_start, Order.created_at < yesterday_same_time,
     ).scalar() or 0
 
     pending_orders = db.query(func.count(Order.id)).filter(
@@ -79,6 +92,15 @@ def build_dashboard(db: Session, business_id: uuid.UUID):
     ).first()
     payments_today_count = payments_today_row[0] or 0
     payments_today_amount = float(payments_today_row[1] or 0)
+
+    sales_yesterday_same_time = float(
+        db.query(func.coalesce(func.sum(Payment.amount), 0))
+        .filter(
+            Payment.business_id == business_id, Payment.status == PaymentStatus.SUCCESS,
+            Payment.created_at >= yesterday_start, Payment.created_at < yesterday_same_time,
+        )
+        .scalar() or 0
+    )
 
     top_items_rows = (
         db.query(OrderItem.menu_item_id, OrderItem.item_name_snapshot, func.sum(OrderItem.quantity).label("qty"))
@@ -129,7 +151,9 @@ def build_dashboard(db: Session, business_id: uuid.UUID):
 
     return {
         "sales_today": payments_today_amount,
+        "sales_yesterday_same_time": sales_yesterday_same_time,
         "orders_today": orders_today,
+        "orders_yesterday_same_time": orders_yesterday_same_time,
         "pending_orders": pending_orders,
         "kot_queue": kot_queue,
         "ready_orders": ready_orders,

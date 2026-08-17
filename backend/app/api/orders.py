@@ -8,7 +8,7 @@ from app.core.permissions import ROLE_BILLING, ROLE_OPERATIONAL, ROLE_SERVICE
 from app.database.session import get_db
 from app.database.transaction import transaction
 from app.models.enums import FeatureModule, OrderSource, OrderStatus
-from app.schemas.order import OrderCreateRequest, OrderOut
+from app.schemas.order import MergeSessionsRequest, OrderCreateRequest, OrderOut, TransferSessionRequest
 from app.services import audit_service, order_service
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -81,3 +81,43 @@ def cancel_order(
             resource_type="order", resource_id=str(order_id),
         )
     return OrderOut.model_validate(order)
+
+
+@router.post("/sessions/{session_id}/transfer", response_model=list[OrderOut])
+def transfer_session(
+    session_id: uuid.UUID,
+    payload: TransferSessionRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_SERVICE)),
+):
+    with transaction(db):
+        session = order_service.transfer_session(db, business_id, session_id, payload.location_id)
+        audit_service.record(
+            db, action="session.transfer", business_id=business_id, user_id=user.id,
+            resource_type="order_session", resource_id=str(session_id),
+            metadata={"new_location_id": str(payload.location_id)},
+        )
+        orders = order_service.list_orders(db, business_id, active_only=True)
+        orders = [o for o in orders if o.session_id == session.id]
+    return [OrderOut.model_validate(o) for o in orders]
+
+
+@router.post("/sessions/{session_id}/merge", response_model=list[OrderOut])
+def merge_sessions(
+    session_id: uuid.UUID,
+    payload: MergeSessionsRequest,
+    business_id=Depends(get_current_business_id),
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(*ROLE_SERVICE)),
+):
+    with transaction(db):
+        session = order_service.merge_sessions(db, business_id, session_id, payload.into_session_id)
+        audit_service.record(
+            db, action="session.merge", business_id=business_id, user_id=user.id,
+            resource_type="order_session", resource_id=str(session_id),
+            metadata={"into_session_id": str(payload.into_session_id)},
+        )
+        orders = order_service.list_orders(db, business_id, active_only=True)
+        orders = [o for o in orders if o.session_id == session.id]
+    return [OrderOut.model_validate(o) for o in orders]

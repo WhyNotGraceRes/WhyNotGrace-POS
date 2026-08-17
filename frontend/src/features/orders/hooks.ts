@@ -51,3 +51,32 @@ export function useCancelOrder() {
     },
   });
 }
+
+function useInvalidateAfterTableMove() {
+  const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ["orders"] });
+    void queryClient.invalidateQueries({ queryKey: ["tables"] });
+    void queryClient.invalidateQueries({ queryKey: ["kot"] });
+    void queryClient.invalidateQueries({ queryKey: ["kitchen"] });
+    void queryClient.invalidateQueries({ queryKey: ["billing", "unbilled-orders"] });
+  };
+}
+
+export function useTransferSession() {
+  const invalidate = useInvalidateAfterTableMove();
+  return useMutation({
+    mutationFn: ({ sessionId, locationId }: { sessionId: string; locationId: string }) =>
+      ordersApi.transferSession(sessionId, locationId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useMergeSessions() {
+  const invalidate = useInvalidateAfterTableMove();
+  return useMutation({
+    mutationFn: ({ sessionId, intoSessionId }: { sessionId: string; intoSessionId: string }) =>
+      ordersApi.mergeSessions(sessionId, intoSessionId),
+    onSuccess: invalidate,
+  });
+}

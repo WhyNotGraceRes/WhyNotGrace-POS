@@ -137,11 +137,36 @@ def compute_line_item(
     quantity: int,
     context: PricingContext,
 ) -> dict:
-    item = db.query(MenuItem).filter(MenuItem.id == item_id, MenuItem.business_id == business_id).first()
+    # FOR UPDATE: without locking this row, two concurrent orders for the
+    # last unit of a stock-tracked item could both read stock_quantity=1,
+    # both pass the check below, and both decrement — overselling by one.
+    # Locking on every read (not just stock-tracked items) is deliberate:
+    # whether an item tracks stock isn't known until after the row is
+    # fetched, and the lock is released at transaction end regardless.
+    item = (
+        db.query(MenuItem)
+        .filter(MenuItem.id == item_id, MenuItem.business_id == business_id)
+        .with_for_update()
+        .first()
+    )
     if item is None or not item.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Menu item is not available")
     if item.is_sold_out:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{item.name} is sold out")
+
+    # stock_quantity is None for the (default) untracked case — a business
+    # that never sets it never hits this branch, unchanged from before this
+    # field existed.
+    if item.stock_quantity is not None:
+        if item.stock_quantity < quantity:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Only {item.stock_quantity} of {item.name} left",
+            )
+        item.stock_quantity -= quantity
+        if item.stock_quantity <= 0:
+            item.is_sold_out = True
+        db.flush()
 
     unit_price = resolve_unit_price(db, business_id=business_id, item=item, variant_id=variant_id, context=context)
     options = resolve_option_price_deltas(db, business_id=business_id, item_id=item_id, option_ids=option_ids)

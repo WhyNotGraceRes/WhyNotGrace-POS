@@ -13,6 +13,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core import toggles
+from app.core.ws_manager import manager as ws_manager
 from app.models.billing import Bill
 from app.models.enums import BillStatus, IntegrationProvider, PaymentMethod, PaymentStatus, WebhookProcessStatus
 from app.models.integration import WebhookEvent
@@ -84,6 +85,7 @@ def record_cash_payment(db: Session, business_id: uuid.UUID, staff_id: uuid.UUID
     db.flush()
 
     billing_service.record_payment_applied(db, business_id, bill.id, float(payload.amount))
+    ws_manager.notify(business_id, "billing", "tables", "orders", "dashboard")
     return payment
 
 

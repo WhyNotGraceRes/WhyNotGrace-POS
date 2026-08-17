@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import BillStatus
+from app.models.enums import BillStatus, PaymentMethod, PaymentStatus
 
 
 class BillTaxCreate(BaseModel):
@@ -45,6 +45,21 @@ class BillLineOut(BaseModel):
     name: str
     percent: float | None = None
     amount: float
+
+    model_config = {"from_attributes": True}
+
+
+class BillPaymentOut(BaseModel):
+    """One payment row applied to this bill — the running ledger a
+    split-tender payment (cash + card on one bill) needs to be legible.
+    Includes non-SUCCESS rows too (e.g. a failed online attempt) since
+    hiding them would make a cashier wonder where a declined swipe went."""
+
+    id: uuid.UUID
+    method: PaymentMethod
+    status: PaymentStatus
+    amount: float
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 
@@ -94,6 +109,7 @@ class BillOut(BaseModel):
     taxes: list[BillLineOut] = Field(default_factory=list)
     discounts: list[BillLineOut] = Field(default_factory=list)
     service_charges: list[BillLineOut] = Field(default_factory=list)
+    payments: list[BillPaymentOut] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
 

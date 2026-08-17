@@ -95,6 +95,13 @@ class Bill(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     service_charges: Mapped[list["BillServiceCharge"]] = relationship(
         back_populates="bill", cascade="all, delete-orphan"
     )
+    # viewonly: Payment rows are owned and written by payment_service, never
+    # through this relationship — this exists only so a bill can show what's
+    # already been collected against it (split-tender: cash + card on one
+    # bill), oldest first so the list reads as a running ledger.
+    payments: Mapped[list["Payment"]] = relationship(
+        "Payment", primaryjoin="Bill.id == foreign(Payment.bill_id)", viewonly=True, order_by="Payment.created_at"
+    )
 
 
 class BillItem(Base, UUIDPrimaryKeyMixin, TimestampMixin):

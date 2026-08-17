@@ -845,6 +845,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/billing/unbilled-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Unbilled Orders
+         * @description Powers the Billing page's session list — orders with no money
+         *     settled against them yet, not a raw unbounded order history. See
+         *     billing_service.list_unbilled_orders for why this can't just be
+         *     "every order for a session".
+         */
+        get: operations["unbilled_orders_api_v1_billing_unbilled_orders_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/billing/{bill_id}": {
         parameters: {
             query?: never;
@@ -1439,7 +1462,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Delivery Orders */
+        /**
+         * List Delivery Orders
+         * @description The delivery worklist — orders still on their way out the door, not
+         *     a lifetime history. Once DELIVERED there's nothing left to act on (see
+         *     DELIVERY_STATUS_TRANSITIONS: DELIVERED has no further transitions), so
+         *     it drops off this list the same way a served KOT drops off the kitchen
+         *     queue.
+         */
         get: operations["list_delivery_orders_api_v1_delivery_orders_get"];
         put?: never;
         post?: never;
@@ -2142,6 +2172,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Notifications */
+        get: operations["list_notifications_api_v1_notifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{notification_id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Read */
+        post: operations["mark_read_api_v1_notifications__notification_id__read_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark All Read */
+        post: operations["mark_all_read_api_v1_notifications_read_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/auth/login": {
         parameters: {
             query?: never;
@@ -2589,6 +2670,31 @@ export interface components {
             discounts?: components["schemas"]["BillLineOut"][];
             /** Service Charges */
             service_charges?: components["schemas"]["BillLineOut"][];
+            /** Payments */
+            payments?: components["schemas"]["BillPaymentOut"][];
+        };
+        /**
+         * BillPaymentOut
+         * @description One payment row applied to this bill — the running ledger a
+         *     split-tender payment (cash + card on one bill) needs to be legible.
+         *     Includes non-SUCCESS rows too (e.g. a failed online attempt) since
+         *     hiding them would make a cashier wonder where a declined swipe went.
+         */
+        BillPaymentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            method: components["schemas"]["PaymentMethod"];
+            status: components["schemas"]["PaymentStatus"];
+            /** Amount */
+            amount: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /**
          * BillPrintOut
@@ -3010,8 +3116,12 @@ export interface components {
         DashboardResponse: {
             /** Sales Today */
             sales_today: number;
+            /** Sales Yesterday Same Time */
+            sales_yesterday_same_time: number;
             /** Orders Today */
             orders_today: number;
+            /** Orders Yesterday Same Time */
+            orders_yesterday_same_time: number;
             /** Pending Orders */
             pending_orders: number;
             /** Kot Queue */
@@ -3419,6 +3529,8 @@ export interface components {
              * @default 0
              */
             display_order: number;
+            /** Stock Quantity */
+            stock_quantity?: number | null;
             /** Variants */
             variants?: components["schemas"]["MenuVariantCreate"][];
             /** Option Groups */
@@ -3458,6 +3570,8 @@ export interface components {
             image_url: string | null;
             /** Display Order */
             display_order: number;
+            /** Stock Quantity */
+            stock_quantity?: number | null;
             /** Variants */
             variants?: components["schemas"]["MenuVariantOut"][];
             /** Option Groups */
@@ -3489,6 +3603,8 @@ export interface components {
             is_todays_special?: boolean | null;
             /** Is Specialty */
             is_specialty?: boolean | null;
+            /** Stock Quantity */
+            stock_quantity?: number | null;
         };
         /** MenuOptionCreate */
         MenuOptionCreate: {
@@ -3628,6 +3744,35 @@ export interface components {
             is_default?: boolean | null;
             /** Is Active */
             is_active?: boolean | null;
+        };
+        /** NotificationListOut */
+        NotificationListOut: {
+            /** Notifications */
+            notifications: components["schemas"]["NotificationOut"][];
+            /** Unread Count */
+            unread_count: number;
+        };
+        /** NotificationOut */
+        NotificationOut: {
+            /** Id */
+            id: string;
+            /** Type */
+            type: string;
+            /** Title */
+            title: string;
+            /** Body */
+            body: string | null;
+            /** Resource Type */
+            resource_type: string | null;
+            /** Resource Id */
+            resource_id: string | null;
+            /** Is Read */
+            is_read: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** OpenShiftRequest */
         OpenShiftRequest: {
@@ -6502,6 +6647,7 @@ export interface operations {
             query?: {
                 status_filter?: components["schemas"]["OrderStatus"] | null;
                 source?: components["schemas"]["OrderSource"] | null;
+                active_only?: boolean;
             };
             header?: never;
             path?: never;
@@ -6821,6 +6967,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unbilled_orders_api_v1_billing_unbilled_orders_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderOut"][];
                 };
             };
         };
@@ -9215,6 +9381,73 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    list_notifications_api_v1_notifications_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationListOut"];
+                };
+            };
+        };
+    };
+    mark_read_api_v1_notifications__notification_id__read_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_all_read_api_v1_notifications_read_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

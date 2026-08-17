@@ -9,6 +9,7 @@ import { useBusiness } from "@/features/business/hooks";
 import { useBill } from "@/features/billing/hooks";
 import { BillItemsList } from "@/features/billing/components/BillItemsList";
 import { NoChargeButton } from "@/features/billing/components/NoChargeButton";
+import { VoidBillButton } from "@/features/billing/components/VoidBillButton";
 import { BillStatusBadge } from "@/features/billing/components/BillStatusBadge";
 import { DiscountForm } from "@/features/billing/components/DiscountForm";
 import { PaymentPanel } from "@/features/billing/components/PaymentPanel";
@@ -102,6 +103,10 @@ export function BillDetailDialog({
               pay. The server marks an unsettled copy as such. */}
           <div className="border-t border-stone-100 pt-4">
             <PrintBillButtons bill={bill} />
+          </div>
+
+          <div className="border-t border-stone-100 pt-4">
+            <VoidBillButton bill={bill} />
           </div>
 
           {bill.status === "PAID" && business && (

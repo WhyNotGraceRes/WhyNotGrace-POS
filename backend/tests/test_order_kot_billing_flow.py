@@ -39,6 +39,51 @@ def test_additional_order_only_sends_new_items_to_kitchen(client, db_session):
     assert kots_for_order2[0]["items"][0]["quantity"] == 1
 
 
+def test_split_tender_two_methods_shows_both_payments_and_settles(client, db_session):
+    owner = register_and_login(client, db_session, business_name="Flow Biz Split Tender")
+    _, item = create_category_and_item(client, owner["headers"], price=500)
+    table = create_table(client, owner["headers"])
+    order = _place_order(client, owner["headers"], table, item)  # subtotal 500
+
+    bill = client.post(
+        "/api/v1/billing/generate",
+        json={"session_id": order["session_id"], "use_default_tax": False, "use_default_service_charge": False},
+        headers=owner["headers"],
+    ).json()
+    assert bill["grand_total"] == 500.0
+    assert bill["payments"] == []
+
+    resp = client.post(
+        "/api/v1/payments/cash", json={"bill_id": bill["id"], "amount": 300.0, "method": "CASH"},
+        headers=owner["headers"],
+    )
+    assert resp.status_code == 201, resp.text
+
+    resp = client.get(f"/api/v1/billing/{bill['id']}", headers=owner["headers"])
+    partially_paid = resp.json()
+    assert partially_paid["status"] == "PARTIALLY_PAID"
+    assert partially_paid["amount_paid"] == 300.0
+    assert len(partially_paid["payments"]) == 1
+    assert partially_paid["payments"][0]["method"] == "CASH"
+    assert partially_paid["payments"][0]["amount"] == 300.0
+
+    resp = client.post(
+        "/api/v1/payments/cash", json={"bill_id": bill["id"], "amount": 200.0, "method": "CARD"},
+        headers=owner["headers"],
+    )
+    assert resp.status_code == 201, resp.text
+
+    resp = client.get(f"/api/v1/billing/{bill['id']}", headers=owner["headers"])
+    settled = resp.json()
+    assert settled["status"] == "PAID"
+    assert settled["amount_paid"] == 500.0
+    assert len(settled["payments"]) == 2
+    assert {p["method"] for p in settled["payments"]} == {"CASH", "CARD"}
+    assert sum(p["amount"] for p in settled["payments"]) == 500.0
+    # Oldest first, matching the order the cashier actually took the money.
+    assert [p["method"] for p in settled["payments"]] == ["CASH", "CARD"]
+
+
 def test_active_only_filter_excludes_served_orders(client, db_session):
     owner = register_and_login(client, db_session, business_name="Flow Biz Active Only")
     _, item = create_category_and_item(client, owner["headers"])

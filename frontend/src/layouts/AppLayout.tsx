@@ -3,11 +3,13 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/shell/Sidebar";
 import { Header } from "@/components/shell/Header";
 import { SubscriptionBanner } from "@/components/shell/SubscriptionBanner";
+import { useLiveUpdates } from "@/hooks/useLiveUpdates";
 
 /** Shell for the authenticated area: responsive sidebar + header + content. */
 export function AppLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const location = useLocation();
+  useLiveUpdates();
 
   useEffect(() => {
     setMobileNavOpen(false);

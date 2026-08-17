@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import { Banknote, CreditCard, Smartphone, Wifi } from "lucide-react";
+import { Banknote, CreditCard, Smartphone, Wifi, HelpCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -18,6 +18,13 @@ const TABS: { method: PaymentMethod; icon: typeof Banknote; labelKey: string }[]
   { method: "CARD", icon: CreditCard, labelKey: "payment.card" },
   { method: "ONLINE", icon: Wifi, labelKey: "payment.online" },
 ];
+
+const METHOD_ICON: Record<string, typeof Banknote> = {
+  CASH: Banknote,
+  UPI: Smartphone,
+  CARD: CreditCard,
+  ONLINE: Wifi,
+};
 
 export function PaymentPanel({ bill }: { bill: BillOut }) {
   const { t } = useTranslation();
@@ -95,6 +102,33 @@ export function PaymentPanel({ bill }: { bill: BillOut }) {
         <span className="text-sm text-stone-500">{t("billing.remaining")}</span>
         <span className="text-lg font-bold text-stone-900">{formatCurrency(remaining)}</span>
       </div>
+
+      {/* The running ledger split-tender needs to be legible: without this,
+          a cashier taking a second partial payment has no way to see what
+          was already collected and by which method — just a shrinking
+          "remaining" number with no explanation. */}
+      {bill.payments.length > 0 && (
+        <div className="mb-3 space-y-1.5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">{t("payment.paymentsSoFar")}</p>
+          <ul className="space-y-1">
+            {bill.payments.map((p) => {
+              const Icon = METHOD_ICON[p.method] ?? HelpCircle;
+              return (
+                <li key={p.id} className="flex items-center gap-2 text-sm">
+                  <Icon size={14} className="shrink-0 text-stone-400" />
+                  <span className="flex-1 text-stone-600">{t(`payment.${p.method.toLowerCase()}`)}</span>
+                  {p.status !== "SUCCESS" && (
+                    <span className="rounded-full bg-danger-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-danger-600">
+                      {t(`payment.status.${p.status}`)}
+                    </span>
+                  )}
+                  <span className="font-semibold tabular-nums text-stone-800">{formatCurrency(p.amount)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       <div className="mb-3 grid grid-cols-4 gap-1.5">
         {TABS.map(({ method, icon: Icon, labelKey }) => (

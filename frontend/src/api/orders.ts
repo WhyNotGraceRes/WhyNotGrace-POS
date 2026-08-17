@@ -14,4 +14,19 @@ export const ordersApi = {
 
   cancel: (id: string) =>
     apiClient.post<OrderOut>(`/orders/${id}/cancel`).then((r) => normalizeOrder(r.data)),
+
+  /** Moves a session's whole running order to a different, currently-empty
+   * table/room. Rejected server-side once a bill exists for the session. */
+  transferSession: (sessionId: string, locationId: string) =>
+    apiClient
+      .post<OrderOut[]>(`/orders/sessions/${sessionId}/transfer`, { location_id: locationId })
+      .then((r) => r.data.map(normalizeOrder)),
+
+  /** Folds one open table's orders into another's, for a single combined
+   * bill. The losing session is retired for good — see the backend's
+   * order_service.merge_sessions docstring. */
+  mergeSessions: (sessionId: string, intoSessionId: string) =>
+    apiClient
+      .post<OrderOut[]>(`/orders/sessions/${sessionId}/merge`, { into_session_id: intoSessionId })
+      .then((r) => r.data.map(normalizeOrder)),
 };

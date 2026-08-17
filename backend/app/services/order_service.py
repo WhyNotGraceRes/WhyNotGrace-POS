@@ -4,14 +4,18 @@ create_order(). Prices are always resolved server-side via
 pricing_service; the client only ever supplies item/variant/option ids.
 """
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.enums import DeliveryStatus, LocationStatus, LocationType, OrderSource, OrderStatus, PricingContext
+from app.core.ws_manager import manager as ws_manager
+from app.models.billing import Bill
+from app.models.enums import BillStatus, DeliveryStatus, KOTStatus, LocationStatus, LocationType, OrderSource, OrderStatus, PricingContext
+from app.models.kot import KOT
 from app.models.location import Location
 from app.models.order import Order, OrderItem, OrderItemOption, OrderSession
-from app.services import kot_service, pricing_service
+from app.services import kot_service, notification_service, pricing_service
 from app.utils.numbering import generate_number
 
 # Default pricing context inferred from location type when the caller
@@ -203,6 +207,13 @@ def create_order(
     if not hold_kot:
         kot_service.create_kot_for_order(db, order)
 
+    # Only when a customer placed this themselves (QR/pickup/delivery/the
+    # website) — a staff member placing an order at the counter doesn't
+    # need to be told about the thing they just did.
+    if placed_by_staff_id is None:
+        notification_service.notify_new_customer_order(db, business_id, order)
+
+    ws_manager.notify(business_id, "orders", "tables", "kot", "kitchen", "dashboard")
     return get_order_or_404(db, business_id, order.id)
 
 
@@ -212,7 +223,141 @@ def cancel_order(db: Session, business_id: uuid.UUID, order_id: uuid.UUID) -> Or
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot cancel a completed order")
     order.status = OrderStatus.CANCELLED
     db.flush()
+    ws_manager.notify(business_id, "orders", "kot", "kitchen")
     return order
+
+
+def _get_session_or_404(db: Session, business_id: uuid.UUID, session_id: uuid.UUID) -> OrderSession:
+    session = (
+        db.query(OrderSession)
+        .filter(OrderSession.id == session_id, OrderSession.business_id == business_id)
+        .first()
+    )
+    if session is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+    return session
+
+
+def _reject_if_billed(db: Session, business_id: uuid.UUID, session: OrderSession, location_name: str) -> None:
+    """Both transfer and merge move orders between locations/sessions —
+    something a Bill (whose own location_id and line items are a snapshot
+    taken at generate time) has no way to follow. Simplest safe rule:
+    once billing has started for a table, its floor position is frozen;
+    settle or void the bill first."""
+    has_bill = (
+        db.query(Bill.id).filter(Bill.business_id == business_id, Bill.session_id == session.id).first()
+        is not None
+    )
+    if has_bill:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{location_name} already has a bill started — settle or void it first",
+        )
+
+
+def transfer_session(
+    db: Session, business_id: uuid.UUID, session_id: uuid.UUID, new_location_id: uuid.UUID
+) -> OrderSession:
+    """Moves an open table/room's entire running order (and every order in
+    it) to a different, currently-available table/room — a guest asking to
+    move seats, or two staff realizing a booking was set at the wrong table.
+    """
+    session = _get_session_or_404(db, business_id, session_id)
+    if session.is_closed:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This session is already closed")
+    if session.location_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Only dine-in/room sessions can be transferred"
+        )
+    if session.location_id == new_location_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Already at that table")
+
+    new_location = (
+        db.query(Location).filter(Location.id == new_location_id, Location.business_id == business_id).first()
+    )
+    if new_location is None or not new_location.is_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid destination table")
+    if new_location.status != LocationStatus.AVAILABLE:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{new_location.name} is not available")
+
+    old_location = db.query(Location).filter(Location.id == session.location_id).first()
+    _reject_if_billed(db, business_id, session, old_location.name if old_location else "This table")
+
+    # The new table inherits whatever occupancy state the old one was in
+    # (ORDERING, KITCHEN, etc.) rather than resetting to a generic
+    # OCCUPIED — a table mid-way through service stays mid-way through
+    # service, just at a different physical spot.
+    new_location.status = old_location.status if old_location else LocationStatus.OCCUPIED
+    if old_location:
+        old_location.status = LocationStatus.AVAILABLE
+
+    session.location_id = new_location.id
+    db.flush()
+
+    orders = db.query(Order).filter(Order.session_id == session.id, Order.status != OrderStatus.CANCELLED).all()
+    order_ids = [order.id for order in orders]
+    for order in orders:
+        order.location_id = new_location.id
+
+    # A ticket already in the kitchen still needs to say where the food is
+    # actually going — otherwise it gets carried to the table the guest
+    # just left.
+    if order_ids:
+        db.query(KOT).filter(
+            KOT.order_id.in_(order_ids), KOT.status.notin_([KOTStatus.SERVED, KOTStatus.CANCELLED])
+        ).update({"location_id": new_location.id}, synchronize_session=False)
+
+    db.flush()
+    ws_manager.notify(business_id, "orders", "tables", "kot", "kitchen")
+    return session
+
+
+def merge_sessions(
+    db: Session, business_id: uuid.UUID, from_session_id: uuid.UUID, into_session_id: uuid.UUID
+) -> OrderSession:
+    """Folds one open table's orders into another's — two tables pushed
+    together for a bigger party who want a single bill. The losing
+    table's session closes for real (unlike the reuse-forever session a
+    table normally keeps — see docs/billing-counter-plan.md's "a settled
+    table can be billed again": that gap is about a session outliving its
+    own table's payment, not this, where the session is deliberately
+    retired and can never receive another order again by construction)."""
+    if from_session_id == into_session_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot merge a table into itself")
+
+    from_session = _get_session_or_404(db, business_id, from_session_id)
+    into_session = _get_session_or_404(db, business_id, into_session_id)
+    if from_session.is_closed or into_session.is_closed:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="One of these sessions is already closed")
+    if from_session.location_id is None or into_session.location_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Only dine-in/room sessions can be merged"
+        )
+
+    from_location = db.query(Location).filter(Location.id == from_session.location_id).first()
+    into_location = db.query(Location).filter(Location.id == into_session.location_id).first()
+    _reject_if_billed(db, business_id, from_session, from_location.name if from_location else "This table")
+    _reject_if_billed(db, business_id, into_session, into_location.name if into_location else "This table")
+
+    orders = db.query(Order).filter(Order.session_id == from_session.id, Order.status != OrderStatus.CANCELLED).all()
+    order_ids = [order.id for order in orders]
+    for order in orders:
+        order.session_id = into_session.id
+        order.location_id = into_session.location_id
+
+    if order_ids:
+        db.query(KOT).filter(
+            KOT.order_id.in_(order_ids), KOT.status.notin_([KOTStatus.SERVED, KOTStatus.CANCELLED])
+        ).update({"location_id": into_session.location_id}, synchronize_session=False)
+
+    if from_location:
+        from_location.status = LocationStatus.AVAILABLE
+
+    from_session.is_closed = True
+    from_session.closed_at = datetime.now(timezone.utc)
+    db.flush()
+    ws_manager.notify(business_id, "orders", "tables", "kot", "kitchen", "billing")
+    return into_session
 
 
 # Legal forward transitions for a delivery order's lifecycle. DELIVERED and
@@ -250,4 +395,5 @@ def update_delivery_status(db: Session, business_id: uuid.UUID, order_id: uuid.U
     # instead of only jumping once at final DELIVERED (the Phase 6 bug).
     order.status = OrderStatus(new_status)
     db.flush()
+    ws_manager.notify(business_id, "orders", "delivery")
     return order

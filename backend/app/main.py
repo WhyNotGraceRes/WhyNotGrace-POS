@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -29,6 +30,17 @@ async def lifespan(app: FastAPI):
     # Refuse to boot with insecure defaults in production (see requirement 54).
     settings.validate_production_safety()
     logger.info("Starting %s in %s mode", settings.app_name, settings.app_env)
+
+    # The WebSocket connection manager needs a reference to *this* event
+    # loop — the one that will actually own every WebSocket connection —
+    # so that ws_manager.notify() calls made from sync request-handler
+    # threads elsewhere can hand their broadcast back to it. See
+    # app/core/ws_manager.py's module docstring for why that handoff is
+    # necessary at all.
+    from app.core.ws_manager import manager as ws_manager
+
+    ws_manager.bind_loop(asyncio.get_running_loop())
+
     yield
 
 
@@ -329,6 +341,8 @@ from app.api import charges  # noqa: E402
 from app.api import toggles as toggles_api  # noqa: E402
 from app.api import receipts  # noqa: E402
 from app.api import shifts  # noqa: E402
+from app.api import notifications  # noqa: E402
+from app.api import ws  # noqa: E402
 from app.api.platform import auth as platform_auth  # noqa: E402
 from app.api.platform import businesses as platform_businesses  # noqa: E402
 from app.api.platform import features as platform_features  # noqa: E402
@@ -373,6 +387,8 @@ app.include_router(charges.router, prefix=prefix)
 app.include_router(toggles_api.router, prefix=prefix)
 app.include_router(shifts.router, prefix=prefix)
 app.include_router(receipts.router, prefix=prefix)
+app.include_router(notifications.router, prefix=prefix)
+app.include_router(ws.router, prefix=prefix)
 app.include_router(platform_auth.router, prefix=prefix)
 app.include_router(platform_businesses.router, prefix=prefix)
 app.include_router(platform_features.router, prefix=prefix)

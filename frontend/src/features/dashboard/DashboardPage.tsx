@@ -20,7 +20,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { FreshnessIndicator } from "@/components/FreshnessIndicator";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { computeTrend, formatCurrency, formatNumber } from "@/lib/format";
 import { useDashboard } from "@/features/dashboard/hooks";
 import { useFeatureFlags } from "@/features/settings/hooks";
 import { StatCard, StatCardSkeleton } from "@/features/dashboard/components/StatCard";
@@ -38,10 +38,31 @@ function occupancyTone(occupied: number, total: number): "default" | "success" {
   return total > 0 && occupied / total >= 0.8 ? "success" : "default";
 }
 
+/** "vs yesterday, same time" comparison — see lib/format.ts's computeTrend
+ * for why a same-elapsed-time window rather than a full closed day. */
+function useTrendLabel() {
+  const { t } = useTranslation();
+  return (current: number, previous: number) => {
+    const trend = computeTrend(current, previous);
+    const label =
+      trend.percent === null
+        ? trend.direction === "up"
+          ? t("dashboard.trendNew")
+          : t("dashboard.trendFlat")
+        : trend.direction === "up"
+          ? t("dashboard.trendUp", { percent: trend.percent })
+          : trend.direction === "down"
+            ? t("dashboard.trendDown", { percent: trend.percent })
+            : t("dashboard.trendFlat");
+    return { ...trend, label };
+  };
+}
+
 export function DashboardPage() {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch, isFetching, dataUpdatedAt } = useDashboard();
   const { data: flags } = useFeatureFlags();
+  const trendLabel = useTrendLabel();
 
   const isEnabled = (module: string) => flags?.find((f) => f.module === module)?.enabled ?? false;
 
@@ -107,8 +128,18 @@ export function DashboardPage() {
               deliberately not clickable, these are totals to read, not
               queues to work through (see the action strip below). */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <HeroStatCard label={t("dashboard.salesToday")} value={formatCurrency(data.sales_today)} icon={IndianRupee} />
-            <HeroStatCard label={t("dashboard.ordersToday")} value={formatNumber(data.orders_today)} icon={ShoppingBag} />
+            <HeroStatCard
+              label={t("dashboard.salesToday")}
+              value={formatCurrency(data.sales_today)}
+              icon={IndianRupee}
+              trend={trendLabel(data.sales_today, data.sales_yesterday_same_time)}
+            />
+            <HeroStatCard
+              label={t("dashboard.ordersToday")}
+              value={formatNumber(data.orders_today)}
+              icon={ShoppingBag}
+              trend={trendLabel(data.orders_today, data.orders_yesterday_same_time)}
+            />
             <HeroStatCard
               label={t("dashboard.avgOrderValue")}
               value={data.orders_today > 0 ? formatCurrency(data.sales_today / data.orders_today) : formatCurrency(0)}

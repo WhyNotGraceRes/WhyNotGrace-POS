@@ -73,6 +73,7 @@ export function MenuItemDialog({
   const [isSoldOut, setIsSoldOut] = useState(item?.is_sold_out ?? false);
   const [isTodaysSpecial, setIsTodaysSpecial] = useState(item?.is_todays_special ?? false);
   const [isSpecialty, setIsSpecialty] = useState(item?.is_specialty ?? false);
+  const [stockQuantity, setStockQuantity] = useState(item?.stock_quantity != null ? String(item.stock_quantity) : "");
   const [error, setError] = useState<string | null>(null);
 
   // Only used while creating a brand-new item — added variants/groups on an
@@ -108,6 +109,7 @@ export function MenuItemDialog({
     setIsSoldOut(item?.is_sold_out ?? false);
     setIsTodaysSpecial(item?.is_todays_special ?? false);
     setIsSpecialty(item?.is_specialty ?? false);
+    setStockQuantity(item?.stock_quantity != null ? String(item.stock_quantity) : "");
     setError(null);
     setDraftVariants([]);
     setDraftGroups([]);
@@ -125,6 +127,9 @@ export function MenuItemDialog({
       setError(t("menuAdmin.itemFieldsRequired"));
       return;
     }
+    // Empty field means untracked/unlimited — null on update explicitly
+    // clears server-side tracking, undefined on create just omits it.
+    const stockQuantityValue = stockQuantity.trim() === "" ? null : Number(stockQuantity);
     try {
       if (isEdit && item) {
         await updateItem.mutateAsync({
@@ -140,6 +145,7 @@ export function MenuItemDialog({
             is_sold_out: isSoldOut,
             is_todays_special: isTodaysSpecial,
             is_specialty: isSpecialty,
+            stock_quantity: stockQuantityValue,
           },
         });
         toast.success(t("menuAdmin.itemUpdated"));
@@ -151,6 +157,7 @@ export function MenuItemDialog({
           category_id: categoryId,
           is_veg: isVeg,
           image_url: imageUrl.trim() || undefined,
+          stock_quantity: stockQuantityValue ?? undefined,
           variants: draftVariants.map(({ key: _key, ...v }) => v),
           option_groups: draftGroups.map((g) => ({
             name: g.name,
@@ -318,6 +325,19 @@ export function MenuItemDialog({
           <div>
             <Label htmlFor="item-image">{t("menuAdmin.imageUrl")}</Label>
             <Input id="item-image" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" />
+          </div>
+          <div>
+            <Label htmlFor="item-stock">{t("menuAdmin.stockQuantity")}</Label>
+            <Input
+              id="item-stock"
+              type="number"
+              min={0}
+              step="1"
+              value={stockQuantity}
+              onChange={(e) => setStockQuantity(e.target.value)}
+              placeholder={t("menuAdmin.stockUnlimited")}
+            />
+            <p className="mt-1 text-xs text-stone-400">{t("menuAdmin.stockQuantityHint")}</p>
           </div>
         </div>
 

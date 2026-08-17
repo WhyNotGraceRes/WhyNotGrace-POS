@@ -1,6 +1,12 @@
-from datetime import datetime, timedelta
+import uuid
+from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 
+from app.models.billing import Bill
+from app.models.enums import BillStatus, OrderSource, OrderStatus, PaymentMethod, PaymentStatus, PricingContext
+from app.models.order import Order, OrderSession
+from app.models.payment import Payment
+from app.utils.numbering import generate_number
 from tests.helpers import create_category_and_item, create_table, register_and_login
 
 IST = ZoneInfo("Asia/Kolkata")
@@ -39,6 +45,57 @@ def test_dashboard_reflects_real_orders(client, db_session):
 
     resp = client.get("/api/v1/dashboard", headers=owner["headers"])
     assert resp.json()["orders_today"] == before + 1
+
+
+def test_dashboard_yesterday_same_time_comparison(client, db_session):
+    owner = register_and_login(client, db_session, business_name="Dashboard Biz Trend")
+    business_id = uuid.UUID(owner["business_id"])
+    _, item = create_category_and_item(client, owner["headers"], price=200)
+    table = create_table(client, owner["headers"])
+
+    now = datetime.now(timezone.utc)
+    today_start = datetime.combine(now.date(), time.min, tzinfo=timezone.utc)
+    yesterday_start = today_start - timedelta(days=1)
+    within_window = yesterday_start + timedelta(minutes=1)
+    outside_window = yesterday_start - timedelta(hours=1)
+
+    session_a = OrderSession(business_id=business_id, location_id=table["id"], source=OrderSource.DINE_IN)
+    db_session.add(session_a)
+    db_session.flush()
+    order_within = Order(
+        business_id=business_id, session_id=session_a.id, location_id=table["id"], source=OrderSource.DINE_IN,
+        pricing_context=PricingContext.DINE_IN, status=OrderStatus.SERVED,
+        order_number=generate_number("ORD"), subtotal=200, created_at=within_window, updated_at=within_window,
+    )
+    order_outside = Order(
+        business_id=business_id, session_id=session_a.id, location_id=table["id"], source=OrderSource.DINE_IN,
+        pricing_context=PricingContext.DINE_IN, status=OrderStatus.SERVED,
+        order_number=generate_number("ORD"), subtotal=200, created_at=outside_window, updated_at=outside_window,
+    )
+    db_session.add_all([order_within, order_outside])
+
+    bill = Bill(
+        business_id=business_id, session_id=session_a.id, bill_number=generate_number("BILL"),
+        status=BillStatus.PAID, subtotal=200, grand_total=200, amount_paid=200,
+    )
+    db_session.add(bill)
+    db_session.flush()
+    payment_within = Payment(
+        business_id=business_id, bill_id=bill.id, method=PaymentMethod.CASH, status=PaymentStatus.SUCCESS,
+        amount=200, created_at=within_window, updated_at=within_window,
+    )
+    payment_outside = Payment(
+        business_id=business_id, bill_id=bill.id, method=PaymentMethod.CASH, status=PaymentStatus.SUCCESS,
+        amount=200, created_at=outside_window, updated_at=outside_window,
+    )
+    db_session.add_all([payment_within, payment_outside])
+    db_session.commit()
+
+    resp = client.get("/api/v1/dashboard", headers=owner["headers"])
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["orders_yesterday_same_time"] == 1
+    assert data["sales_yesterday_same_time"] == 200.0
 
 
 def test_reports_channel_breakdown(client, db_session):

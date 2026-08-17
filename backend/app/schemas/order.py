@@ -24,6 +24,14 @@ class OrderCreateRequest(BaseModel):
     customer_id: uuid.UUID | None = None
 
 
+class TransferSessionRequest(BaseModel):
+    location_id: uuid.UUID
+
+
+class MergeSessionsRequest(BaseModel):
+    into_session_id: uuid.UUID
+
+
 class OrderItemOptionOut(BaseModel):
     option_id: uuid.UUID
     option_name_snapshot: str

@@ -3,6 +3,7 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.ws_manager import manager as ws_manager
 from app.models.enums import KOTStatus, OrderStatus
 from app.models.kot import KOT, KOTItem
 from app.models.order import Order
@@ -120,4 +121,5 @@ def update_kot_status(db: Session, business_id: uuid.UUID, kot_id: uuid.UUID, ne
         order.status = _KOT_TO_ORDER_STATUS[new_status]
         db.flush()
 
+    ws_manager.notify(business_id, "kot", "kitchen", "orders")
     return kot

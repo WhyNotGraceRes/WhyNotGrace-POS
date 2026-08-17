@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Pencil, Plus, QrCode, Trash2, Users } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, Pencil, Plus, QrCode, Trash2, Users } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { PageHeader } from "@/components/PageHeader";
@@ -12,7 +12,9 @@ import { Dialog } from "@/components/ui/Dialog";
 import { cn } from "@/lib/cn";
 import { parseApiError } from "@/api/errors";
 import { useDeleteTable, useTables } from "@/features/tables/hooks";
+import { useOrders } from "@/features/orders/hooks";
 import { TableFormDialog } from "@/features/tables/components/TableFormDialog";
+import { TableMoveDialog } from "@/features/tables/components/TableMoveDialog";
 import type { LocationOut, LocationStatus } from "@/types/models";
 
 const STATUS_CLASSES: Record<LocationStatus, string> = {
@@ -30,10 +32,22 @@ const STATUS_CLASSES: Record<LocationStatus, string> = {
 export function TablesPage() {
   const { t } = useTranslation();
   const { data: tables, isLoading, isError, isFetching, dataUpdatedAt, refetch } = useTables();
+  // Transfer/merge need to know which open session a table's order belongs
+  // to — GET /tables doesn't carry that, only GET /orders does.
+  const { data: activeOrders } = useOrders({ active_only: true });
   const deleteTable = useDeleteTable();
   const [qrTable, setQrTable] = useState<LocationOut | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<LocationOut | null>(null);
+  const [moveTable, setMoveTable] = useState<LocationOut | null>(null);
+
+  const sessionIdByLocation = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const order of activeOrders ?? []) {
+      if (order.location_id && !map.has(order.location_id)) map.set(order.location_id, order.session_id);
+    }
+    return map;
+  }, [activeOrders]);
 
   const handleDelete = async (table: LocationOut) => {
     if (!window.confirm(t("tables.confirmDelete", { name: table.name }))) return;
@@ -92,6 +106,16 @@ export function TablesPage() {
               className={cn("group relative flex flex-col items-center gap-1.5 border-2 p-4", STATUS_CLASSES[table.status])}
             >
               <span className="absolute right-1.5 top-1.5 hidden items-center gap-0.5 group-hover:flex">
+                {sessionIdByLocation.has(table.id) && (
+                  <button
+                    type="button"
+                    onClick={() => setMoveTable(table)}
+                    className="rounded p-1 hover:bg-white/70"
+                    aria-label={t("tables.moveTable")}
+                  >
+                    <ArrowRightLeft size={12} />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -162,6 +186,14 @@ export function TablesPage() {
       </Dialog>
 
       <TableFormDialog open={formOpen} table={editingTable} onClose={() => setFormOpen(false)} />
+
+      <TableMoveDialog
+        table={moveTable}
+        sessionId={moveTable ? (sessionIdByLocation.get(moveTable.id) ?? null) : null}
+        allTables={tables ?? []}
+        sessionIdByLocation={sessionIdByLocation}
+        onClose={() => setMoveTable(null)}
+      />
     </div>
   );
 }

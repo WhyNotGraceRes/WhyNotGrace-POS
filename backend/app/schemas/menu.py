@@ -109,6 +109,7 @@ class MenuItemCreate(BaseModel):
     is_veg: bool = True
     image_url: str | None = None
     display_order: int = 0
+    stock_quantity: int | None = Field(default=None, ge=0)
     variants: list[MenuVariantCreate] = Field(default_factory=list)
     option_groups: list[MenuOptionGroupCreate] = Field(default_factory=list)
 
@@ -126,6 +127,12 @@ class MenuItemUpdate(BaseModel):
     is_sold_out: bool | None = None
     is_todays_special: bool | None = None
     is_specialty: bool | None = None
+    # Optional[int] with no sentinel needed: menu_service.update_item uses
+    # model_dump(exclude_unset=True), so omitting this field entirely
+    # leaves stock untouched, while explicitly sending `"stock_quantity":
+    # null` clears it back to untracked/unlimited — Pydantic's exclude_unset
+    # already distinguishes "not sent" from "sent as null" correctly.
+    stock_quantity: int | None = Field(default=None, ge=0)
 
 
 class MenuItemOut(BaseModel):
@@ -142,6 +149,7 @@ class MenuItemOut(BaseModel):
     is_specialty: bool
     image_url: str | None
     display_order: int
+    stock_quantity: int | None = None
     variants: list[MenuVariantOut] = Field(default_factory=list)
     option_groups: list[MenuOptionGroupOut] = Field(default_factory=list)
 
