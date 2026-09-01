@@ -14,6 +14,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
+RUN chmod +x docker-entrypoint.sh
 
 # Run as a non-root user — the process only needs to read its own code and
 # talk to PostgreSQL over the network, never write to anything under /app.
@@ -24,6 +25,8 @@ USER app
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Migrates then serves — see docker-entrypoint.sh. Binds to $PORT when set
+# (Render and similar platforms inject it dynamically), else 8000.
+CMD ["./docker-entrypoint.sh"]
