@@ -66,6 +66,12 @@ services:
       # validate_production_safety() would refuse this under APP_ENV=production.
       - key: EMAIL_BACKEND
         value: console
+      # Menu-photo digitization (platform staff upload a menu card photo,
+      # get a structured draft to review — see menu_import_service.py).
+      # Optional: leave unset and that one feature 503s with a clear
+      # message; everything else works fine without it.
+      - key: ANTHROPIC_API_KEY
+        sync: false
 
   - name: whynotgrace-app
     type: web

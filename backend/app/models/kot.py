@@ -10,7 +10,12 @@ from app.models.enums import KOTStatus
 
 class KOT(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     """Kitchen Order Ticket. One KOT is generated per order (original or
-    additional) so only new items are ever sent to the kitchen.
+    additional) so only new items are ever sent to the kitchen. An order
+    whose items span multiple kitchen stations (menu_items.kitchen_station)
+    still gets one KOT record — the split into a Tandoor ticket and a
+    Chinese ticket happens at *print* time, not as separate rows here; see
+    app.services.receipt.builder.stations_for_kot / build_kot_ticket and
+    GET /kot/{id}/stations, GET /kot/{id}/ticket?station=....
     """
     __tablename__ = "kots"
 

@@ -32,7 +32,10 @@ _ALLOWED_TRANSITIONS = {
 def create_kot_for_order(db: Session, order: Order) -> KOT:
     """Generate exactly one KOT covering the items of a single Order. Since
     each additional order is its own Order row, this naturally ensures
-    only newly-added items are ever sent to the kitchen.
+    only newly-added items are ever sent to the kitchen. An order whose
+    items span multiple kitchen stations still gets one KOT — see
+    app.services.receipt.builder for where that gets split into a
+    per-station printed ticket.
     """
     kot = KOT(
         business_id=order.business_id,

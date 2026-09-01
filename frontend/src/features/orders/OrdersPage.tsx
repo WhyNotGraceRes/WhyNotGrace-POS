@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ClipboardList } from "lucide-react";
 
 import { PageHeader } from "@/components/PageHeader";
 import { FreshnessIndicator } from "@/components/FreshnessIndicator";
@@ -122,9 +122,13 @@ export function OrdersPage() {
         )}
 
         {!isLoading && !isError && rows.length === 0 && (
-          <p className="py-16 text-center text-sm text-stone-400">
-            {search ? t("orders.noSearchResults", { query: search }) : t("orders.empty")}
-          </p>
+          <div className="flex flex-col items-center gap-1.5 py-12 text-center">
+            <ClipboardList size={26} className="mb-1 text-stone-300" />
+            <p className="text-sm font-medium text-stone-600">
+              {search ? t("orders.noSearchResults", { query: search }) : t("orders.empty")}
+            </p>
+            {!search && <p className="text-xs text-stone-400">{t("orders.emptyHint")}</p>}
+          </div>
         )}
 
         {!isLoading && !isError && rows.length > 0 && (

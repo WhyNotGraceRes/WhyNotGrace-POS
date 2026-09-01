@@ -185,6 +185,11 @@ export function MenuAdminPage() {
                           {t("menuAdmin.variantCount", { count: item.variants.length })}
                         </span>
                       )}
+                      {item.kitchen_station && (
+                        <span className="rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-700">
+                          {item.kitchen_station}
+                        </span>
+                      )}
                     </div>
                   </Card>
                 ))}

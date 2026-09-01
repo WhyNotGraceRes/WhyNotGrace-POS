@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, X } from "lucide-react";
+import toast from "react-hot-toast";
+import { Clock, Printer, X } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { minutesSince } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { printKotForAllStations } from "@/lib/printReceipt";
 import type { KOTOut, KOTStatus } from "@/types/models";
 
 const NEXT_STATUS: Partial<Record<KOTStatus, KOTStatus>> = {
@@ -35,6 +38,19 @@ export function KotCard({
   const { t } = useTranslation();
   const age = minutesSince(kot.created_at);
   const next = NEXT_STATUS[kot.status];
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrint = async () => {
+    setIsPrinting(true);
+    try {
+      const stationCount = await printKotForAllStations(kot.id);
+      if (stationCount > 1) toast.success(t("kitchen.printedStationTickets", { count: stationCount }));
+    } catch {
+      toast.error(t("kitchen.printFailed"));
+    } finally {
+      setIsPrinting(false);
+    }
+  };
 
   return (
     <Card className={cn("flex flex-col gap-3 border-2 p-4", AGE_TONE(age))}>
@@ -73,6 +89,16 @@ export function KotCard({
             {t(NEXT_LABEL_KEY[kot.status] as string)}
           </Button>
         )}
+        <Button
+          variant="ghost"
+          size="md"
+          isLoading={isPrinting}
+          disabled={isUpdating}
+          onClick={() => void handlePrint()}
+          aria-label={t("kitchen.printKot")}
+        >
+          <Printer size={16} />
+        </Button>
         <Button
           variant="ghost"
           size="md"

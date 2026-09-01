@@ -3,6 +3,7 @@ import {
   platformAuthApi,
   platformBusinessesApi,
   platformFeaturesApi,
+  platformMenuImportApi,
   platformSubscriptionApi,
   platformTogglesApi,
   platformWebsiteApi,
@@ -10,6 +11,7 @@ import {
 import { usePlatformAuthStore } from "@/stores/platformAuthStore";
 import type {
   FeatureModule,
+  MenuImportCategoryDraft,
   PlatformLoginRequest,
   ProvisionBusinessRequest,
   ProvisionSubscriptionRequest,
@@ -169,5 +171,17 @@ export function useSetPlatformWebsite(businessId: string) {
   return useMutation({
     mutationFn: (payload: WebsiteConfigUpdateRequest) => platformWebsiteApi.set(businessId, payload),
     onSuccess: (data) => queryClient.setQueryData(["platform", "website", businessId], data),
+  });
+}
+
+export function useExtractMenuFromPhotos(businessId: string) {
+  return useMutation({
+    mutationFn: (files: File[]) => platformMenuImportApi.extract(businessId, files),
+  });
+}
+
+export function usePublishImportedMenu(businessId: string) {
+  return useMutation({
+    mutationFn: (categories: MenuImportCategoryDraft[]) => platformMenuImportApi.publish(businessId, { categories }),
   });
 }

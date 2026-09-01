@@ -46,6 +46,18 @@
       "locked": "Account temporarily locked due to repeated failed attempts.",
       "invalidCredentials": "Invalid credentials.",
       "unverified": "Please verify your email before logging in."
+    },
+    "register": {
+      "businessTypes": {
+        "RESTAURANT": "Restaurant",
+        "HOTEL": "Hotel",
+        "RESORT": "Resort",
+        "LODGE": "Lodge",
+        "LOUNGE": "Lounge",
+        "CAFE": "Cafe",
+        "CLOUD_KITCHEN": "Cloud kitchen",
+        "OTHER": "Other"
+      }
     }
   },
   "roles": {
@@ -271,6 +283,7 @@
     "all": "All",
     "loadError": "Couldn't load orders.",
     "empty": "No orders yet.",
+    "emptyHint": "Orders placed from POS, QR, or the website will show up here.",
     "orderNumber": "Order",
     "table": "Table",
     "source": "Source",
@@ -392,7 +405,10 @@
     "minutesAgo": "{{count}}m ago",
     "loadError": "Couldn't load the kitchen queue.",
     "empty": "No active tickets. New orders will appear here.",
-    "kotCancelled": "Ticket cancelled."
+    "kotCancelled": "Ticket cancelled.",
+    "printKot": "Print ticket",
+    "printedStationTickets": "Printed {{count}} station tickets.",
+    "printFailed": "Couldn't print — check the printer connection."
   },
   "billStatus": {
     "OPEN": "Open",
@@ -616,7 +632,10 @@
     "translations": "Translations",
     "saveTranslation": "Save translation",
     "translationSaved": "Translation saved.",
-    "translationEnglishReference": "English: {{value}}"
+    "translationEnglishReference": "English: {{value}}",
+    "kitchenStation": "Kitchen station (optional)",
+    "kitchenStationPlaceholder": "e.g. Tandoor, Bar, Chinese",
+    "kitchenStationHint": "Items sharing a station print together as one ticket, separate from other stations — leave blank for the default kitchen."
   },
   "pricingContext": {
     "DINE_IN": "Dine-in",

@@ -2659,6 +2659,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/businesses/{business_id}/menu-import/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Extract Menu
+         * @description Step 1 of 2: upload photo(s) of the restaurant's physical menu card,
+         *     get back a structured draft — nothing is written to the real menu yet.
+         *     See menu_import_service for the extraction model call, and /publish
+         *     below for the second step, after staff have reviewed/corrected this.
+         */
+        post: operations["extract_menu_api_v1_platform_businesses__business_id__menu_import_extract_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/businesses/{business_id}/menu-import/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publish Menu
+         * @description Step 2 of 2: staff have reviewed/corrected the extracted draft
+         *     (edited names, fixed misread prices, deleted anything wrong) and are
+         *     now committing it as real menu categories/items for this business.
+         */
+        post: operations["publish_menu_api_v1_platform_businesses__business_id__menu_import_publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2874,6 +2919,11 @@ export interface components {
             name: string;
             /** Percent */
             percent: number;
+        };
+        /** Body_extract_menu_api_v1_platform_businesses__business_id__menu_import_extract_post */
+        Body_extract_menu_api_v1_platform_businesses__business_id__menu_import_extract_post: {
+            /** Files */
+            files: string[];
         };
         /** BusinessOut */
         BusinessOut: {
@@ -3658,6 +3708,44 @@ export interface components {
             display_order?: number | null;
             /** Is Active */
             is_active?: boolean | null;
+        };
+        /** MenuImportCategoryDraft */
+        MenuImportCategoryDraft: {
+            /** Name */
+            name: string;
+            /** Items */
+            items?: components["schemas"]["MenuImportItemDraft"][];
+        };
+        /** MenuImportExtractResponse */
+        MenuImportExtractResponse: {
+            /** Categories */
+            categories: components["schemas"]["MenuImportCategoryDraft"][];
+        };
+        /** MenuImportItemDraft */
+        MenuImportItemDraft: {
+            /** Name */
+            name: string;
+            /** Description */
+            description?: string | null;
+            /** Price */
+            price: number;
+            /**
+             * Is Veg
+             * @default true
+             */
+            is_veg: boolean;
+        };
+        /** MenuImportPublishRequest */
+        MenuImportPublishRequest: {
+            /** Categories */
+            categories: components["schemas"]["MenuImportCategoryDraft"][];
+        };
+        /** MenuImportPublishResponse */
+        MenuImportPublishResponse: {
+            /** Categories Created */
+            categories_created: number;
+            /** Items Created */
+            items_created: number;
         };
         /** MenuItemCreate */
         MenuItemCreate: {
@@ -10458,6 +10546,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebsiteConfigOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extract_menu_api_v1_platform_businesses__business_id__menu_import_extract_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                business_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_extract_menu_api_v1_platform_businesses__business_id__menu_import_extract_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MenuImportExtractResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_menu_api_v1_platform_businesses__business_id__menu_import_publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                business_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuImportPublishRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MenuImportPublishResponse"];
                 };
             };
             /** @description Validation Error */

@@ -21,6 +21,7 @@ import {
 } from "@/features/platform/hooks";
 import { SubscriptionPanel } from "@/features/platform/components/SubscriptionPanel";
 import { WebsiteConfigPanel } from "@/features/platform/components/WebsiteConfigPanel";
+import { MenuImportSection } from "@/features/platform/components/MenuImportSection";
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -137,6 +138,14 @@ export function BusinessDetailPage() {
             </div>
           ))}
         </div>
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="mb-1 text-sm font-bold text-stone-800">Menu import</h2>
+        <p className="mb-4 text-xs text-stone-500">
+          Upload photos of their physical menu card to digitize it — works whether they're on POS-only or POS+Website.
+        </p>
+        <MenuImportSection businessId={id} />
       </Card>
 
       <Card className="p-5">

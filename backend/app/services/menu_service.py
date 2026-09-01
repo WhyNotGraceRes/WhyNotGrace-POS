@@ -48,6 +48,37 @@ def create_category(db: Session, business_id: uuid.UUID, payload) -> MenuCategor
     return category
 
 
+def import_categories_and_items(db: Session, business_id: uuid.UUID, categories) -> tuple[int, int]:
+    """Bulk-creates categories and items from a reviewed menu-photo-import
+    draft (see app.services.menu_import_service). Always creates new
+    categories rather than merging into existing ones by name — staff
+    reviewed the draft before calling this, so a duplicate category is
+    their call to make (rename/delete) rather than something to guess at
+    silently here."""
+    categories_created = 0
+    items_created = 0
+    for order, category_draft in enumerate(categories):
+        category = MenuCategory(business_id=business_id, name=category_draft.name, display_order=order)
+        db.add(category)
+        db.flush()
+        categories_created += 1
+        for item_order, item_draft in enumerate(category_draft.items):
+            db.add(
+                MenuItem(
+                    business_id=business_id,
+                    category_id=category.id,
+                    name=item_draft.name,
+                    description=item_draft.description,
+                    base_price=item_draft.price,
+                    is_veg=item_draft.is_veg,
+                    display_order=item_order,
+                )
+            )
+            items_created += 1
+    db.flush()
+    return categories_created, items_created
+
+
 def update_category(db: Session, business_id: uuid.UUID, category_id: uuid.UUID, payload) -> MenuCategory:
     category = _get_category_or_404(db, business_id, category_id)
     for field, value in payload.model_dump(exclude_unset=True).items():

@@ -46,6 +46,18 @@
       "locked": "बार-बार गलत प्रयासों के कारण खाता अस्थायी रूप से लॉक है।",
       "invalidCredentials": "अमान्य विवरण।",
       "unverified": "लॉग इन करने से पहले कृपया अपना ईमेल सत्यापित करें।"
+    },
+    "register": {
+      "businessTypes": {
+        "RESTAURANT": "रेस्तराँ",
+        "HOTEL": "होटल",
+        "RESORT": "रिज़ॉर्ट",
+        "LODGE": "लॉज",
+        "LOUNGE": "लाउंज",
+        "CAFE": "कैफ़े",
+        "CLOUD_KITCHEN": "क्लाउड किचन",
+        "OTHER": "अन्य"
+      }
     }
   },
   "roles": {
@@ -271,6 +283,7 @@
     "all": "सभी",
     "loadError": "ऑर्डर लोड नहीं हो सके।",
     "empty": "अभी तक कोई ऑर्डर नहीं है।",
+    "emptyHint": "पीओएस, क्यूआर या वेबसाइट से किए गए ऑर्डर यहाँ दिखेंगे।",
     "orderNumber": "ऑर्डर",
     "table": "टेबल",
     "source": "स्रोत",
@@ -392,7 +405,10 @@
     "minutesAgo": "{{count}} मिनट पहले",
     "loadError": "किचन क्यू लोड नहीं हो सकी।",
     "empty": "कोई सक्रिय टिकट नहीं है। नए ऑर्डर यहां दिखाई देंगे।",
-    "kotCancelled": "टिकट रद्द कर दिया गया।"
+    "kotCancelled": "टिकट रद्द कर दिया गया।",
+    "printKot": "टिकट प्रिंट करें",
+    "printedStationTickets": "{{count}} स्टेशन टिकट प्रिंट किए गए।",
+    "printFailed": "प्रिंट नहीं हो सका — प्रिंटर कनेक्शन जांचें।"
   },
   "billStatus": {
     "OPEN": "खुला",
@@ -616,7 +632,10 @@
     "translations": "अनुवाद",
     "saveTranslation": "अनुवाद सहेजें",
     "translationSaved": "अनुवाद सहेजा गया।",
-    "translationEnglishReference": "अंग्रेज़ी: {{value}}"
+    "translationEnglishReference": "अंग्रेज़ी: {{value}}",
+    "kitchenStation": "किचन स्टेशन (वैकल्पिक)",
+    "kitchenStationPlaceholder": "जैसे तंदूर, बार, चाइनीज़",
+    "kitchenStationHint": "एक ही स्टेशन के आइटम एक साथ एक टिकट के रूप में प्रिंट होते हैं, अन्य स्टेशनों से अलग — डिफ़ॉल्ट किचन के लिए खाली छोड़ें।"
   },
   "pricingContext": {
     "DINE_IN": "डाइन-इन",

@@ -102,6 +102,18 @@ export type TranslationOut = Schemas["TranslationOut"];
 export type ItemTranslationUpdateRequest = Schemas["ItemTranslationUpdateRequest"];
 export type CategoryTranslationUpdateRequest = Schemas["CategoryTranslationUpdateRequest"];
 
+// --- Photo-based menu import (platform staff onboarding step — see
+// backend app/services/menu_import_service.py) ---
+export type MenuImportItemDraft = Schemas["MenuImportItemDraft"];
+/** See GenerateBillRequest above — scalar-default-marked-optional quirk
+ * (items: list[...] = Field(default_factory=list) comes through as items?:). */
+export type MenuImportCategoryDraft = Omit<Schemas["MenuImportCategoryDraft"], "items"> & {
+  items: MenuImportItemDraft[];
+};
+export type MenuImportExtractResponse = { categories: MenuImportCategoryDraft[] };
+export type MenuImportPublishRequest = { categories: MenuImportCategoryDraft[] };
+export type MenuImportPublishResponse = Schemas["MenuImportPublishResponse"];
+
 // --- Pricing contexts ---
 export type PriceRuleOut = Schemas["PriceRuleOut"];
 export type PriceRuleCreate = Schemas["PriceRuleCreate"];

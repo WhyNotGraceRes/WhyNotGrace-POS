@@ -144,6 +144,9 @@ class Settings(BaseSettings):
     swiggy_client_secret: str = ""
     swiggy_webhook_secret: str = ""
 
+    # Anthropic (menu-photo digitization — see app/services/menu_import_service.py)
+    anthropic_api_key: str = ""
+
     # QR
     qr_session_expire_hours: int = 6
 

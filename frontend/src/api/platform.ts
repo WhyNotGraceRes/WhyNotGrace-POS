@@ -17,6 +17,9 @@ import type {
   ProvisionSubscriptionRequest,
   RenewSubscriptionRequest,
   SetBusinessActiveRequest,
+  MenuImportExtractResponse,
+  MenuImportPublishRequest,
+  MenuImportPublishResponse,
   SubscriptionOut,
   ToggleOut,
   WebsiteConfigOut,
@@ -109,5 +112,22 @@ export const platformWebsiteApi = {
   set: (businessId: string, payload: WebsiteConfigUpdateRequest) =>
     platformApiClient
       .put<WebsiteConfigOut>(`/platform/businesses/${businessId}/website`, payload)
+      .then((r) => r.data),
+};
+
+export const platformMenuImportApi = {
+  extract: (businessId: string, files: File[]) => {
+    const form = new FormData();
+    for (const file of files) form.append("files", file);
+    return platformApiClient
+      .post<MenuImportExtractResponse>(`/platform/businesses/${businessId}/menu-import/extract`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data);
+  },
+
+  publish: (businessId: string, payload: MenuImportPublishRequest) =>
+    platformApiClient
+      .post<MenuImportPublishResponse>(`/platform/businesses/${businessId}/menu-import/publish`, payload)
       .then((r) => r.data),
 };

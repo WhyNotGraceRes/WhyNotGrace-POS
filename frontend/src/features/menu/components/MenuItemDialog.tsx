@@ -75,6 +75,7 @@ export function MenuItemDialog({
   const [isTodaysSpecial, setIsTodaysSpecial] = useState(item?.is_todays_special ?? false);
   const [isSpecialty, setIsSpecialty] = useState(item?.is_specialty ?? false);
   const [stockQuantity, setStockQuantity] = useState(item?.stock_quantity != null ? String(item.stock_quantity) : "");
+  const [kitchenStation, setKitchenStation] = useState(item?.kitchen_station ?? "");
   const [error, setError] = useState<string | null>(null);
 
   // Only used while creating a brand-new item — added variants/groups on an
@@ -111,6 +112,7 @@ export function MenuItemDialog({
     setIsTodaysSpecial(item?.is_todays_special ?? false);
     setIsSpecialty(item?.is_specialty ?? false);
     setStockQuantity(item?.stock_quantity != null ? String(item.stock_quantity) : "");
+    setKitchenStation(item?.kitchen_station ?? "");
     setError(null);
     setDraftVariants([]);
     setDraftGroups([]);
@@ -147,6 +149,7 @@ export function MenuItemDialog({
             is_todays_special: isTodaysSpecial,
             is_specialty: isSpecialty,
             stock_quantity: stockQuantityValue,
+            kitchen_station: kitchenStation.trim() || null,
           },
         });
         toast.success(t("menuAdmin.itemUpdated"));
@@ -159,6 +162,7 @@ export function MenuItemDialog({
           is_veg: isVeg,
           image_url: imageUrl.trim() || undefined,
           stock_quantity: stockQuantityValue ?? undefined,
+          kitchen_station: kitchenStation.trim() || undefined,
           variants: draftVariants.map(({ key: _key, ...v }) => v),
           option_groups: draftGroups.map((g) => ({
             name: g.name,
@@ -339,6 +343,16 @@ export function MenuItemDialog({
               placeholder={t("menuAdmin.stockUnlimited")}
             />
             <p className="mt-1 text-xs text-stone-400">{t("menuAdmin.stockQuantityHint")}</p>
+          </div>
+          <div>
+            <Label htmlFor="item-station">{t("menuAdmin.kitchenStation")}</Label>
+            <Input
+              id="item-station"
+              value={kitchenStation}
+              onChange={(e) => setKitchenStation(e.target.value)}
+              placeholder={t("menuAdmin.kitchenStationPlaceholder")}
+            />
+            <p className="mt-1 text-xs text-stone-400">{t("menuAdmin.kitchenStationHint")}</p>
           </div>
         </div>
 

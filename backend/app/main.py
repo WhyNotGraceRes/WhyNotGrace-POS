@@ -349,6 +349,7 @@ from app.api.platform import features as platform_features  # noqa: E402
 from app.api.platform import toggles as platform_toggles  # noqa: E402
 from app.api.platform import subscriptions as platform_subscriptions  # noqa: E402
 from app.api.platform import website as platform_website  # noqa: E402
+from app.api.platform import menu_import as platform_menu_import  # noqa: E402
 
 prefix = settings.api_v1_prefix
 
@@ -396,3 +397,4 @@ app.include_router(platform_features.router, prefix=prefix)
 app.include_router(platform_toggles.router, prefix=prefix)
 app.include_router(platform_subscriptions.router, prefix=prefix)
 app.include_router(platform_website.router, prefix=prefix)
+app.include_router(platform_menu_import.router, prefix=prefix)
