@@ -63,7 +63,11 @@ services:
   - name: whynotgrace-app
     type: web
     runtime: static
-    buildCommand: cd frontend && npm install && npm run build
+    # --include=dev: Render's build environment sets NODE_ENV=production,
+    # which makes plain `npm install` skip devDependencies — and
+    # typescript/vite (needed to run the build itself, see
+    # frontend/package.json) live there, not in dependencies.
+    buildCommand: cd frontend && npm install --include=dev && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
       # The backend's public URL — must match whynotgrace-api's custom
