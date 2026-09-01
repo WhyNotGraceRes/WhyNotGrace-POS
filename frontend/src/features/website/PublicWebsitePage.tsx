@@ -10,7 +10,7 @@ import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { usePublicWebsite, usePublicWebsiteMenu } from "@/features/website/hooks";
 
-const DEFAULT_ACCENT = "#19766c";
+const DEFAULT_ACCENT = "#0284c7";
 
 export function PublicWebsitePage() {
   const { businessSlug } = useParams<{ businessSlug: string }>();

@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand: deep teal (hospitality, trustworthy) + warm amber accent (CTAs). */
-  --color-brand-50: #eefbf8;
-  --color-brand-100: #d4f3ec;
-  --color-brand-200: #ade5da;
-  --color-brand-300: #78d0c1;
-  --color-brand-400: #45b2a1;
-  --color-brand-500: #269485;
-  --color-brand-600: #19766c;
-  --color-brand-700: #175f58;
-  --color-brand-800: #164c47;
-  --color-brand-900: #14403c;
-  --color-brand-950: #072522;
+  /* Brand: sky blue — lighter and friendlier than a straight azure, still
+     clear and high-trust, minimal + warm amber accent (CTAs). */
+  --color-brand-50: #f0faff;
+  --color-brand-100: #e0f5ff;
+  --color-brand-200: #bee9fe;
+  --color-brand-300: #88d5fc;
+  --color-brand-400: #39b9f9;
+  --color-brand-500: #02a2f2;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #026ca2;
+  --color-brand-800: #035882;
+  --color-brand-900: #044667;
+  --color-brand-950: #042b3e;
 
   --color-accent-50: #fffbea;
   --color-accent-100: #fff3c4;

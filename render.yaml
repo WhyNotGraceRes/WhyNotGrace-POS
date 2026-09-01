@@ -1,0 +1,79 @@
+# Zero-cost deployment blueprint (Render free tier) for the first
+# app.whynotgrace.com launch. Two services, deployed together from this one
+# file via Render's "New > Blueprint":
+#
+#   whynotgrace-api  — the FastAPI backend, Docker runtime, free web service.
+#                       Needs a database — this blueprint does NOT provision
+#                       one (Render's own free Postgres expires after 90
+#                       days; use Neon or Supabase's permanent free tier
+#                       instead — see backend/README.md's Deployment Guide
+#                       and the DATABASE_URL note below).
+#   whynotgrace-app  — the React SPA (dashboard, POS, platform admin, QR
+#                       ordering, and every restaurant's public /site/:slug
+#                       page all live in this one build), free static site.
+#
+# Custom domains (app.whynotgrace.com, api.whynotgrace.com) are attached
+# after the initial deploy, in each service's Render dashboard — see the
+# chat guidance for the exact DNS records to add.
+#
+# APP_ENV is set to "staging" rather than "production" deliberately: this
+# is a first "see it working" deploy, not the final launch. Staging skips
+# app/core/config.py's validate_production_safety() gate (which otherwise
+# refuses to boot without real Razorpay keys and real SMTP credentials —
+# neither is set up yet). Flip APP_ENV to "production" and fill those in
+# once payments/email are ready; nothing else about this file needs to
+# change.
+
+services:
+  - name: whynotgrace-api
+    type: web
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: staging
+      - key: DEBUG
+        value: "false"
+      # Paste your Neon/Supabase connection string here at blueprint-setup
+      # time, with the scheme changed to postgresql+psycopg:// (this repo
+      # only installs the psycopg3 driver, not psycopg2 — a bare
+      # postgresql:// URL fails to connect). Keep the ?sslmode=require
+      # query param Neon gives you.
+      - key: DATABASE_URL
+        sync: false
+      # Generate with `openssl rand -hex 64` — never reuse the dev
+      # placeholder from backend/.env.example.
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: CORS_ORIGINS
+        value: https://app.whynotgrace.com
+      - key: FRONTEND_BASE_URL
+        value: https://app.whynotgrace.com
+      # Logs emails instead of sending them — fine until SMTP is set up.
+      # validate_production_safety() would refuse this under APP_ENV=production.
+      - key: EMAIL_BACKEND
+        value: console
+
+  - name: whynotgrace-app
+    type: web
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      # The backend's public URL — must match whynotgrace-api's custom
+      # domain (or its onrender.com URL, until that's attached).
+      - key: VITE_API_URL
+        value: https://api.whynotgrace.com
+    routes:
+      # Client-side routes (e.g. /pos, /site/the-copper-kettle) must all
+      # resolve to index.html — React Router takes it from there. Without
+      # this, a hard refresh on any non-root path 404s.
+      - path: /*
+        destination: /index.html
+        type: rewrite
