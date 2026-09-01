@@ -55,10 +55,13 @@ services:
         sync: false
       - key: JWT_ALGORITHM
         value: HS256
+      # TEMPORARY: pointed at the onrender.com URL until the real
+      # app.whynotgrace.com domain is attached — see render.yaml's header.
+      # Swap both back to https://app.whynotgrace.com once that's done.
       - key: CORS_ORIGINS
-        value: https://app.whynotgrace.com
+        value: https://whynotgrace-app.onrender.com
       - key: FRONTEND_BASE_URL
-        value: https://app.whynotgrace.com
+        value: https://whynotgrace-app.onrender.com
       # Logs emails instead of sending them — fine until SMTP is set up.
       # validate_production_safety() would refuse this under APP_ENV=production.
       - key: EMAIL_BACKEND
@@ -79,10 +82,13 @@ services:
     buildCommand: cd frontend && npm install --include=dev --legacy-peer-deps && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
-      # The backend's public URL — must match whynotgrace-api's custom
-      # domain (or its onrender.com URL, until that's attached).
+      # TEMPORARY: pointed at whynotgrace-api's onrender.com URL until the
+      # real api.whynotgrace.com domain is attached — swap this back to
+      # https://api.whynotgrace.com then (and note this is build-time —
+      # Vite bakes it into the JS bundle, so changing it always needs a
+      # fresh build, never just a restart).
       - key: VITE_API_URL
-        value: https://api.whynotgrace.com
+        value: https://whynotgrace-api.onrender.com
     routes:
       # Client-side routes (e.g. /pos, /site/the-copper-kettle) must all
       # resolve to index.html — React Router takes it from there. Without
