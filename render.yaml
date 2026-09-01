@@ -71,7 +71,12 @@ services:
     # which makes plain `npm install` skip devDependencies — and
     # typescript/vite (needed to run the build itself, see
     # frontend/package.json) live there, not in dependencies.
-    buildCommand: cd frontend && npm install --include=dev && npm run build
+    # --legacy-peer-deps: openapi-typescript's peer dep range doesn't
+    # cover the TypeScript 6.x this project uses yet. Safe to skip strict
+    # peer resolution here specifically — openapi-typescript is a dev-only
+    # CLI for manually regenerating API types (see frontend/README.md),
+    # never invoked by `npm run build` itself.
+    buildCommand: cd frontend && npm install --include=dev --legacy-peer-deps && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
       # The backend's public URL — must match whynotgrace-api's custom
