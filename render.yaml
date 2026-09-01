@@ -74,6 +74,6 @@ services:
       # Client-side routes (e.g. /pos, /site/the-copper-kettle) must all
       # resolve to index.html — React Router takes it from there. Without
       # this, a hard refresh on any non-root path 404s.
-      - path: /*
+      - source: /*
         destination: /index.html
         type: rewrite
